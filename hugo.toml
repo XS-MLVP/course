@@ -8,6 +8,8 @@ defaultContentLanguageInSubdir = false
 # Useful when translating.
 enableMissingTranslationPlaceholders = true
 
+staticDir = ['static',]
+
 enableRobotsTXT = true
 
 # Will give values to .Lastmod etc.
