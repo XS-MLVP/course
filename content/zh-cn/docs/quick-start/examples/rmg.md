@@ -32,6 +32,8 @@ endmodule
 ```
 
 该随机数生成器包含一个 16 位的 LFSR，其输入为一个 16 位的种子数，输出为一个 16 位的随机数。
+LFSR 的更新规则为：将当前的 LFSR 的最高位与次高位异或，然后将结果放在 LFSR 的最低位，溢出的位被丢弃。
+
 
 ## 测试过程
 
@@ -42,7 +44,7 @@ endmodule
 进入 RandomGenerator 文件夹，执行如下命令：
 
 ```bash
-mcv RandomGenerator.v -w RandomGenerator.fst -S RandomGenerator -t mcv_out_random_generator -l cpp -e -v --sim verilator
+picker RandomGenerator.v -w RandomGenerator.fst -S RandomGenerator -t picker_out_random_generator -l cpp -e -v --sim verilator
 ```
 
 该命令的含义是：
@@ -50,4 +52,6 @@ mcv RandomGenerator.v -w RandomGenerator.fst -S RandomGenerator -t mcv_out_rando
 1. 将RandomGenerator.v作为 Top 文件，并将RandomGenerator作为 Top Module，利用verilator仿真器将其编译为Cpp Class
 2. 启用波形输出，目标波形文件为RandomGenerator.fst
 3. 输出示例项目(-e) 并保留生成时产生的中间文件(-v)
-4. 最终的文件输出路径是 mcv_out_random_generator
+4. 最终的文件输出路径是 picker_out_random_generator
+
+

@@ -1,7 +1,7 @@
 ---
 title: 关于
 linkTitle: 关于
-menu: {main: {weight: 10}}
+menu: {main: {weight: 50}}
 ---
 
 {{% blocks/cover title="About Goldydocs" image_anchor="bottom" height="auto" %}}

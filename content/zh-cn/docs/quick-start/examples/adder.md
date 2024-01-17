@@ -35,7 +35,7 @@ endmodule
 进入 Adder 文件夹，执行如下命令：
 
 ```bash
-mcv Adder.v -w Adder.fst -S Adder -t mcv_out_adder -l cpp -e -v --sim verilator
+picker Adder.v -w Adder.fst -S Adder -t picker_out_adder -l cpp -e -v --sim verilator
 ```
 
 该命令的含义是：
@@ -43,14 +43,14 @@ mcv Adder.v -w Adder.fst -S Adder -t mcv_out_adder -l cpp -e -v --sim verilator
 1. 将Adder.v作为 Top 文件，并将Adder作为 Top Module，利用verilator仿真器将其编译为Cpp Class
 2. 启用波形输出，目标波形文件为Adder.fst
 3. 输出示例项目(-e) 并保留生成时产生的中间文件(-v)
-4. 最终的文件输出路径是 mcv_out_adder
+4. 最终的文件输出路径是 picker_out_adder
 
 在使用该命令时，还有部分命令行参数没有使用，这些命令将在后续的章节中介绍。
 
 输出的目录结构如下，请注意这部分均为中间文件：
 
 ```bash
-mcv_out_adder
+picker_out_adder
 |-- Adder.v # 原始的RTL源码
 |-- Adder_top.sv # 生成的Adder_top顶层封装，使用DPI驱动Adder模块的inputs和outputs
 |-- Adder_top.v # 生成的Adder_top顶层封装，因为Verdi不支持导入SV源码使用，因此需要生成一个Verilog版本
@@ -85,9 +85,9 @@ mcv_out_adder
 ```
 
 ### 编译C++ Class为动态库，并构建测试代码
-在生成的 `mcv_out_adder` 目录下，替换 `example.cpp` 后执行命令 make 即可编译出 `libUTAdder.so` 动态库及其依赖文件和测试驱动程序。 同时，因为使用了 `-e` 参数， make 命令还会编译出 example 示例项目。
+在生成的 `picker_out_adder` 目录下，替换 `example.cpp` 后执行命令 make 即可编译出 `libUTAdder.so` 动态库及其依赖文件和测试驱动程序。 同时，因为使用了 `-e` 参数， make 命令还会编译出 example 示例项目。
 
-请注意，由于 `libUTAdder.so` 依赖于 `libDPIAdder.so` ，因此在编译 `libUTAdder.so`之前，需要先编译 `libDPIAdder.so` （自动完成）。 并且我们还需要替换 `mcv_out_adder/cpp/example.cpp` 中的内容，以保证 example 示例项目按预期运行。
+请注意，由于 `libUTAdder.so` 依赖于 `libDPIAdder.so` ，因此在编译 `libUTAdder.so`之前，需要先编译 `libDPIAdder.so` （自动完成）。 并且我们还需要替换 `picker_out_adder/cpp/example.cpp` 中的内容，以保证 example 示例项目按预期运行。
 
 `example.cpp` 的内容如下：
 
@@ -168,7 +168,7 @@ int main()
 }
 ```
 
-成功编译后，我们即可看到 example 示例项目的输出，作为Release内容的输出结果均在 mcv_out_adder/UT_Adder 目录下。
+成功编译后，我们即可看到 example 示例项目的输出，作为Release内容的输出结果均在 picker_out_adder/UT_Adder 目录下。
 
 ```
 [...]
@@ -180,19 +180,19 @@ REF: sum=0xfcad9866c3d98d72, cout=0x0
 此时目录结构如下图
 
 ```bash
-~/mcv_out_adder$ tree UT_Adder
+~/picker_out_adder$ tree UT_Adder
 UT_Adder
-|-- Adder.cmake # 原 mcv_out_adder/cpp/cmake/verilator.cmake
-|-- Adder.v # 原 mcv_out_adder/Adder.v
+|-- Adder.cmake # 原 picker_out_adder/cpp/cmake/verilator.cmake
+|-- Adder.v # 原 picker_out_adder/Adder.v
 |-- Adder_top.sv
 |-- Adder_top.v
-|-- CMakeLists.txt # 原 mcv_out_adder/cpp/CMakeLists.txt
-|-- Makefile # 原 mcv_out_adder/cpp/Makefile
+|-- CMakeLists.txt # 原 picker_out_adder/cpp/CMakeLists.txt
+|-- Makefile # 原 picker_out_adder/cpp/Makefile
 |-- UTAdder_example # 测试程序
-|-- UT_Adder.cpp # 原 mcv_out_adder/cpp/dut.cpp，经过模板渲染，已经被编译到libUTAdder.so中
-|-- UT_Adder.hpp # 原 mcv_out_adder/cpp/dut.hpp，经过模板渲染
+|-- UT_Adder.cpp # 原 picker_out_adder/cpp/dut.cpp，经过模板渲染，已经被编译到libUTAdder.so中
+|-- UT_Adder.hpp # 原 picker_out_adder/cpp/dut.hpp，经过模板渲染
 |-- UT_Adder_dpi.hpp # 仿真器生成的DPI函数声明，用于链接时使用
-|-- dut_base.hpp # 原 mcv_out_adder/dut_base.hpp，基类头文件声明，用于链接时使用
+|-- dut_base.hpp # 原 picker_out_adder/dut_base.hpp，基类头文件声明，用于链接时使用
 |-- example.cpp # 测试程序代码
 |-- libDPIAdder.a # 仿真器生成的静态(verilator)/动态库(vcs)，用于链接时使用
 `-- libUTAdder.so # 经过封装的动态库，UT_Adder.cpp的实现已经包含在其中。
