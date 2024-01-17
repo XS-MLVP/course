@@ -1,27 +1,76 @@
 ---
 title: 芯片验证
-description:  关于芯片验证的基础知识。
-categories: [示例项目, 教程]
-tags: [examples, docs]
-weight: 10
+weight: 4
+description: >
+  关于芯片验证的基础知识
 ---
 
 {{% pageinfo %}}
-在开始前本页会 简单的介绍什么是验证，以及示例里面用到的概念，如 DUT (Design Under Test) 和 RM (Reference Model) 。
+本页简单介绍什么是芯片验证，以及示例里面用到的概念，如 DUT (Design Under Test) 和 RM (Reference Model) 。
+芯片验证过程需要和企业、团队的实际情况契合，没有符合所有要求，必须参考的绝对标准。
 {{% /pageinfo %}}
 
-## 硬件验证
+## 什么是芯片验证 ##
 
-Are there any system requirements for using your project? What languages are supported (if any)? Do users need to already have any software or tools installed?
+---
 
-## Design Under Test
+芯片从设计到成品的过程主要包括芯片设计、芯片制造、芯片封测试三大阶段。在芯片设计中，又分前端设计和后端设计，前端设计也称之为逻辑设计，目标是让电路逻辑达到预期功能要求。后端设计也称为物理设计，主要工作是优化布局布线，减小芯片面积，降低功耗，提高频率等。芯片验证（Chip Verification）是芯片设计流程中的一个重要环节。它的目标是确保设计的芯片在功能、性能和功耗等方面都满足预定的规格。验证过程通常包括功能验证、时序验证和功耗验证等多个步骤，使用的方法和工具包括仿真、形式验证、硬件加速和原型制作等。**针对本文，芯片验证仅包含对芯片前端设计的验证，验证设计的电路逻辑是否满足既定需求（"Does this proposed design do what is intended?"），通常也称为功能验证（Functional verification），不包含功耗、频率等后端设计**。
 
-Where can your user find your project code? How can they install it (binaries, installable package, build from source)? Are there multiple options/versions they can install and how should they choose the right one for them?
+<blockquote><p>
+对于芯片产品，一旦设计错误被制造出来修改成本将会非常高昂，因为可能需要召回产品，并重新制造芯片，无论是经济成本还是时间成本都十分昂贵。经典由于芯片验证不足导致失败的典型案例如下：
 
-## Reference Model
+**Intel Pentium FDIV Bug**：在1994年，Intel的Pentium处理器被发现存在一个严重的除法错误，这个错误被称为FDIV bug。这个错误是由于在芯片的浮点单元中，一个查找表中的几个条目错误导致的。这个错误在大多数应用中不会出现，但在一些特定的计算中会导致结果错误。由于这个错误，Intel不得不召回了大量的处理器，造成了巨大的经济损失。
 
-Is there any initial setup users need to do after installation to try your project?
+**Ariane 5 Rocket Failure**：虽然这不是一个芯片的例子，但它展示了硬件验证的重要性。在1996年，欧洲空间局的Ariane 5火箭在发射后不久就爆炸了。原因是火箭的导航系统中的一个64位浮点数被转换为16位整数时溢出，导致系统崩溃。这个错误在设计阶段没有被发现，导致了火箭的失败。
 
-## 开始实验
+**AMD Barcelona Bug**：在2007年，AMD的Barcelona处理器被发现存在一个严重的转译查找缓冲（TLB）错误。这个错误会导致系统崩溃或者重启。AMD不得不通过降低处理器的频率和发布BIOS更新来解决这个问题，这对AMD的声誉和财务状况造成了重大影响。
 
-Can your users test their installation, for example by running a command or deploying a Hello World example?
+这些案例都强调了芯片验证的重要性。如果在设计阶段就能发现并修复这些错误，那么就可以避免这些昂贵的失败。验证不足的案例不仅发生在过去，也发生在现在，例如某新入局 ASIC 芯片市场的互联网企业打造一款 55 纳米芯片，极力追求面积缩减并跳过验证环节，最终导致算法失败，三次流片皆未通过测试，平均每次流片失败导致企业损失约 50 万美元。
+</p></blockquote>
+
+
+## 芯片验证流程 ##
+
+---
+
+![验证在芯片设计中的位置](ic-verify.drawio.svg)
+
+芯片设计和验证的耦合关系如上图所示，设计和验证有同样的输入，即规范文档（specification）。参考规范，设计与验证人员双方按照各自的理解，以及各自的需求进行独立编码实现。设计方需要满足的前提是编码的RTL代码“可综合”，需要考虑电路特性，而验证方一般只要考虑功能是否满足要求，编码限制少。双方完成模块开发后，需要进行健全性对比测试（Sanity Test），判定功能是否表现一致，若不一致需要进行协同排查，确定问题所在并进行修复，再进行对比测试，直到所有功能点都满足预期。由于芯片设计和芯片验证耦合度很高，因此有些企业在研发队伍上也进行了直接耦合，为每个子模块的设计团队都配置了对应的验证团队（DV）。上图中的设计与验证的耦合流程为粗粒度的关系，具体到具体芯片（例如Soc、DDR）、具体企业等都有其适合自身的合作模式。
+
+在上述对比测试中，设计方的产出的模块通常称为DUT（Design Under Test），验证方开发的模型通常称为RM（Reference Model）。针对图中的验证工作，按照流程可以有：编写验证计划、创建验证平台、整理功能点、构建测试用例、运行调试、收集Bug/覆盖率、回归测试、编写测试报告等多个阶段。
+
+**验证计划：** 验证计划通常由
+
+**验证平台：** XXXXX
+
+**功能点整理：** XXXXX
+
+**测试用例：** XXXXX
+
+**编码实现：** XXXXX
+
+**收集bug/覆盖率：** XXXXX
+
+**回归测试：** xxxxx
+
+**测试报告：** XXXX
+
+
+## 芯片验证层次 ##
+---
+
+
+## 芯片验证指标 ##
+---
+
+
+## 芯片验证管理 ##
+---
+
+
+## 芯片验证现状 ##
+---
+
+## 开源众包芯片验证 ##
+---
+
