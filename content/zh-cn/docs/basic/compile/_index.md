@@ -1,9 +1,9 @@
 ---
-title: 编译教程
+title: DUT编译
 description:  开放验证平台工具链需要的编译相关知识。
-categories: [示例项目, 教程]
+categories: [示例项目, 学习材料]
 tags: [examples, docs]
-weight: 20
+weight: 4
 ---
 
 {{% pageinfo %}}

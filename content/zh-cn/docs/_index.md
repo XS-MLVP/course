@@ -1,6 +1,6 @@
 ---
-title: 教程
-linkTitle: 教程
+title: 学习资源
+linkTitle: 学习资源
 menu: {main: {weight: 20}}
 weight: 20
 ---

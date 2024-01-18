@@ -62,8 +62,8 @@ languageName ="中文"
 # Weight used for sorting.
 weight = 1
 [languages.zh-cn.params]
-title = "开放验证平台课程"
-description = "快速加入开放验证平台的尝试"
+title = "开放验证平台学习资源"
+description = "如何快速加入开放验证平台"
 
 [languages.en]
 languageName ="English"

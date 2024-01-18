@@ -3,7 +3,7 @@ title: 快速开始
 description: 如何使用开放验证平台的环境参与到硬件验证中来。
 categories: [示例项目, 教程]
 tags: [examples, docs]
-weight: 2
+weight: 1
 ---
 
 {{% pageinfo %}}

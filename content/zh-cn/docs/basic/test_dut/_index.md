@@ -1,13 +1,13 @@
 ---
-title: 基础知识
-description: 参与开放验证平台工作所需要的基础知识。
-categories: [示例项目, 教程]
+title: DUT验证
+description:  开放验证平台工具链需要的编译相关知识。
+categories: [示例项目, 学习材料]
 tags: [examples, docs]
-weight: 2
+weight: 5
 ---
 
 {{% pageinfo %}}
-
+在开始前本页会 简单的介绍什么是验证，以及示例里面用到的概念，如 DUT (Design Under Test) 和 RM (Reference Model) 。
 {{% /pageinfo %}}
 
 ## 硬件验证
