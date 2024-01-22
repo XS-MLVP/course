@@ -84,12 +84,21 @@ picker_out_adder
     `-- dut.py # 生成的python UT封装，包含了对libDPIAdder.so的调用，及UTAdder类的声明及实现，等价于 libUTAdder.so
 ```
 
-### 编译C++ Class为动态库，并构建测试代码
-在生成的 `picker_out_adder` 目录下，替换 `example.cpp` 后执行命令 make 即可编译出 `libUTAdder.so` 动态库及其依赖文件和测试驱动程序。 同时，因为使用了 `-e` 参数， make 命令还会编译出 example 示例项目。
+### 编译C++ Class为动态库
+在生成的 `picker_out_adder` 目录下，替换 `cpp/example.cpp` 后执行命令 make 即可编译出 `libUTAdder.so` 动态库及其依赖文件和测试驱动程序。
 
-请注意，由于 `libUTAdder.so` 依赖于 `libDPIAdder.so` ，因此在编译 `libUTAdder.so`之前，需要先编译 `libDPIAdder.so` （自动完成）。 并且我们还需要替换 `picker_out_adder/cpp/example.cpp` 中的内容，以保证 example 示例项目按预期运行。
+> 由 `Makefile` 定义的自动编译过程流如下：
+> 
+> 1. 通过 `cmake/*.cmake` 定义的仿真器调用脚本，编译 `Adder_top.sv` 及相关文件为 `libDPIAdder.so` 动态库。
+> 2. 通过 `CMakelists.txt` 定义的编译脚本，将 `libDPIAdder.so` 通过 `dut_base.cpp` 封装为 `libUTAdder.so` 动态库。并将1、2步产物拷贝到 `UT_Adder` 目录下。
+> 3. 如果有 `-e` 参数，则拷贝 `cpp` 目录下的所有文件到 `UT_Adder` 目录下，并编译 `example.cpp` 为 `example` 可执行文件。
+> 4. 上一步过程由 `mk/cpp.mk` 定义，可以通过修改 `mk/cpp.mk` 中的 `example` 目标，来修改编译过程。
+> 5. 在编译 `example` 可执行二进制文件的过程中，不同仿真器需要不同cmake文件编译参数，因为需要链接不同的仿真器的依赖库。
 
-`example.cpp` 的内容如下：
+
+### 配置测试代码
+
+> 注意只有替换 `cpp/example.cpp` 中的内容，才能保证 example 示例项目按预期运行。
 
 ```cpp
 #include "UT_Adder.hpp"
@@ -168,7 +177,9 @@ int main()
 }
 ```
 
-成功编译后，我们即可看到 example 示例项目的输出，作为Release内容的输出结果均在 picker_out_adder/UT_Adder 目录下。
+### 运行测试
+
+成功编译并运行后，我们即可看到 example 示例项目的输出，作为Release内容的输出结果均在 picker_out_adder/UT_Adder 目录下。
 
 ```
 [...]

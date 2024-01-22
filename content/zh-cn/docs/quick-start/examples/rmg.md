@@ -55,3 +55,108 @@ picker RandomGenerator.v -w RandomGenerator.fst -S RandomGenerator -t picker_out
 4. 最终的文件输出路径是 picker_out_random_generator
 
 
+输出的目录类似[加法器验证-目录结构](/docs/quick-start/examples/adder/#将rtl构建为c-class)，这里不再赘述。
+
+### 编译C++ Class为动态库
+
+在生成的 `picker_out_random_generator` 目录下，替换 `cpp/example.cpp` 后执行命令 make 即可编译出 `libUTRandomGenerator.so` 动态库及其依赖文件和测试驱动程序。
+
+> 备注：其编译过程类似于 [加法器验证-编译流程](/docs/quick-start/examples/adder/#编译c-class为动态库)，这里不再赘述。
+
+### 配置测试驱动程序
+
+> 注意只有替换 `cpp/example.cpp` 中的内容，才能保证 example 示例项目按预期运行。
+
+```cpp
+#include "UT_RandomGenerator.hpp"
+
+int64_t random_int64()
+{
+    static std::random_device rd;
+    static std::mt19937_64 generator(rd());
+    static std::uniform_int_distribution<int64_t> distribution(INT64_MIN,
+                                                               INT64_MAX);
+    return distribution(generator);
+}
+
+int main()
+{
+#if defined(USE_VCS)
+    UTRandomGenerator *dut = new UTRandomGenerator("libDPIAdder.so");
+#elif defined(USE_VERILATOR)
+    UTRandomGenerator *dut = new UTRandomGenerator();
+#endif
+    unsigned short seed = random_int64() & 0xffff;
+    printf("seed = 0x%x\n", seed);
+    dut->initClock(dut->clk);
+    dut->xclk.Step(10);
+    dut->reset = 1;
+    dut->seed = seed;
+    dut->xclk.Step(1);
+    dut->reset = 0;
+    dut->xclk.Step(1);
+    printf("Initialized UTRandomGenerator\n");
+
+    struct output_t {
+        uint64_t cout;
+    };
+
+    for (int c = 0; c < 114514; c++) {
+        
+        output_t o_dut, o_ref;
+
+        auto dut_cal = [&]() {
+            dut->xclk.Step(1);
+            o_dut.cout = (unsigned short)dut->random_number;
+        };
+
+        // as lfsr
+        auto ref_cal = [&]() { 
+            seed = (seed << 1) | ((seed >> 15) ^ (seed >> 14) & 1);
+            o_ref.cout = seed;
+        };
+
+        dut_cal();
+        ref_cal();
+        printf("[cycle %llu] ", dut->xclk.clk);
+        printf("DUT: cout=0x%x , ", o_dut.cout);
+        printf("REF: cout=0x%x\n", o_ref.cout);
+        Assert(o_dut.cout == o_ref.cout, "sum mismatch");
+    }
+
+    delete dut;
+    printf("Test Passed, destory UTRandomGenerator\n");
+    return 0;
+}
+```
+
+### 运行测试程序
+
+在 `picker_out_random_generator` 目录下执行 `./example` 即可运行测试程序。
+
+输出示例为：
+
+```bash
+...
+[cycle 114510] DUT: cout=0x7e8d , REF: cout=0x7e8d
+[cycle 114511] DUT: cout=0xfd1b , REF: cout=0xfd1b
+[cycle 114512] DUT: cout=0xfa36 , REF: cout=0xfa36
+[cycle 114513] DUT: cout=0xf46c , REF: cout=0xf46c
+[cycle 114514] DUT: cout=0xe8d8 , REF: cout=0xe8d8
+[cycle 114515] DUT: cout=0xd1b0 , REF: cout=0xd1b0
+[cycle 114516] DUT: cout=0xa360 , REF: cout=0xa360
+[cycle 114517] DUT: cout=0x46c1 , REF: cout=0x46c1
+[cycle 114518] DUT: cout=0x8d83 , REF: cout=0x8d83
+[cycle 114519] DUT: cout=0x1b07 , REF: cout=0x1b07
+[cycle 114520] DUT: cout=0x360e , REF: cout=0x360e
+[cycle 114521] DUT: cout=0x6c1c , REF: cout=0x6c1c
+[cycle 114522] DUT: cout=0xd839 , REF: cout=0xd839
+[cycle 114523] DUT: cout=0xb072 , REF: cout=0xb072
+[cycle 114524] DUT: cout=0x60e5 , REF: cout=0x60e5
+[cycle 114525] DUT: cout=0xc1cb , REF: cout=0xc1cb
+[cycle 114526] DUT: cout=0x8396 , REF: cout=0x8396
+Test Passed, destory UTRandomGenerator
+...
+```
+
+此时目录结构及核心文件也和[加法器验证-运行测试](/docs/quick-start/examples/adder/#运行测试)类似，这里不再赘述。
