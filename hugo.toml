@@ -1,5 +1,5 @@
 baseURL = "/"
-title = "OpenVerify Courses"
+title = "开放芯片验证"
 
 # Language settings
 contentDir = "content/zh-cn"
@@ -56,22 +56,18 @@ anchor = "Smart"
 # Language configuration
 
 [languages]
-
 [languages.zh-cn]
 languageName ="中文"
-# Weight used for sorting.
-weight = 1
-[languages.zh-cn.params]
+weight = 100
 title = "开放验证平台学习资源"
 description = "如何快速加入开放验证平台"
 
 [languages.en]
 languageName ="English"
-# Weight used for sorting.
 weight = 2
-[languages.en.params]
 title = "OpenVerify Courses"
 description = "Quickly join the open verification platform trial"
+contentDir = "content/en"
 
 [markup]
   [markup.goldmark]
@@ -175,32 +171,13 @@ enable = false
   url = "https://example.org/mail"
   icon = "fa fa-envelope"
   desc = "Discussion and help from your fellow users"
-[[params.links.user]]
-  name ="Twitter"
-  url = "https://example.org/twitter"
-  icon = "fab fa-twitter"
-  desc = "Follow us on Twitter to get the latest news!"
-[[params.links.user]]
-  name = "Stack Overflow"
-  url = "https://example.org/stack"
-  icon = "fab fa-stack-overflow"
-  desc = "Practical questions and curated answers"
+
 # Developer relevant links. These will show up on right side of footer and in the community page if you have one.
 [[params.links.developer]]
   name = "GitHub"
   url = "https://github.com/google/docsy"
   icon = "fab fa-github"
   desc = "Development takes place here!"
-[[params.links.developer]]
-  name = "Slack"
-  url = "https://example.org/slack"
-  icon = "fab fa-slack"
-  desc = "Chat with other project developers"
-[[params.links.developer]]
-  name = "Developer mailing list"
-  url = "https://example.org/mail"
-  icon = "fa fa-envelope"
-  desc = "Discuss development issues around the project"
 
 # hugo module configuration
 
