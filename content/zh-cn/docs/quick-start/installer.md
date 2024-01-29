@@ -1,5 +1,5 @@
 ---
-title: 安装相关软件
+title: 搭建验证环境
 description: 安装相关依赖，**下载、构建并安装**对应的工具。
 categories: [教程]
 tags: [docs]
