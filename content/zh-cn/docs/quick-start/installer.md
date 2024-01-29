@@ -1,5 +1,5 @@
 ---
-title: 安装教程
+title: 工具安装
 description: 安装相关依赖，**下载、构建并安装**对应的工具。
 categories: [教程]
 tags: [docs]

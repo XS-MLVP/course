@@ -10,18 +10,46 @@ weight: 1
 在开始前本页会 简单的介绍什么是验证，以及示例里面用到的概念，如 DUT (Design Under Test) 和 RM (Reference Model) 。
 {{% /pageinfo %}}
 
-## 硬件验证
+### 芯片验证
 
-Are there any system requirements for using your project? What languages are supported (if any)? Do users need to already have any software or tools installed?
+芯片验证是确保芯片设计正确性和可靠性的重要环节，主要包括功能验证、形式验证和物理验证等形式，本学习材料仅仅包含对功能验证的介绍，且侧重于基于仿真器的芯片功能验证。芯片功能验证的流程和方法与软件测试有比较大的共同点，例如都有单元测试、系统测试、黑盒测试、白盒测试等。在验证指标上也有共同特点，例如功能覆盖率、代码覆盖率等等。从某种形式上说，除了使用的工具和编程语言不一样外，他们的目标和流程几乎相同。**因此，在不考虑工具和编程语言的情况下，会软件测试的工程师应当就会芯片验证。** 但在实际工作中，软件测试和芯片验证属于两个完全不相交的行业，其主要原因是验证工具和验证语言的不同，导致软件测试工程师很难实现跨界。在芯片验证领域，通常使用硬件描述语言进行验证（例如 Verilog 或者 System Verilog），使用专业商业工具进行电路仿真。硬件描述语言不同于C++/Python等高级软件编程语言，具有独特的“时钟”特性，对于软件领域的工程师不友好，学习成本高。
 
-## Design Under Test
+**为了打通芯片验证与传统软件测试之间的壁垒，让更多的人参与到芯片验证，本项目提供如下内容：**
 
-Where can your user find your project code? How can they install it (binaries, installable package, build from source)? Are there multiple options/versions they can install and how should they choose the right one for them?
+<blockquote><p>
+多语言验证工具（Picker），让用户可以使用自己擅长的编程语言进行芯片验证
 
-## Reference Model
+验证框架（MLVP），如何在不关心时钟的情况下进行功能验证
 
-Is there any initial setup users need to do after installation to try your project?
+介绍基本电路、验证知识，方便软件背景爱好者更能容易的理解电路特征
 
-## 开始实验
+提供基本学习材料，学习基本验证知识
 
-Can your users test their installation, for example by running a command or deploying a Hello World example?
+提供真实高性能芯片验证案例，让爱好者可以远程参与验证工作
+
+</blockquote></p>
+
+
+### 基本术语
+
+**DUT：** DUT（Design Under Test）指待测试设计，通常指设计好的RTL代码。
+
+**RM：** Reference Model （RM）指代待测试单元对应的参考模型，参考模型通常被认为是标准的，没有错误的。
+
+**TRL：** 指寄存器传输级（Register Transfer Level），通常指代芯片设计对应的 verilog 或者 vhdl 代码。
+
+**覆盖率：** 
+
+**DV：**
+
+**差分测试（difftest）：**
+
+### 工具介绍
+
+
+
+### 系统需求
+
+操作系统建议： ubuntu 20.04 （支持WSL）
+
+GCC/G++版本： 11 以上支持  C++20 特征
