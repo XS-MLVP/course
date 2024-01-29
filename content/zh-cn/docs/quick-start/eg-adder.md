@@ -1,9 +1,11 @@
 ---
-title: 加法器验证
-description: 通过一个简单的加法器验证示例辅助学习，此过程只有组合逻辑，没有时序逻辑与寄存器的概念。
+title: 验证加法器
+date: 2017-01-05
+description: >
+  通过一个简单的加法器验证示例辅助学习，此过程只有组合逻辑，没有时序逻辑与寄存器的概念。
 categories: [示例项目, 教程]
 tags: [examples, docs]
-weight: 10
+weight: 2
 ---
 
 ## RTL源码
