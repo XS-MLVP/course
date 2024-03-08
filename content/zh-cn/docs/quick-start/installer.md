@@ -23,6 +23,10 @@ weight: 1
 
 ```bash
 git clone https://gitee.com/yaozhicheng/picker.git
+git clone https://gitee.com/XS-MLVP/xcomm.git
+cd picker/dependence
+rmdir xcomm/
+ln -s ../../xcomm xcomm
 ```
 
 ### 构建并安装
