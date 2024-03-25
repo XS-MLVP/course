@@ -36,7 +36,7 @@ weight: 1
 
 **RM：** Reference Model （RM）指代待测试单元对应的参考模型，参考模型通常被认为是标准的，没有错误的。
 
-**TRL：** 指寄存器传输级（Register Transfer Level），通常指代芯片设计对应的 verilog 或者 vhdl 代码。
+**RTL：** 指寄存器传输级（Register Transfer Level），通常指代芯片设计对应的 verilog 或者 vhdl 代码。
 
 **覆盖率：** 测试覆盖率是指测试范围与整个需求范围的百分比。在芯片验证领域，通常有代码行覆盖率、函数覆盖率、功能覆盖率等。
 
