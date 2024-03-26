@@ -60,7 +60,6 @@ anchor = "Smart"
 languageName ="中文"
 weight = 100
 title = "开放验证平台学习资源"
-description = "如何快速加入开放验证平台"
 
 #[languages.en]
 #languageName ="English"
@@ -90,6 +89,7 @@ section = ["HTML", "print", "RSS"]
 [params]
 copyright = "BOSC"
 privacy_policy = "https://policies.google.com/privacy"
+baiduAnalytics = "6aacb1c7ca0a3ef4e3aa84c1eaa237dd"
 
 # First one is picked as the Twitter card image if not set on page.
 # images = ["images/project-illustration.png"]
