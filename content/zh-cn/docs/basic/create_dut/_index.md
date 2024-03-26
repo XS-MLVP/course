@@ -12,7 +12,7 @@ weight: 3
 
 创建DUT（Design Under Test）是指在芯片验证过程中，设计并实现被测对象的电路或系统。DUT是验证的主体，是需要验证的电路设计。在创建DUT时，通常需要考虑被测对象的功能、性能要求和验证目标，然后使用硬件描述语言（HDL）如Verilog或VHDL编写相应的电路描述代码，或通过图形化设计工具生成电路设计。创建DUT是验证过程中的第一步，其质量和准确性直接影响着后续的验证工作。
 
-以[加法器DUT的创建：]({{< ref "/content/zh-cn/docs/quick-start/_index.md" >}})为例，进行解释：
+以[加法器DUT的创建：]("/zh-cn/docs/quick-start/")为例，进行解释：
 
 创建一个名为 Adder 的文件夹，并在其中创建一个名为 Adder.v 的文件。这个文件将包含加法器的 Verilog 代码。下面是一个示例的加法器 Verilog 代码：
 
