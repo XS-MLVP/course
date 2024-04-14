@@ -22,11 +22,9 @@ weight: 1
 ### 下载源码
 
 ```bash
-git clone https://gitee.com/yaozhicheng/picker.git
-git clone https://gitee.com/XS-MLVP/xcomm.git
-cd picker/dependence
-rmdir xcomm/
-ln -s ../../xcomm xcomm
+git clone https://github.com/XS-MLVP/picker.git
+cd picker
+make init
 ```
 
 ### 构建并安装
