@@ -1,6 +1,6 @@
 ---
 title: 异步编程
-description: XXXX。
+description: 利用异步模式简化回调
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 2

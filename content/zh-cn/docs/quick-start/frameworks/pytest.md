@@ -1,6 +1,6 @@
 ---
 title: PyTest
-description: XXX。
+description: 可用来管理测试，生成测试报告
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 51
