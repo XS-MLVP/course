@@ -3,7 +3,7 @@ title: C++
 description: 基于C++封装DUT硬件的运行环境，并编译为动态库。
 categories: [教程]
 tags: [docs]
-draft: true
+draft: false
 weight: 61
 ---
 

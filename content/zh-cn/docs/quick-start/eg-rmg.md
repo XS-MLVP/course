@@ -1,5 +1,5 @@
 ---
-title: 验证随机数
+title: 驱动随机数
 description: 以LFSR随机数生成器作为案例，引入时序逻辑与寄存器的概念。
 categories: [示例项目, 教程]
 tags: [examples, docs]
