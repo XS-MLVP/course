@@ -43,7 +43,7 @@ module CacheMeta(
     ...
 endmodule
 ```  
-其中，待测模块为Cache，位于`Cache.sv`中，则您可以通过以下命令生成指定语言的DUT：  
+其中，待测模块为Cache，位于`Cache.sv`中，则您可以通过以下命令生成DUT：  
 ```bash
 picker Cache.sv -f CacheStage.sv,CacheMeta.sv -S Cache
 ```
