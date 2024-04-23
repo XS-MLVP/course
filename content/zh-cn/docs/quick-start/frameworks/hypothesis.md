@@ -21,9 +21,9 @@ Hypothesis 的核心思想是使用假设（hypothesis）来推断代码的行�
 ## 2. 安装
 可以使用pip 命令安装 Hypothesis，然后在python 中导入就可以使用
 ```bash hl: title:
-　pip install hypothesis
+pip install hypothesis
 
-　import hypothesis
+import hypothesis
 ```
 
 
@@ -81,4 +81,53 @@ def test_reverse_string(s):
 	assert actual == expected
 ```
 
+### 3.4 使用Hypothesis结合pytest验证全加器
+在上一节的例子上，我们可以进行一些修改，将生成测试用例的方法从随机数修改为integers ()方法，修改后的代码如下：
 
+```bash hl: title:
+from UT_Adder import *
+import pytest
+import ctypes
+from hypothesis import given, strategies as st
+
+
+def full_adder(a, b, cin):
+	cin = cin & 0b1
+	Sum = ctypes.c_uint64(a).value
+	Sum = Sum + ctypes.c_uint64(b).value + cin
+	Cout = (Sum > 0xffffffffffffffff)
+	Sum = Sum & 0xffffffffffffffff
+	return Sum, Cout
+
+@given(
+    a=st.integers(min_value=0, max_value=0xffffffffffffffff),
+    b=st.integers(min_value=0, max_value=0xffffffffffffffff),
+    cin=st.integers(min_value=0, max_value=1)
+)
+def test_full_adder_with_hypothesis(a, b, cin):
+	dut=DUTAdder("libDPIAdder.so")
+	dut.Step(1)
+	sum_expected, cout_expected = full_adder(a, b, cin)
+	dut.a.xdata.value = a
+	dut.b.xdata.value = b
+	dut.cin.xdata.value = cin
+	dut.Step(1)
+	assert sum_expected == dut.sum.xdata.value
+	assert cout_expected == dut.cout.xdata.value
+
+if __name__=="__main__":
+	pytest.main(['-v', 'test_adder.py::test_full_adder_with_hypothesis'])
+
+```
+
+运行测试，输出结果如下：
+```bash hl: title:
+
+test_adder.py ✓                                                 100% ██████████
+
+Results (1.65s):
+       1 passed
+
+```
+
+这个例子中，@given 装饰器和 strategies 用于生成符合条件的随机数据。st.integers() 是生成指定范围整数的策略，用于为 a 和 b 生成 0 到 0xffffffffffffffff 之间的数，以及为 cin 生成 0 或 1。Hypothesis会自动重复运行这个测试，每次都使用不同的随机输入，这有助于揭示潜在的边界条件或异常情况。对比使用随机数生成测试用例的test，可以看到，使用given方法生成的测试用例覆盖率更高。

@@ -50,4 +50,10 @@ weight: 1
 
 ### 系统需求
 
-操作系统建议： Linux 系统
+操作系统：Ubuntu 22.04 LTS
+
+<blockquote><p>
+在系统结构开发、科研的过程中，Linux 是最为常用的平台，这主要是因为 Linux 拥有丰富的软件、工具资源：由于 Linux 的开源性，各大重要工具软件（如 Verilator）可以很容易地面向 Linux 进行开发。
+在本课程的实验中，多语言验证工具Picker、Swig等工具都可以在 Linux 上稳定运行。
+</blockquote></p>
+
