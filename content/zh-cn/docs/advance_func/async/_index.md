@@ -8,16 +8,20 @@ weight: 2
 
 # 异步编程
 ### 1.1. 概述  
+#### 为什么要引入异步编程？
+理想情况下，我们希望我们写的每行代码可以立即执行，没有延迟，然而由于cpu执行指令的时间，以及等待io的时间两个因素，导致我们实际上代码运行的速度要慢的多
+
 > 异步编程通过将某些任务异步执行，程序可以在等待结果时继续执行其他任务，从而减少了阻塞和等待的时间。
 > 传统的同步编程方式中，代码会按照顺序依次执行，直到前一个任务完成后才能执行下一个任务，异步编程通过将任务分解为更小的子任务，并且不需要等待前一个任务完成，从而实现并行执行多个任务的效果。
 
 ### 1.2. 实现原理
-> 异步编程的实现基于以下两个核心概念，我们会在下一小节进行更详细的介绍
+> 在python的asyncio中异步编程的实现基于以下三个核心概念，我们会在下一小节进行更详细的介绍
 1. 回调函数（Callback）
-回调函数是异步编程的基础。当一个任务完成时，系统会调用预先注册的回调函数来处理任务的结果。通过回调函数的方式，程序可以在等待任务完成的同时继续执行其他任务，提高了程序的并发性。
+回调函数预先注册的回是异步编程的基础。当一个任务完成时，系统会调用调函数来处理任务的结果。通过回调函数的方式，程序可以在等待任务完成的同时继续执行其他任务，提高了程序的并发性。
 2. 事件循环（Event Loop）
 事件循环是异步编程的核心机制之一。它负责监听各种事件（如用户输入、I/O 操作等），当事件发生时，触发相应的回调函数进行处理。事件循环通过不断地轮询事件队列，实现了非阻塞式的任务处理。
-
+3. 协程
+其中协程就是用户自己定义的任务
 
 ### 1.3. 常见的异步编程框架和工具
 >为了方便开发者进行异步编程，有许多优秀的框架和工具可供选择。以下是一些常见的异步编程框架和工具：
@@ -28,6 +32,51 @@ Asyncio 是 Python 的一个强大的异步编程框架，提供了高效的协�
 Node. Js 是基于 Chrome V 8 引擎构建的 JavaScript 运行时环境，天生支持非阻塞 I/O 操作。它在 Web 开发领域广泛应用，尤其擅长处理高并发的实时应用。
 3. RxJava
 RxJava 是一个基于观察者模式和迭代器模式的异步编程库。它为 Java 开发者提供了丰富的操作符和组合方式，简化了异步编程的复杂性。
+
+在python中使用异步，需要使用async和await两个关键字
+- **async**：用于定义异步函数，在异步函数中，通常需要包含异步操作
+- **await**：用于在异步函数中等待异步操作的完成
+
+下面是一个简单的python代码，来演示async和await关键字的用法
+```
+async def my_async_function():
+    print("Start async_function and wait some funcion ")
+    await some_other_async_function()
+    print("End of my_async_function")
+
+```
+在python中要想实现异步，通常使用asyncio模块，在下面的例子中，我们定义了一个greet函数，分别打印Hello+name和Goodbye+name,两次打印中间间隔2s.使用asyncio.create创建两个异步任务，并收集执行结果
+- asyncio.create_task()：用于创建一个协程任务，并安排其立即执行
+- asyncio.gather()：等待多个协程任务的全部完成，并且可以收集执行结果
+- asyncio.sleep()：在异步操作中等待一段实际
+
+
+```
+import asyncio
+# 定义一个异步函数
+async def greet(name):
+    print("Hello, " + name)
+    await asyncio.sleep(2)  # 使用异步的sleep函数
+    print("Goodbye, " + name)
+
+# 执行异步函数
+async def main():
+    # 创建任务并发执行
+    task1 = asyncio.create_task(greet("verify chip"))
+    task2 = asyncio.create_task(greet("picker"))
+
+    # 等待所有任务完成
+    await asyncio.gather(task1, task2)
+
+# 运行主函数
+if __name__ == "__main__":
+    asyncio.run(main())
+
+
+```
+- 首先执行greet("verify chip")，打印Hello,verify chip
+- 当遇到await时，转去执行greet("picker"), 打印Hello,picker
+- 当要等待的操作执行完以后两个task分别输出Goodbye,verify chip，Goodbye,picker
 
 ### 1.4. 异步编程的优势
 异步编程具有以下几个显著的优势：
@@ -46,4 +95,23 @@ RxJava 是一个基于观察者模式和迭代器模式的异步编程库。它�
 3. 消息队列
 消息队列是异步编程的经典应用之一。异步消息队列可以实现不同系统之间的解耦和异步通信，提高系统的可扩展性和稳定性。
 
+### picker中异步的用法
+例如在picker中，我们可以通过如下方法通过周期来控制代码执行的流程
+- await clk.AStep(3)：等待时钟 clk 走 3 个时钟周期。await 关键字使得程序在这里暂停执行，直到时钟走完指定的时钟周期后才继续执行下一行代码。
+- await clk.ACondition(lambda: clk.clk == 20)：它等待条件 clk.clk == 20 成立。类似地，程序在这里暂停执行，直到条件成立后才继续执行下一行代码。
+```
+async def test_async():
+    clk = XClock(lambda a: 0)
+    clk.StepRis(lambda c : print("lambda ris: ", c))
+    task = create_task(clk.RunStep(30))
+    print("test      AStep:", clk.clk)
+    await clk.AStep(3)
+    print("test ACondition:", clk.clk)
+    await clk.ACondition(lambda: clk.clk == 20)
+    print("test        cpm:", clk.clk)
+    await task
+```
 
+
+
+### 验证加法器时使用异步
