@@ -26,9 +26,7 @@ synopsys vcs
 ## 1.Picker的工作原理
 Picker的主要功能就是将Verilog代码转换为C++或者Python代码，以处理器的仿真为例:
 
-#TODO 矢量图
-
-
+![Picker的工作原理](Picker_working_principle.svg)
 ## 2.使用Python访问Verilog信号
 
 >Picker的使用xspcomm来为公用数据定义与操作接口，包括接口读/写、时钟、协程、SWIG回调函数定义等。xspcomm以基础组件的方式被 DUT、MLVP、OVIP等上层应用或者库使用。xspcomm需要用到C++20的特征，建议使用g++ 11 以上版本， cmake 版本大于等于3.11。当通过SWIG导出Python接口时，需要 swig 版本大于等于 4.2.0。
@@ -100,5 +98,4 @@ dut.clk.value = ~clk
 dut.Step(1)
 dut.finalize()
 ```
-
 关于信号访问的高级教程具体可以参考[xcomm文档](https://github.com/XS-MLVP/xcomm)，详细讲解了 Picker 的公用数据定义与操作接口，包括接口读/写、时钟、协程、SWIG回调函数定义等。

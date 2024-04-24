@@ -29,7 +29,7 @@ import hypothesis
 ## 3. 基本用法
 
 ### 3.1. 属性和策略   
->Hypothesis 使用属性装饰器来定义测试函数的属性。最常用的装饰器是 @given，它指定了测试函数应该满足的属性。
+>Hypothesis 使用属性装饰器来定义测试函数的属性。最常用的装饰器是 @given，它指定了测试函数应该满足的属性。    
 
 我们可以通过@given 装饰器定义了一个测试函数 test_addition。并给x 添加对应的属性，测试生成器会自动为测试函数生成测试数据，并将其作为参数传递给函数，例如
 ```bash hl: title:
@@ -121,6 +121,8 @@ if __name__=="__main__":
     dut.finalize()
 
 ```
+
+>这个例子中，@given 装饰器和 strategies 用于生成符合条件的随机数据。st.integers() 是生成指定范围整数的策略，用于为 a 和 b 生成 0 到 0xffffffffffffffff 之间的数，以及为 cin 生成 0 或 1。Hypothesis会自动重复运行这个测试，每次都使用不同的随机输入，这有助于揭示潜在的边界条件或异常情况。
 - 运行测试，输出结果如下：
 ```bash hl: title:
  test_adder.py ✓                                                 100% ██████████
@@ -129,6 +131,3 @@ Results (0.43s):
        1 passed
 ```
 
->这个例子中，@given 装饰器和 strategies 用于生成符合条件的随机数据。st.integers() 是生成指定范围整数的策略，用于为 a 和 b 生成 0 到 0xffffffffffffffff 之间的数，以及为 cin 生成 0 或 1。Hypothesis会自动重复运行这个测试，每次都使用不同的随机输入，这有助于揭示潜在的边界条件或异常情况。对比使用随机数生成测试用例的test，可以看到，使用given方法生成的测试用例覆盖率更高。
-
-#TODO：覆盖率报告

@@ -32,7 +32,7 @@ assign {cout, sum}  = a + b + cin;
 endmodule
 ```
 
-UDT解释：
+DUT解释：
 
 module Adder ... endmodule: 定义了一个名为 Adder 的模块，该模块实现了加法器的功能。
 

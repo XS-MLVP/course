@@ -38,7 +38,8 @@ sudo -E make install
 
 > 默认的安装的目标路径是 `/usr/local`， 二进制文件被置于 `/usr/local/bin`，模板文件被置于 `/usr/local/share/picker`。  
 > 安装时会自动安装 `xspcomm` 基础库，该基础库是用于封装 `RTL` 模块的基础类型，位于 `/usr/local/lib/libxspcomm.so`。 **可能需要手动设置编译时的链接目录参数(-L)**
-> 同时如果开启了python支持，还会安装 `xspcomm` 的python包，位于 `/usr/local/share/picker/python/xspcomm/`。 
+> 同时如果开启了python支持，还会安装 `xspcomm` 的python包，位于 `/usr/local/share/picker/python/xspcomm/`。   
+> 为了后续生成测试覆盖率html文件，还需要安装lcov(genhtml)。直接使用apt-get安装即可。
 
 ### 安装测试
 
@@ -109,6 +110,7 @@ Usage:
 * `--internal`: 可选。导出的内部信号配置文件，默认为空，表示没有内部引脚。
 * `--frequency, -F`: 可选。设置 仅 VCS DUT 的频率，默认是 100MHz，可以使用 Hz、KHz、MHz、GHz 作为单位。
 * `--wave_file_name, -w`: 可选。波形文件名，为空表示不导出波形。
+* `--coverage, -c`: 可选。打开之后在测试完成后生成.dat的覆盖率数据。
 * `--vflag, -V`: 可选。用户定义的模拟器编译参数，透传。例如：'-v -x-assign=fast -Wall --trace' 或 '-f filelist.f'。
 * `--cflag, -C`: 可选。用户定义的 gcc/clang 编译参数，透传。例如：'-O3 -std=c++17 -I./include'。
 * `--verbose, -v`: 可选。详细模式，保留生成的中间文件。
