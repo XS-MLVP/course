@@ -7,27 +7,27 @@ weight: 51
 ---
 
 ## 1. 软件测试
-在正式开始pytest 之间我们先了解一下软件的测试，软件测试一般分为如下四个方面
-- 单元测试：称模块测试，针对软件设计中的最小单位——程序模块，进行正确性检查的测试工作
-- 集成测试：称组装测试，通常在单元测试的基础上，将所有程序模块进行有序的、递增测试，重点测试不同模块的接口部分
-- 系统测试：将整个软件系统看成一个整体进行测试，包括对功能、性能以及软件所运行的软硬件环境进行测试
-- 验收测试：指按照项目任务书或合同、供需双方约定的验收依据文档进行的对整个系统的测试与评审，决定是否接收或拒收系统
+>在正式开始pytest 之间我们先了解一下软件的测试，软件测试一般分为如下四个方面
+>- 单元测试：称模块测试，针对软件设计中的最小单位——程序模块，进行正确性检查的测试工作
+>- 集成测试：称组装测试，通常在单元测试的基础上，将所有程序模块进行有序的、递增测试，重点测试不同模块的接口部分
+>- 系统测试：将整个软件系统看成一个整体进行测试，包括对功能、性能以及软件所运行的软硬件环境进行测试
+>- 验收测试：指按照项目任务书或合同、供需双方约定的验收依据文档进行的对整个系统的测试与评审，决定是否接收或拒收系统
 
 
- pytest最初是作为一个单元测试框架而设计的，但它也提供了许多功能，使其能够进行更广泛的测试，包括集成测试，系统测试，他是一个非常成熟的全功能的python 测试框架。
- 它通过收集测试函数和模块，并提供丰富的断言库来简化测试的编写和运行，是一个非常成熟且功能强大的 Python 测试框架，具有以下几个特点：
-- **简单灵活**：Pytest 容易上手，且具有灵活性。
-- **支持参数化**：您可以轻松地为测试用例提供不同的参数。
-- **全功能**：Pytest 不仅支持简单的单元测试，还可以处理复杂的功能测试。您甚至可以使用它来进行自动化测试，如 Selenium 或 Appium 测试，以及接口自动化测试（结合 Pytest 和 Requests 库）。
-- **丰富的插件生态**：Pytest 有许多第三方插件，您还可以自定义扩展。一些常用的插件包括：
-    - `pytest-selenium`：集成 Selenium。
-    - `pytest-html`：生成完美的 HTML 测试报告。
-    - `pytest-rerunfailures`：在失败的情况下重复执行测试用例。
-    - `pytest-xdist`：支持多 CPU 分发。
-- **与 Jenkins 集成良好**。
-- **支持 Allure 报告框架**。
+>pytest最初是作为一个单元测试框架而设计的，但它也提供了许多功能，使其能够进行更广泛的测试，包括集成测试，系统测试，他是一个非常成熟的全功能的python 测试框架。
+它通过收集测试函数和模块，并提供丰富的断言库来简化测试的编写和运行，是一个非常成熟且功能强大的 Python 测试框架，具有以下几个特点：
+>- **简单灵活**：Pytest 容易上手，且具有灵活性。
+>- **支持参数化**：您可以轻松地为测试用例提供不同的参数。
+>- **全功能**：Pytest 不仅支持简单的单元测试，还可以处理复杂的功能测试。您甚至可以使用它来进行自动化测试，如 Selenium 或 Appium 测试，以及接口自动化测试（结合 Pytest 和 Requests 库）。
+>- **丰富的插件生态**：Pytest 有许多第三方插件，您还可以自定义扩展。一些常用的插件包括：
+>    - `pytest-selenium`：集成 Selenium。
+>    - `pytest-html`：生成HTML测试报告。
+>    - `pytest-rerunfailures`：在失败的情况下重复执行测试用例。
+>    - `pytest-xdist`：支持多 CPU 分发。
+>- **与 Jenkins 集成良好**。
+>- **支持 Allure 报告框架**。
 
-本文将基于测试需求简单介绍pytest的用法，其[完整手册](https://learning-pytest.readthedocs.io/zh/latest/)在这里，有兴趣的同学也可以继续进行学习
+本文将基于测试需求简单介绍pytest的用法，其[完整手册](https://learning-pytest.readthedocs.io/zh/latest/)在这里，供同学们进行深入学习。
 ## 2. Pytest安装
 
 ```bash hl: title:
@@ -48,7 +48,6 @@ pip install pytest-xdist
 pip install pytest-assume
 pip install pytest-html
 ```
-
 
 ## 3. Pytest使用
 
@@ -104,27 +103,60 @@ pytest test_se.py -s
 ```
 
 
-### 3.3. 使用
-如果您需要运行测试用例，可以使用以下方式：
-1. **测试类主函数模式**：通过 `pytest.main("-s test_abc.py")` 调用 Pytest 的主函数执行测试。
-2. **命令行模式**：使用 `pytest 文件路径/测试文件名`，例如 `pytest ./test_abc.py`。
+### 3.3. Pytest 选择测试用例执行
+
+**在 Pytest 中，您可以按照测试文件夹、测试文件、测试类和测试方法的不同维度来选择执行测试用例。**
+
+- 按照测试文件夹执行
+```
+# 执行所有当前文件夹及子文件夹下的所有测试用例
+pytest .
+# 执行跟当前文件夹同级的tests文件夹及子文件夹下的所有测试用例
+pytest ../tests
+```
+
+- 按照测试文件执行
+```
+# 运行test_se.py下的所有的测试用例
+pytest test_se.py
+```
+
+- 按照测试类执行
+```
+# 按照测试类执行，必须以如下格式：
+pytest 文件名 .py:: 测试类，其中“::”是分隔符，用于分割测试module和测试类。
+# 运行test_se.py文件下的，类名是TestSE下的所有测试用例
+pytest test_se.py::TestSE
+```
+
+- 按照测试方法执行
+```
+# 同样的测试方法执行，必须以如下格式：
+pytest 文件名 .py:: 测试类 :: 测试方法，其中 “::” 是分隔符，用于分割测试module、测试类，以及测试方法。
+# 运行test_se.py文件下的，类名是TestSE下的，名字为test_get_new_message的测试用例 
+pytest test_se.py::TestSE::test_get_new_message
+```
+- 以上选择测试用例的方法均是在**命令行**，如果您想直接在测试程序里执行可以直接在main函数中**调用pytest.main()**,其格式为：
+```
+pytest.main([模块.py::类::方法])
+```
 
 此外，Pytest 还支持控制测试用例执行的多种方式，例如过滤执行、多进程运行、重试运行等。
 
 
-### 3.4. 使用Pytest验证全加器
-在测试过程中，我们使用之前验证过的加法器，进入Adder文件夹，删除之前生成的文件夹，执行如下命令：
+## 4. 使用Pytest编写验证
+- 在测试过程中，我们使用之前验证过的加法器，进入Adder文件夹，删除之前生成的文件夹，执行如下命令：
 ```bash
 picker Adder.v -w Adder.fst -S Adder -t picker_out_adder -l python -c --sim verilator
 ```
 
-该命令的含义是：
+- 该命令的含义是：
 
 1. 将Adder.v作为 Top 文件，并将Adder作为 Top Module，利用verilator仿真器将其编译为Python Class
 3. 输出覆盖测试率(-c)
 4. 最终的文件输出路径是 picker_out_adder
 
-make编译之后Adder目录结构如下：
+- make编译之后Adder目录结构如下：
 
 ```bash hl: title:
 ├── Adder.v 
@@ -147,49 +179,52 @@ make编译之后Adder目录结构如下：
             └── _pyxspcomm.so.0.0.1
 ```
 
-此时在picker_out_adder目录下新建一个test_adder.py文件，内容如下：
+- 此时在picker_out_adder目录下新建一个test_adder.py文件，内容如下：
 
 ```bash hl：title
 from UT_Adder import *
 import pytest
-import random
 import ctypes
+from hypothesis import given, strategies as st
+import random
 
 def full_adder(a, b, cin):
-	cin = cin & 0b1
-	Sum = ctypes.c_uint64(a).value
-	Sum = Sum + ctypes.c_uint64(b).value + cin
-	Cout =(Sum // 0xffffffffffffffff)!= 0
-	Sum = Sum & 0xffffffffffffffff
-	return Sum, Cout
+    cin = cin & 0b1
+    Sum = ctypes.c_uint64(a).value
+    Sum = Sum + ctypes.c_uint64(b).value + cin
+    Cout = (Sum >> 64) & 0b1
+    Sum = Sum & 0xffffffffffffffff
+    return Sum, Cout
 
-def test_addr():
-	dut=DUTAdder("libDPIAdder.so")
-	dut.Step(1)
-	for _ in range(114514):
-		a = random.getrandbits(64)
-		b = random.getrandbits(64)
-		cin = random.getrandbits(1)
-		dut.a.xdata.value = a
-		dut.b.xdata.value = b
-		dut.cin.xdata.value = cin
-		dut.Step(1)
-		sum, cout = full_adder(a, b, cin)
-		assert sum == dut.sum.xdata.value
-		assert cout == dut.cout.xdata.value
+def test_adder():
+    dut=DUTAdder("libDPIAdder.so")
+    dut.Step(1)
+    dut=DUTAdder("libDPIAdder.so")
+    dut.Step(1)
+    for _ in range(114514):
+        a = random.getrandbits(64)
+        b = random.getrandbits(64)
+        cin = random.getrandbits(1)
+        dut.a.value = a
+        dut.b.value = b
+        dut.cin.value = cin
+        dut.Step(1)
+        sum, cout = full_adder(a, b, cin)
+        assert sum == dut.sum.value
+        assert cout == dut.cout.value
+    dut.finalize()
 
-if __name__=="__main__":
-	pytest.main(['-v', 'test_adder.py::test_addr'])
+if __name__ == "__main__":
+    pytest.main(['-v', 'test_adder.py::test_adder'])
 ```
 >其中，full_adder函数是一个模拟全加器的函数，使用 ctypes.c_uint64 将 a, b 包装成64位无符号整数，保证数值在进行算术操作时不会因为Python的整数自动扩展而出错。
 
-运行python代码，可以看到输出如下：
+- 运行python代码，可以看到输出如下：
 ```bash hl：title
-test_adder.py::test_addr ✓                                                                                                                                                                                                                                                                                   100% ██████████
+ test_adder.py ✓                                                 100% ██████████
 
-Results (3.89s):
+Results (4.71s):
        1 passed
-```
->说明经过114514次循环，暂时没有检测出我们的DUT有bug，但是如果使用随机数生成测试用例的话可能会有一些潜在的bug在测试中不会被测出来，在下一节，我们将会介绍一个强大的python库，可以生成更丰富的测试用例。
 
-#TODO,覆盖率报告
+```
+>说明经过114514次循环，暂时没有检测出我们的DUT有bug，但是用多次循环随机数来生成测试用例的话，会消耗大量的资源，在下一节中我们会介绍一个强大的方法来生成测试用例。

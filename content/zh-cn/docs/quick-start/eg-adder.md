@@ -5,7 +5,7 @@ description: >
   通过一个简单的加法器驱动示例辅助学习，此过程只有组合逻辑，没有时序逻辑与寄存器的概念。
 categories: [示例项目, 教程]
 tags: [examples, docs]
-weight: 2
+weight: 3
 ---
 
 ## RTL源码
