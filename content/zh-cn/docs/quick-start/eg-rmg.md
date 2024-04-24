@@ -1,6 +1,6 @@
 ---
-title: 驱动随机数
-description: 以LFSR随机数生成器作为案例，引入时序逻辑与寄存器的概念。
+title: 验证随机数
+description: 基于一个16bit的LFSR随机数生成器展示工具的用法，该随机数生成器内部存在时钟信号、时序逻辑与寄存器。
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 4
@@ -31,132 +31,113 @@ module RandomGenerator (
 endmodule
 ```
 
-该随机数生成器包含一个 16 位的 LFSR，其输入为一个 16 位的种子数，输出为一个 16 位的随机数。
-LFSR 的更新规则为：将当前的 LFSR 的最高位与次高位异或，然后将结果放在 LFSR 的最低位，溢出的位被丢弃。
+该随机数生成器包含一个 16 位的 LFSR，其输入为一个 16 位的种子数，输出为一个 16 位的随机数。LFSR 的更新规则为：
+1. 将当前的 LFSR 的最高位与次高位异或，称为new_bit。
+2. 将原来的 LFSR 向左平移一位，将 new_bit 放在最低位。
+2. 丢弃最高位。
 
 
 ## 测试过程
 
 在测试过程中，我们将创建一个名为 RandomGenerator 的文件夹，其中包含一个 RandomGenerator.v 文件。该文件内容即为上述的 RTL 源码。
 
-### 将RTL构建为C++ Class
+### 将RTL构建为 Python Module
+
+#### 生成中间文件
 
 进入 RandomGenerator 文件夹，执行如下命令：
 
 ```bash
-picker RandomGenerator.v -w RandomGenerator.fst -S RandomGenerator -t picker_out_random_generator -l cpp -e -v --sim verilator
+picker --autobuild=false RandomGenerator.v -w RandomGenerator.fst -S RandomGenerator -t picker_out_rmg -l cpp -e --sim verilator
 ```
 
 该命令的含义是：
 
-1. 将RandomGenerator.v作为 Top 文件，并将RandomGenerator作为 Top Module，利用verilator仿真器将其编译为Cpp Class
+1. 将RandomGenerator.v作为 Top 文件，并将RandomGenerator作为 Top Module，基于 verilator 仿真器生成动态库，生成目标语言为 Python。
 2. 启用波形输出，目标波形文件为RandomGenerator.fst
-3. 输出示例项目(-e) 并保留生成时产生的中间文件(-v)
-4. 最终的文件输出路径是 picker_out_random_generator
+3. 包含用于驱动示例项目的文件(-e)，同时codegen完成后不自动编译(-autobuild=false)。
+4. 最终的文件输出路径是 picker_out_rmg
 
 
-输出的目录类似[加法器验证-目录结构](/docs/quick-start/examples/adder/#将rtl构建为c-class)，这里不再赘述。
+输出的目录类似[加法器验证-生成中间文件](/docs/quick-start/eg-adder/#生成中间文件)，这里不再赘述。
 
-### 编译C++ Class为动态库
+#### 构建中间文件
 
-在生成的 `picker_out_random_generator` 目录下，替换 `cpp/example.cpp` 后执行命令 make 即可编译出 `libUTRandomGenerator.so` 动态库及其依赖文件和测试驱动程序。
+进入 `picker_out_rmg` 目录并执行 make 命令，即可生成最终的文件。
 
-> 备注：其编译过程类似于 [加法器验证-编译流程](/docs/quick-start/examples/adder/#编译c-class为动态库)，这里不再赘述。
+> 备注：其编译过程类似于 [加法器验证-编译流程](/docs/quick-start/eg-adder/#构建中间文件)，这里不再赘述。
 
-### 配置测试驱动程序
+最终目录结果为：
 
-> 注意只有替换 `cpp/example.cpp` 中的内容，才能保证 example 示例项目按预期运行。
+```shell
+picker_out_rmg
+|-- RandomGenerator.fst # 测试的波形文件
+|-- UT_RandomGenerator
+|   |-- RandomGenerator.fst.hier
+|   |-- _UT_RandomGenerator.so # Swig生成的wrapper动态库
+|   |-- __init__.py  # Python Module的初始化文件，也是库的定义文件
+|   |-- libDPIRandomGenerator.a # 仿真器生成的库文件
+|   |-- libUTRandomGenerator.so # 基于dut_base生成的libDPI动态库封装
+|   `-- libUT_RandomGenerator.py # Swig生成的Python Module
+|   `-- xspcomm  # xspcomm基础库，固定文件夹，不需要关注
+`-- example.py # 示例代码
+```
 
-```cpp
-#include "UT_RandomGenerator.hpp"
+### 配置测试代码
 
-int64_t random_int64()
-{
-    static std::random_device rd;
-    static std::mt19937_64 generator(rd());
-    static std::uniform_int_distribution<int64_t> distribution(INT64_MIN,
-                                                               INT64_MAX);
-    return distribution(generator);
-}
+> 注意需要替换 `example.py` 中的内容，才能保证 example 示例项目按预期运行。
 
-int main()
-{
-#if defined(USE_VCS)
-    UTRandomGenerator *dut = new UTRandomGenerator("libDPIAdder.so");
-#elif defined(USE_VERILATOR)
-    UTRandomGenerator *dut = new UTRandomGenerator();
-#endif
-    unsigned short seed = random_int64() & 0xffff;
-    printf("seed = 0x%x\n", seed);
-    dut->initClock(dut->clk);
-    dut->xclk.Step(10);
-    dut->reset = 1;
-    dut->seed = seed;
-    dut->xclk.Step(1);
-    dut->reset = 0;
-    dut->xclk.Step(1);
-    printf("Initialized UTRandomGenerator\n");
+```python
+from UT_RandomGenerator import *
+import random
 
-    struct output_t {
-        uint64_t cout;
-    };
+class LSRF_16:
+    def __init__(self, seed):
+        self.state = seed & ((1 << 16) - 1)
 
-    for (int c = 0; c < 114514; c++) {
-        
-        output_t o_dut, o_ref;
+    def step(self):
+        new_bit = (self.state >> 15) ^ (self.state >> 14) & 1
+        self.state = ((self.state << 1) | new_bit ) & ((1 << 16) - 1)
 
-        auto dut_cal = [&]() {
-            dut->xclk.Step(1);
-            o_dut.cout = (unsigned short)dut->random_number;
-        };
+if __name__ == "__main__":
+    dut = DUTRandomGenerator()
+    dut.init_clock("clk")
 
-        // as lfsr
-        auto ref_cal = [&]() { 
-            seed = (seed << 1) | ((seed >> 15) ^ (seed >> 14) & 1);
-            o_ref.cout = seed;
-        };
+    seed = random.randint(0, 2**16 - 1)
 
-        dut_cal();
-        ref_cal();
-        printf("[cycle %llu] ", dut->xclk.clk);
-        printf("DUT: cout=0x%x , ", o_dut.cout);
-        printf("REF: cout=0x%x\n", o_ref.cout);
-        Assert(o_dut.cout == o_ref.cout, "sum mismatch");
-    }
+    dut.seed.value = seed
+    ref = LSRF_16(seed)
+    
+    # reset
+    dut.reset.value = 1
+    dut.Step(1) # 该步进行了初始化赋值操作
+    dut.reset.value = 0 # 设置完成后需要记得复位原信号！
+    dut.Step(1) 
 
-    delete dut;
-    printf("Test Passed, destory UTRandomGenerator\n");
-    return 0;
-}
+    for i in range(65536):
+        print(f"Cycle {i}, DUT: {dut.random_number.value:x}, REF: {ref.state:x}")
+        assert dut.random_number.value == ref.state, "Mismatch"
+        dut.Step(1)
+        ref.step()
+
+    print("Test Passed, destroy UT_RandomGenerator")
+    dut.finalize()
 ```
 
 ### 运行测试程序
 
-在 `picker_out_random_generator` 目录下执行 `./example` 即可运行测试程序。
+在 `picker_out_rmg` 目录下执行 `python example.py` 即可运行测试程序。在运行完成后，若输出 `Test Passed, destroy UT_RandomGenerator`，则表示测试通过。
 
-输出示例为：
+输出示例：
 
-```bash
-...
-[cycle 114510] DUT: cout=0x7e8d , REF: cout=0x7e8d
-[cycle 114511] DUT: cout=0xfd1b , REF: cout=0xfd1b
-[cycle 114512] DUT: cout=0xfa36 , REF: cout=0xfa36
-[cycle 114513] DUT: cout=0xf46c , REF: cout=0xf46c
-[cycle 114514] DUT: cout=0xe8d8 , REF: cout=0xe8d8
-[cycle 114515] DUT: cout=0xd1b0 , REF: cout=0xd1b0
-[cycle 114516] DUT: cout=0xa360 , REF: cout=0xa360
-[cycle 114517] DUT: cout=0x46c1 , REF: cout=0x46c1
-[cycle 114518] DUT: cout=0x8d83 , REF: cout=0x8d83
-[cycle 114519] DUT: cout=0x1b07 , REF: cout=0x1b07
-[cycle 114520] DUT: cout=0x360e , REF: cout=0x360e
-[cycle 114521] DUT: cout=0x6c1c , REF: cout=0x6c1c
-[cycle 114522] DUT: cout=0xd839 , REF: cout=0xd839
-[cycle 114523] DUT: cout=0xb072 , REF: cout=0xb072
-[cycle 114524] DUT: cout=0x60e5 , REF: cout=0x60e5
-[cycle 114525] DUT: cout=0xc1cb , REF: cout=0xc1cb
-[cycle 114526] DUT: cout=0x8396 , REF: cout=0x8396
-Test Passed, destory UTRandomGenerator
-...
+```shell
+···
+Cycle 65529, DUT: d9ea, REF: d9ea
+Cycle 65530, DUT: b3d4, REF: b3d4
+Cycle 65531, DUT: 67a9, REF: 67a9
+Cycle 65532, DUT: cf53, REF: cf53
+Cycle 65533, DUT: 9ea6, REF: 9ea6
+Cycle 65534, DUT: 3d4d, REF: 3d4d
+Cycle 65535, DUT: 7a9a, REF: 7a9a
+Test Passed, destroy UT_RandomGenerator
 ```
-
-此时目录结构及核心文件也和[加法器验证-运行测试](/docs/quick-start/examples/adder/#运行测试)类似，这里不再赘述。

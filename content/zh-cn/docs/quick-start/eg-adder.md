@@ -1,21 +1,20 @@
 ---
 title: 驱动加法器
 date: 2017-01-05
-description: >
-  通过一个简单的加法器驱动示例辅助学习，此过程只有组合逻辑，没有时序逻辑与寄存器的概念。
+description: 基于一个简单的加法器验证展示工具的原理和使用方法，这个加法器内部是简单的组合逻辑。
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 3
 ---
 
 ## RTL源码
-在本案例中，我们驱动一个 64 位的加法器，其源码如下：
+在本案例中，我们驱动一个 256 位的加法器，其源码如下：
 
 ```verilog
-// A verilog 64-bit full adder with carry in and carry out
+// A verilog 256-bit full adder with carry in and carry out
 
 module Adder #(
-    parameter WIDTH = 64
+    parameter WIDTH = 256
 ) (
     input [WIDTH-1:0] a,
     input [WIDTH-1:0] b,
@@ -28,28 +27,31 @@ assign {cout, sum}  = a + b + cin;
 
 endmodule
 ```
-该加法器包含一个 64 位的加法器，其输入为两个 64 位的数和一个进位信号，输出为一个 64 位的和和一个进位信号。
+该加法器包含一个 256 位的加法器，其输入为两个 256 位的数和一个进位信号，输出为一个 256 位的和和一个进位信号。
 
 ## 测试过程
 在测试过程中，我们将创建一个名为 Adder 的文件夹，其中包含一个 Adder.v 文件。该文件内容即为上述的 RTL 源码。
 
-### 将RTL构建为C++ Class
+### 将RTL构建为 Python Module
+
+#### 生成中间文件
+
 进入 Adder 文件夹，执行如下命令：
 
 ```bash
-picker Adder.v -w Adder.fst -S Adder -t picker_out_adder -l cpp -e -v --sim verilator
+picker --autobuild=false Adder.v -w Adder.fst -S Adder -t picker_out_adder -l python -e --sim verilator
 ```
 
 该命令的含义是：
 
-1. 将Adder.v作为 Top 文件，并将Adder作为 Top Module，利用verilator仿真器将其编译为Cpp Class
-2. 启用波形输出，目标波形文件为Adder.fst
-3. 输出示例项目(-e) 并保留生成时产生的中间文件(-v)
+1. 将 Adder.v 作为 Top 文件，并将 Adder 作为 Top Module，基于 verilator 仿真器生成动态库，生成目标语言为 Python。
+2. 启用波形输出，目标波形文件为Adder.fst。
+3. 包含用于驱动示例项目的文件(-e)，同时codegen完成后不自动编译(-autobuild=false)。
 4. 最终的文件输出路径是 picker_out_adder
 
 在使用该命令时，还有部分命令行参数没有使用，这些命令将在后续的章节中介绍。
 
-输出的目录结构如下，请注意这部分均为中间文件：
+输出的目录结构如下，**请注意这部分均为中间文件**，不能直接使用：
 
 ```bash
 picker_out_adder
@@ -86,137 +88,110 @@ picker_out_adder
     `-- dut.py # 生成的python UT封装，包含了对libDPIAdder.so的调用，及UTAdder类的声明及实现，等价于 libUTAdder.so
 ```
 
-### 编译C++ Class为动态库
-在生成的 `picker_out_adder` 目录下，替换 `cpp/example.cpp` 后执行命令 make 即可编译出 `libUTAdder.so` 动态库及其依赖文件和测试驱动程序。
+#### 构建中间文件
+
+进入 `picker_out_adder` 目录并执行 `make` 命令，即可生成最终的文件。
 
 > 由 `Makefile` 定义的自动编译过程流如下：
 > 
 > 1. 通过 `cmake/*.cmake` 定义的仿真器调用脚本，编译 `Adder_top.sv` 及相关文件为 `libDPIAdder.so` 动态库。
 > 2. 通过 `CMakelists.txt` 定义的编译脚本，将 `libDPIAdder.so` 通过 `dut_base.cpp` 封装为 `libUTAdder.so` 动态库。并将1、2步产物拷贝到 `UT_Adder` 目录下。
-> 3. 如果有 `-e` 参数，则拷贝 `cpp` 目录下的所有文件到 `UT_Adder` 目录下，并编译 `example.cpp` 为 `example` 可执行文件。
-> 4. 上一步过程由 `mk/cpp.mk` 定义，可以通过修改 `mk/cpp.mk` 中的 `example` 目标，来修改编译过程。
-> 5. 在编译 `example` 可执行二进制文件的过程中，不同仿真器需要不同cmake文件编译参数，因为需要链接不同的仿真器的依赖库。
+> 3. 通过 `dut_base.hpp` 及 `dut.hpp` 等头文件，利用 `SWIG` 工具生成封装层，并最终在 `UT_Adder` 这一目录中构建一个 Python Module。
+> 4. 如果有 `-e` 参数，则将预先定义好的 `example.py` 置于 `UT_Adder` 目录的上级目录，作为如何调用该 Python Module 的示例代码。
 
+最终目录结果为：
+
+```bash
+.
+|-- Adder.fst # 测试的波形文件
+|-- UT_Adder
+|   |-- Adder.fst.hier
+|   |-- _UT_Adder.so # Swig生成的wrapper动态库
+|   |-- __init__.py # Python Module的初始化文件，也是库的定义文件
+|   |-- libDPIAdder.a # 仿真器生成的库文件
+|   |-- libUTAdder.so # 基于dut_base生成的libDPI动态库封装
+|   `-- libUT_Adder.py # Swig生成的Python Module
+|   `-- xspcomm # xspcomm基础库，固定文件夹，不需要关注
+`-- example.py # 示例代码
+```
 
 ### 配置测试代码
 
-> 注意只有替换 `cpp/example.cpp` 中的内容，才能保证 example 示例项目按预期运行。
+> 注意需要替换 `example.py` 中的内容，才能保证 example 示例项目按预期运行。
 
-```cpp
-#include "UT_Adder.hpp"
+```python
+from UT_Adder import *
 
-int64_t random_int64()
-{
-    static std::random_device rd;
-    static std::mt19937_64 generator(rd());
-    static std::uniform_int_distribution<int64_t> distribution(INT64_MIN,
-                                                            INT64_MAX);
-    return distribution(generator);
-}
+import random
 
-int main()
-{
-#if defined(USE_VCS)
-    UTAdder *dut = new UTAdder("libDPIAdder.so");
-#elif defined(USE_VERILATOR)
-    UTAdder *dut = new UTAdder();
-#endif
-    // dut->initClock(dut->clock);
-    dut->xclk.Step(1);
-    printf("Initialized UTAdder\n");
+class input_t:
+    def __init__(self, a, b, cin):
+        self.a = a
+        self.b = b
+        self.cin = cin
 
-    struct input_t {
-        uint64_t a;
-        uint64_t b;
-        uint64_t cin;
-    };
+class output_t:
+    def __init__(self):
+        self.sum = 0
+        self.cout = 0
 
-    struct output_t {
-        uint64_t sum;
-        uint64_t cout;
-    };
+def random_int(): # 需要将数据以无符号数的形式传入dut
+    return random.randint(-(2**255), 2**255 - 1) & ((1 << 255) - 1)
 
-    for (int c = 0; c < 114514; c++) {
-        input_t i;
-        output_t o_dut, o_ref;
+def as_uint(x, nbits): # 将数据转换为无符号数
+    return x & ((1 << nbits) - 1)
 
-        i.a   = random_int64();
-        i.b   = random_int64();
-        i.cin = random_int64() & 1;
+def main():
+    dut = DUTAdder()  # Assuming USE_VERILATOR
+    
+    print("Initialized UTAdder")
+    
+    for c in range(114514):
+        i = input_t(random_int(), random_int(), random_int() & 1)
+        o_dut, o_ref = output_t(), output_t()
+        
+        def dut_cal():
+            # 针对 DUT 的输入赋值，必须使用 .value
+            dut.a.value, dut.b.value, dut.cin.value = i.a, i.b, i.cin
+            # 驱动电路运行一个周期
+            dut.Step(1)
+            o_dut.sum = dut.sum.value
+            o_dut.cout = dut.cout.value
+        
+        def ref_cal():
+            sum = as_uint( i.a + i.b, 256 )
+            carry = sum < i.a
+            sum += i.cin
+            carry = carry or sum < i.cin
+            o_ref.sum, o_ref.cout = sum, carry
+        
+        dut_cal()
+        ref_cal()
+        
+        print(f"[cycle {dut.xclock.clk}] a=0x{i.a:x}, b=0x{i.b:x}, cin=0x{i.cin:x} ")
+        print(f"DUT: sum=0x{o_dut.sum:x}, cout=0x{o_dut.cout:x}")
+        print(f"REF: sum=0x{o_ref.sum:x}, cout=0x{o_ref.cout:x}")
+        
+        assert o_dut.sum == o_ref.sum, "sum mismatch"
 
-        auto dut_cal = [&]() {
-            dut->a   = i.a;
-            dut->b   = i.b;
-            dut->cin = i.cin;
-            dut->xclk.Step(1);
-            o_dut.sum  = (uint64_t)dut->sum;
-            o_dut.cout = (uint64_t)dut->cout;
-        };
+    dut.finalize() # 必须显式调用finalize方法，否则会导致内存泄漏，并无法生成波形和覆盖率
+    print("Test Passed, destroy UTAdder")
 
-        auto ref_cal = [&]() {
-            uint64_t sum = i.a + i.b;
-            bool carry   = sum < i.a;
-
-            sum += i.cin;
-            carry = carry || sum < i.cin;
-
-            o_ref.sum  = sum;
-            o_ref.cout = carry ;
-        };
-
-        dut_cal();
-        ref_cal();
-        printf("[cycle %llu] a=0x%lx, b=0x%lx, cin=0x%lx\n", dut->xclk.clk, i.a,
-            i.b, i.cin);
-        printf("DUT: sum=0x%lx, cout=0x%lx\n", o_dut.sum, o_dut.cout);
-        printf("REF: sum=0x%lx, cout=0x%lx\n", o_ref.sum, o_ref.cout);
-        Assert(o_dut.sum == o_ref.sum, "sum mismatch");
-    }
-
-    delete dut;
-    printf("Test Passed, destory UTAdder\n");
-    return 0;
-}
+if __name__ == "__main__":
+    main()
 ```
 
 ### 运行测试
 
-成功编译并运行后，我们即可看到 example 示例项目的输出，作为Release内容的输出结果均在 picker_out_adder/UT_Adder 目录下。
+在 `picker_out_adder` 目录下执行 `python example.py` 命令，即可运行测试。在测试完成后我们即可看到 example 示例项目的输出。波形文件会被保存在 `Adder.fst` 中。
 
 ```
 [...]
-[cycle 114515] a=0xa312f444394e8372, b=0x599aa4228a8b09ff, cin=0x1
-DUT: sum=0xfcad9866c3d98d72, cout=0x0
-REF: sum=0xfcad9866c3d98d72, cout=0x0
-[...]
+[cycle 114513] a=0x6b57b425d7b07128bac8b8ba5ec5e4fe8b14cd20a496657902741622f2e91799, b=0x3046e344d56a4e799e8f2235f0200d356d438cf619aa93a3964b850fc1c22109, cin=0x0
+DUT: sum=0x9b9e976aad1abfa25957daf04ee5f233f8585a16be40f91c98bf9b32b4ab38a2, cout=0x0
+REF: sum=0x9b9e976aad1abfa25957daf04ee5f233f8585a16be40f91c98bf9b32b4ab38a2, cout=0x0
+[cycle 114514] a=0x52c53bd3f8a23b0a9513d551aa0f7e93484c04c3649c594fb0d72700cb62e3ef, b=0x300b8c30293bb564592b18e811846d8237ea9e6fdb3f515d373208c99ff5617c, cin=0x0
+DUT: sum=0x82d0c80421ddf06eee3eee39bb93ec158036a3333fdbaaace8092fca6b58456b, cout=0x0
+REF: sum=0x82d0c80421ddf06eee3eee39bb93ec158036a3333fdbaaace8092fca6b58456b, cout=0x0
+Test Passed, destroy UTAdder
 ```
-此时目录结构如下图
-
-```bash
-~/picker_out_adder$ tree UT_Adder
-UT_Adder
-|-- Adder.cmake # 原 picker_out_adder/cpp/cmake/verilator.cmake
-|-- Adder.v # 原 picker_out_adder/Adder.v
-|-- Adder_top.sv
-|-- Adder_top.v
-|-- CMakeLists.txt # 原 picker_out_adder/cpp/CMakeLists.txt
-|-- Makefile # 原 picker_out_adder/cpp/Makefile
-|-- UTAdder_example # 测试程序
-|-- UT_Adder.cpp # 原 picker_out_adder/cpp/dut.cpp，经过模板渲染，已经被编译到libUTAdder.so中
-|-- UT_Adder.hpp # 原 picker_out_adder/cpp/dut.hpp，经过模板渲染
-|-- UT_Adder_dpi.hpp # 仿真器生成的DPI函数声明，用于链接时使用
-|-- dut_base.hpp # 原 picker_out_adder/dut_base.hpp，基类头文件声明，用于链接时使用
-|-- example.cpp # 测试程序代码
-|-- libDPIAdder.a # 仿真器生成的静态(verilator)/动态库(vcs)，用于链接时使用
-`-- libUTAdder.so # 经过封装的动态库，UT_Adder.cpp的实现已经包含在其中。
-```
-
-可以发现核心文件包含
-
-1. `libUTAdder.so` 动态库，包含了 `UT_Adder.cpp` 的实现
-2. `libDPIAdder.so` 动态库，包含了编译为C++的RTL模块实现，及DPI函数导出。
-3. `UT_Adder.hpp`, `UT_Adder_dpi.hpp`, `dut_base.hpp` 三个头文件，用于链接时使用。
-
-辅助文件包含
-
-1. Adder.cmake，用于控制编译二进制文件时的链接参数
