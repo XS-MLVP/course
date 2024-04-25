@@ -166,13 +166,3 @@ dut.finalize()
 ### XClock
 
 ### Async & Event
-
-```
----
-title: 使用 Python
-description: 基于Python封装DUT硬件的运行环境，将生成的C++ lib基于Swig导出为Python module。
-categories: [教程]
-tags: [docs]
-weight: 2
----
-```
