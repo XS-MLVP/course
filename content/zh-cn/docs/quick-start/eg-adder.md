@@ -1,5 +1,5 @@
 ---
-title: 驱动加法器
+title: 案例一：加法器
 date: 2017-01-05
 description: 基于一个简单的加法器验证展示工具的原理和使用方法，这个加法器内部是简单的组合逻辑。
 categories: [示例项目, 教程]
@@ -93,7 +93,7 @@ picker_out_adder
 进入 `picker_out_adder` 目录并执行 `make` 命令，即可生成最终的文件。
 
 > 由 `Makefile` 定义的自动编译过程流如下：
-> 
+>
 > 1. 通过 `cmake/*.cmake` 定义的仿真器调用脚本，编译 `Adder_top.sv` 及相关文件为 `libDPIAdder.so` 动态库。
 > 2. 通过 `CMakelists.txt` 定义的编译脚本，将 `libDPIAdder.so` 通过 `dut_base.cpp` 封装为 `libUTAdder.so` 动态库。并将1、2步产物拷贝到 `UT_Adder` 目录下。
 > 3. 通过 `dut_base.hpp` 及 `dut.hpp` 等头文件，利用 `SWIG` 工具生成封装层，并最终在 `UT_Adder` 这一目录中构建一个 Python Module。
@@ -143,13 +143,13 @@ def as_uint(x, nbits): # 将数据转换为无符号数
 
 def main():
     dut = DUTAdder()  # Assuming USE_VERILATOR
-    
+
     print("Initialized UTAdder")
-    
+
     for c in range(114514):
         i = input_t(random_int(), random_int(), random_int() & 1)
         o_dut, o_ref = output_t(), output_t()
-        
+
         def dut_cal():
             # 针对 DUT 的输入赋值，必须使用 .value
             dut.a.value, dut.b.value, dut.cin.value = i.a, i.b, i.cin
@@ -157,21 +157,21 @@ def main():
             dut.Step(1)
             o_dut.sum = dut.sum.value
             o_dut.cout = dut.cout.value
-        
+
         def ref_cal():
             sum = as_uint( i.a + i.b, 256 )
             carry = sum < i.a
             sum += i.cin
             carry = carry or sum < i.cin
             o_ref.sum, o_ref.cout = sum, carry
-        
+
         dut_cal()
         ref_cal()
-        
+
         print(f"[cycle {dut.xclock.clk}] a=0x{i.a:x}, b=0x{i.b:x}, cin=0x{i.cin:x} ")
         print(f"DUT: sum=0x{o_dut.sum:x}, cout=0x{o_dut.cout:x}")
         print(f"REF: sum=0x{o_ref.sum:x}, cout=0x{o_ref.cout:x}")
-        
+
         assert o_dut.sum == o_ref.sum, "sum mismatch"
 
     dut.finalize() # 必须显式调用finalize方法，否则会导致内存泄漏，并无法生成波形和覆盖率

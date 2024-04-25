@@ -1,5 +1,5 @@
 ---
-title: 验证随机数
+title: 案例二：随机数生成器
 description: 基于一个16bit的LFSR随机数生成器展示工具的用法，该随机数生成器内部存在时钟信号、时序逻辑与寄存器。
 categories: [示例项目, 教程]
 tags: [examples, docs]
@@ -107,12 +107,12 @@ if __name__ == "__main__":
 
     dut.seed.value = seed
     ref = LSRF_16(seed)
-    
+
     # reset
     dut.reset.value = 1
     dut.Step(1) # 该步进行了初始化赋值操作
     dut.reset.value = 0 # 设置完成后需要记得复位原信号！
-    dut.Step(1) 
+    dut.Step(1)
 
     for i in range(65536):
         print(f"Cycle {i}, DUT: {dut.random_number.value:x}, REF: {ref.state:x}")

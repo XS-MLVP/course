@@ -1,12 +1,12 @@
 ---
-title: 回调与Eventloop
+title: 回调函数
 description: 利用回调处理电路事件
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 1
 ---
 ## 1. 回调
-### 1.1. 概述  
+### 1.1. 概述
 > 当程序运行时，一般情况下，应用程序会时常通过API调用库里所预先备好的函数。但是有些库函数却要求应用先传给它一个函数，好在合适的时候调用，以完成目标任务。这个被传入的、后又被调用的函数就称为回调函数（callback function）。
 
 - 回调函数就是一个**被作为参数**传递的函数。
@@ -51,7 +51,7 @@ print(calc(1, 2, add))
 - 我们可以通过一个中间函数，来分别调用addOne和addTwo来生成形如1/(x+1)和1/(x+2)形式的数
 - 也可以使用匿名函数的形式生成1/(x+3)形式的数
 ```bash hl: title:
- 
+
 def addOne(x):
     return x + 1
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     print(getNumber(x, lambda k: k +3))
 
 ```
-### 1.3. 回调函数的使用场景包括 
+### 1.3. 回调函数的使用场景包括
 
 1. **事件处理**：回调函数可以用于处理各种事件，例如鼠标点击、键盘输入、网络请求等。
 2. **异步操作**：回调函数可以用于异步操作，例如读取文件、发送邮件、下载文件等。
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
 
 ## 2. Eventloop
-### 2.1. 概述  
+### 2.1. 概述
 >**Event Loop：**事件循环机制是一种计算机编程模型，其目的是使程序能够在一种非阻塞方式下等待事件(如`输入、计时器、定时器、网络`等)的发生，并在发生事件时被通知及时处理事件，用于等待和分配消息和事件，单线程运行时不会阻塞的一种机制，也就是实现异步的原理。作为一种单线程语言,事件循环机制的核心是**事件循环**，即**程序会轮询事件队列中是否有待处理事件**，如果有，就执行相应的回调函数来处理该事件。然后继续等待下一个事件。事件可以是来自外部资源（如网络套接字、文件、定时器等）的输入、用户输入、系统通知等。由此，程序就可以实现**异步、非阻塞**的编程方式，提高程序的响应速度和运行效率.
 
 ### 2.2. 基本原理
@@ -145,16 +145,16 @@ python中的Asyncio模块提供了以下方法来管理事件循环
 
 ```
 import asyncio
- 
+
 def callback(a, loop):
     print("我的参数为 {0}，执行的时间为{1}".format(a,loop.time()))
- 
+
 if __name__ == "__main__":
     try:
         loop = asyncio.get_event_loop()
         now = loop.time()
-        loop.call_later(5, callback, 5, loop) 
-        loop.call_at(now+2, callback, 2, loop)    
+        loop.call_later(5, callback, 5, loop)
+        loop.call_at(now+2, callback, 2, loop)
         loop.call_at(now+1, callback, 1, loop)
         loop.call_at(now+3, callback, 3, loop)
         loop.call_soon(callback, 4, loop)

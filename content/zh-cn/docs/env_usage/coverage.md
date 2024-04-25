@@ -1,9 +1,9 @@
 ---
-title: 输出覆盖率
+title: 覆盖率统计
 description: 覆盖率工具
 categories: [示例项目, 教程]
 tags: [examples, docs]
-weight: 43
+weight: 4
 ---
 
 > picker工具支持生成部分的覆盖率报告。

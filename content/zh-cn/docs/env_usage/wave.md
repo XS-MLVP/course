@@ -1,9 +1,9 @@
 ---
-title: 生成DUT波形
+title: 波形生成
 description: 生成电路波形
 categories: [示例项目, 教程]
 tags: [examples, docs]
-weight: 41
+weight: 2
 ---
 
 在使用Picker工具生成DUT时，使用选项`-w [wave_file]`指定预保存的波形文件，其文件格式为`.vcd`或者`.fst`。需要注意的是使用verilator作为仿真器时，只支持`.vcd`格式的波形文件。

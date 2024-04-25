@@ -36,9 +36,9 @@ make
 sudo -E make install
 ```
 
-> 默认的安装的目标路径是 `/usr/local`， 二进制文件被置于 `/usr/local/bin`，模板文件被置于 `/usr/local/share/picker`。  
+> 默认的安装的目标路径是 `/usr/local`， 二进制文件被置于 `/usr/local/bin`，模板文件被置于 `/usr/local/share/picker`。
 > 安装时会自动安装 `xspcomm` 基础库，该基础库是用于封装 `RTL` 模块的基础类型，位于 `/usr/local/lib/libxspcomm.so`。 **可能需要手动设置编译时的链接目录参数(-L)**
-> 同时如果开启了python支持，还会安装 `xspcomm` 的python包，位于 `/usr/local/share/picker/python/xspcomm/`。   
+> 同时如果开启了python支持，还会安装 `xspcomm` 的python包，位于 `/usr/local/share/picker/python/xspcomm/`。
 > 为了后续生成测试覆盖率html文件，还需要安装lcov(genhtml)。直接使用apt-get安装即可。
 
 ### 安装测试
@@ -47,50 +47,50 @@ sudo -E make install
 
 ```bash
 ➜  picker git:(master) picker
-XDut Generate. 
+XDut Generate.
 Convert DUT(*.v/*.sv) to C++ DUT libs. Notice that [file] option allow only one file.
 
 Usage:
-  XDut Gen [file] [OPTION...] 
+  XDut Gen [file] [OPTION...]
 
-  -f, --filelist arg            DUT .v/.sv source files, contain the top 
+  -f, --filelist arg            DUT .v/.sv source files, contain the top
                                 module, split by comma.
-                                Or use '*.txt' file  with one RTL file path 
-                                per line to specify the file list (default: 
+                                Or use '*.txt' file  with one RTL file path
+                                per line to specify the file list (default:
                                 "")
-      --sim arg                 vcs or verilator as simulator, default is 
+      --sim arg                 vcs or verilator as simulator, default is
                                 verilator (default: verilator)
-  -l, --language arg            Build example project, default is cpp, 
+  -l, --language arg            Build example project, default is cpp,
                                 choose cpp or python (default: cpp)
-  -s, --source_dir arg          Template Files Dir, default is 
-                                ${picker_install_path}/../picker/template 
+  -s, --source_dir arg          Template Files Dir, default is
+                                ${picker_install_path}/../picker/template
                                 (default: /usr/local/share/picker/template)
-  -t, --target_dir arg          Render files to target dir, default is 
+  -t, --target_dir arg          Render files to target dir, default is
                                 ./picker_out (default: ./picker_out)
-  -S, --source_module_name arg  Pick the module in DUT .v file, default is 
-                                the last module in the -f marked file 
+  -S, --source_module_name arg  Pick the module in DUT .v file, default is
+                                the last module in the -f marked file
                                 (default: "")
-  -T, --target_module_name arg  Set the module name and file name of target 
-                                DUT, default is the same as source. For 
-                                example, -T top, will generate UTtop.cpp 
-                                and UTtop.hpp with UTtop class (default: 
+  -T, --target_module_name arg  Set the module name and file name of target
+                                DUT, default is the same as source. For
+                                example, -T top, will generate UTtop.cpp
+                                and UTtop.hpp with UTtop class (default:
                                 "")
-      --internal arg            Exported internal signal config file, 
-                                default is empty, means no internal pin 
+      --internal arg            Exported internal signal config file,
+                                default is empty, means no internal pin
                                 (default: "")
-  -F, --frequency arg           Set the frequency of the **only VCS** DUT, 
-                                default is 100MHz, use Hz, KHz, MHz, GHz as 
+  -F, --frequency arg           Set the frequency of the **only VCS** DUT,
+                                default is 100MHz, use Hz, KHz, MHz, GHz as
                                 unit (default: 100MHz)
-  -w, --wave_file_name arg      Wave file name, emtpy mean don't dump wave 
+  -w, --wave_file_name arg      Wave file name, emtpy mean don't dump wave
                                 (default: "")
-  -c, --coverage                Enable coverage, default is not selected as 
+  -c, --coverage                Enable coverage, default is not selected as
                                 OFF
-  -V, --vflag arg               User defined simulator compile args, 
-                                passthrough. Eg: '-v -x-assign=fast -Wall 
-                                --trace' || '-C vcs -cc -f filelist.f' 
+  -V, --vflag arg               User defined simulator compile args,
+                                passthrough. Eg: '-v -x-assign=fast -Wall
+                                --trace' || '-C vcs -cc -f filelist.f'
                                 (default: "")
-  -C, --cflag arg               User defined gcc/clang compile command, 
-                                passthrough. Eg:'-O3 -std=c++17 
+  -C, --cflag arg               User defined gcc/clang compile command,
+                                passthrough. Eg:'-O3 -std=c++17
                                 -I./include' (default: "")
   -v, --verbose                 Verbose mode
   -e, --example                 Build example project, default is OFF
@@ -125,7 +125,7 @@ Usage:
 
 ```bash
 cd picker # 进入项目根目录，即git clone的目录
-./example/Adder/release-verilator.sh -l cpp -e 
+./example/Adder/release-verilator.sh -l cpp -e
 ```
 
 程序应当输出**类似**的内容：
@@ -143,7 +143,7 @@ Test Passed, destory UTAdder
 
 ```bash
 cd picker
-./example/RandomGenerator/release-verilator.sh -l cpp -e 
+./example/RandomGenerator/release-verilator.sh -l cpp -e
 ```
 
 程序应当输出**类似**的内容：

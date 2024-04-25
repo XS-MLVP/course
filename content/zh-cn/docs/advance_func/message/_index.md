@@ -1,6 +1,6 @@
 ---
-title: 事件驱动
-description: 利用事件对电路和软件激励进行解耦
+title: 消息驱动
+description: 利用消息对电路和软件激励进行解耦
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 3
@@ -22,7 +22,7 @@ weight: 3
 2. **事件循环**：事件循环是一个在程序执行期间不断运行的主循环，用于接收、分发和处理事件。在 Python 中，`asyncio` 模块提供了一个事件循环框架，用于编写异步事件驱动的程序。
 3. **事件处理器**：事件处理器是用于处理特定类型事件的函数或方法。当事件发生时，事件处理器会被调用来执行相应的操作。
 4. **回调函数**：回调函数是一种特殊的事件处理器，它在特定事件发生时被异步调用。通常，回调函数被注册到事件处理器中，以便在事件发生时被调用。
-## 2. 基本用法 
+## 2. 基本用法
 > 在 Python 中，asyncio. Event 是一个用于协调异步任务之间的状态同步的对象。它可以在多个异步任务之间设置和清除信号，并且可以用于实现等待和通知的模式。
 
 asyncio.Event 的一些常用方法和属性：
@@ -41,18 +41,18 @@ asyncio.Event 的一些常用方法和属性：
 def set_event():
     print('setting event ')
     event.set()
- 
+
 async def wait1():
     print('wait1 waiting for event')
     await event.wait()
     print('wait1 triggered')
- 
- 
+
+
 async def wait2(event):
     print('wait2 waiting for event')
     await event.wait()
     print('wait2 triggered')
- 
+
 async def main(loop):
 	event = asyncio.Event()
     asyncio.create_task(wait1())
@@ -67,7 +67,7 @@ async def main(loop):
 - 调用awaited_func, 此时需要等待event 事件的发生
 - 调用 set_event，等待 2s 后，set event 发生，打印 `event has been set`, 并等待event 2
 - awaited_func 等待event 发生后打印 `event has been waited`，set event 2 发生
-- envent 2 发生后set_event 打印 `event2 has been waited` 
+- envent 2 发生后set_event 打印 `event2 has been waited`
 
 
 ```bash hl: title:
