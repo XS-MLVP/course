@@ -165,12 +165,70 @@ dut.finalize()
 
 ### Async & Event
 
+**时钟事件 (Event)**
+
+生成的 Python 模块中提供了基础的异步功能，以方便用户编写异步测试用例。
+
+具体地，我们在每一个由 Picker 生成的 Python 模块中设置了一个时钟事件（Event），并围绕这一事件提供了异步的接口。该时钟事件可通过实例化对象的 `event` 属性获取，例如 `dut.event`。
+
+同时，该事件也可以从 dut 的每一个接口中获取。这是因为我们将接口定义为了 `XPin`，其中包含了该接口的 `xdata` 和全局时钟事件 `event`，因此可以通过 `dut.signal_1.event` 这样的方式获取到全局的时钟事件。这有助于我们在仅能访问到一个接口的情况下，获取到该接口对应的全局时钟信号。
+
+**使用异步**
+
+上文介绍的时钟事件是异步功能的核心，在这里我们将介绍如何使用时钟事件来实现异步功能。
+
+首先我们需要创建一个协程(Coroutine)对象，并将其加入到事件循环(EventLoop)中，以实现全局时钟的驱动，方法如下：
+
+```python
+asyncio.create_task(dut.xclock.RunStep(10))
 ```
----
-title: 使用 Python
-description: 基于Python封装DUT硬件的运行环境，将生成的C++ lib基于Swig导出为Python module。
-categories: [教程]
-tags: [docs]
-weight: 2
----
+
+这将会使得时钟在“后台”被驱动 10 次，而不会阻塞当前正在执行的代码。但是其他的协程如何得知时钟被驱动了一次呢？这就要用到时钟事件了。在 `RunStep` 函数中，每驱动一次时钟，都会对时钟事件进行一次触发，其他协程可以通过监听时钟事件来得知时钟被驱动了。例如：
+
+```python
+async def other_task():
+	for _ in range(10):
+		await dut.xclock.AStep(1)
+		print(f"Clock has been ticked")
 ```
+
+`dut.xclock.AStep` 中封装了对时钟事件的等待，当时钟事件被触发时，程序才会继续向下执行。我们也可以直接使用 `await dut.event.wait()` 来等待直接时钟事件的触发。通过这种异步的方式，我们便可以同时创建多个任务，每个任务中都可以等待时钟事件的触发，从而实现多任务的并发执行。
+
+我们做了相应的工作，以确保在下一次时钟事件到来之前，所有能够执行的任务都将会被执行，并由下一次时钟事件进行阻塞。
+
+以下是一个完整的示例：
+
+```python
+import asyncio
+
+dut = UT_mydut()
+dut.init_clock("clk")
+
+async def other_task():
+	for _ in range(10):
+		await dut.xclock.AStep(1)
+		print(f"Clock has been ticked")
+
+async def my_test():
+	clock_task = asyncio.create_task(dut.xclock.RunStep(10))
+	asyncio.create_task(other_task())
+
+	await clock_task
+
+asyncio.run(my_test())
+```
+
+除了 `RunStep` 和 `AStep` 之外，我们还提供了一个实用函数 `xclock.ACondition` 来实现更复杂的条件等待，例如 `await dut.xclock.ACondition(lambda: dut.signal_1.value == 1)`。这将会在每次时钟事件触发时检查条件是否满足，如果满足才继续向下执行。
+
+
+
+**自定义异步事件**
+
+如果你需要在异步的使用过程中，需要实例化若干 `Event` 或 `Queue` 来实现相应的功能，你需要使用 `xspcomm` 库中提供的 `Event` 和 `Queue` 的实现，而不是使用 Python 标准库中的 `asyncio.Event` 和 `asyncio.Queue`，这会使自定义事件和时钟触发的先后顺序得不到保证。
+
+使用 `xspcomm` 库中的实现可以保证在当前周期所有可被触发的自定义事件都会在下一个周期到来之前被触发。
+
+**更方便的异步使用**
+
+picker 提供的 dut 当中仅提供了最基础的异步功能，如果你需要更加方便的使用异步，可以参考 `mlvp` 库的文档，该库提供了更加丰富的异步接口。
+
