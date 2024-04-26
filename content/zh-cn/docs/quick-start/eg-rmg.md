@@ -26,13 +26,13 @@ module RandomGenerator (
             lfsr <= {lfsr[14:0], lfsr[15] ^ lfsr[14]};
         end
     end
-
+ 
     assign random_number = lfsr;
 endmodule
 ```
 
 该随机数生成器包含一个 16 位的 LFSR，其输入为一个 16 位的种子数，输出为一个 16 位的随机数。LFSR 的更新规则为：
-1. 将当前的 LFSR 的最高位与次高位异或，称为new_bit。
+1. 将当前的 LFSR 的最高位与次高位异或，称为new_bit。 
 2. 将原来的 LFSR 向左平移一位，将 new_bit 放在最低位。
 2. 丢弃最高位。
 
