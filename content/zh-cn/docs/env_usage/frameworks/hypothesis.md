@@ -154,3 +154,4 @@ collected 1 item
 Results (0.42s):
        1 passed
 ```
+> 可以看到在很短的时间里我们已经完成了测试
