@@ -84,7 +84,125 @@ if __name__ == "__main__":
 
 
 
-### 1.4. picker中使用回调函数
+### 1.4. Picker中使用回调函数
+
+下面的[代码](#test_random_generator_with_callback)是使用回调函数配合对进行测试随机数生成器。
+
+整个测试在114514个时钟周期内验证随机数生成器的结果，并统计生成的随机数中大于中位数和小于等于中位数的数量。其中，结果的验证和数据的统计都在时钟上升沿进行。
+
+`TestRandomGenerator`是对随机数生成器进行测试的类，在它的属性和方法中：
+
++ `self.dut`是用于测试的实例化`DUTRandomGenerator`对象。
++ `self.ref`是用于验证结果的实例化`LSRF_16`对象。
++ `callback1(self, clk)`会对随机数生成器进行验证，在时钟上升沿触发。
++ `callback2(self, clk)`会统计生成随机数的分布，也在时钟上升沿触发。
++ `test_rg(self, callback3)`方法会执行整个测试流程，最后执行`callback3`函数。
+
+Picker生成的DUT类会包含一个驱动电路的时钟源`self.xclock`，`DUTRandomGenerator`也同样如此，开始时先把测试模块的`clk`引脚接入时钟源：
+
+```python
+self.dut.init_clock("clk")
+```
+
+之后再对生成器进行复位，进行初始化赋值：
+
+```python
+self.dut.reset.value = 1 
+self.dut.Step(1)  # 该步进行了初始化赋值操作
+self.dut.reset.value = 0  # # 设置完成后需要记得复位原信号！
+```
+
+完成初始化后，在时钟源添加时钟上升沿触发的回调函数，用于验证与统计：
+
+```python
+self.dut.xclock.StepRis(self.callback1)  # 添加在时钟上升沿触发的回调函数
+self.dut.xclock.StepRis(self.callback2)  # 当然可也添加多个
+```
+
+然后把时钟推进114514个周期，此后每个时钟的上升沿会结果进行验证并统计生成随机数的分布：
+
+```python
+self.dut.Step(114514)
+```
+
+最后进行收尾工作，以回调函数的形式调用`median_distribution_stats`输出随机数的分布情况：
+
+```python
+self.dut.finalize()
+callback3(self.greater, self.less_equal, self.MEDIAN)
+```
+
+至此，测试完成。
+
+#### 配合回调函数测试随机数生成器的代码{#test_random_generator_with_callback}
+
+```python
+from UT_RandomGenerator import *
+import random
+
+
+def median_distribution_stats(gt, le, mid) -> None:
+    # 输出产生结果中大于中位数的个数和小于等于中位数的个数。
+    print(f"There are {gt} numbers > {mid} and {le} numbers <= {mid}")
+
+
+class LSRF_16:
+    def __init__(self, seed):
+        self.state = seed & ((1 << 16) - 1)
+
+    def step(self):
+        new_bit = (self.state >> 15) ^ (self.state >> 14) & 1
+        self.state = ((self.state << 1) | new_bit) & ((1 << 16) - 1)
+
+
+class TestRandomGenerator:
+    def __init__(self) -> None:
+        self.MEDIAN = 2**15
+        self.SEED = random.randint(0, 2**16 - 1)
+        self.greater = 0
+        self.less_equal = 0
+        self.ref = LSRF_16(self.SEED)
+        self.dut = DUTRandomGenerator()
+
+    def test_rg(self, callback3) -> None:
+        # clk引脚接入时钟源
+        self.dut.init_clock("clk")
+        self.dut.seed.value = self.SEED
+        # reset
+        self.dut.reset.value = 1 
+        self.dut.Step(1)  # 该步进行了初始化赋值操作
+        self.dut.reset.value = 0  # # 设置完成后需要记得复位原信号！
+        # 设置回调函数
+        self.dut.xclock.StepRis(self.callback1)  # 添加在时钟上升沿触发的回调函数
+        self.dut.xclock.StepRis(self.callback2)  # 当然可也添加多个
+        # 测试，启动！
+        self.dut.Step(114514)
+        # 结束
+        self.dut.finalize()
+        callback3(self.greater, self.less_equal, self.MEDIAN)
+        pass
+
+    def callback1(self, clk):
+        # 比对结果是否符合预期
+        assert self.dut.random_number.value == self.ref.state, "Mismatch"
+        print(
+            f"Cycle {clk}, DUT: {self.dut.random_number.value:x},"
+            + f" REF: {self.ref.state:x}"
+        )
+        self.ref.step()
+
+    def callback2(self, clk):
+        # 统计产生的随机数中，大于中位数和小于等于中位数的分布
+        if self.dut.random_number.value > self.MEDIAN:
+            self.greater += 1
+        else:
+            self.less_equal += 1
+
+
+if __name__ == "__main__":
+    TestRandomGenerator().test_rg(median_distribution_stats)
+    pass
+```
 
 
 ### 1.5. 在验证加法器时添加回调函数
