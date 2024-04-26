@@ -87,47 +87,70 @@ def test_reverse_string(s):
 from UT_Adder import *
 import pytest
 import ctypes
-from hypothesis import given, strategies as st
 import random
+from hypothesis import given, strategies as st
 
+# 使用 pytest fixture 来初始化和清理资源
+from UT_Adder import *
+import pytest
+import ctypes
+from hypothesis import given, strategies as st
 
-def full_adder(a, b, cin):
-	cin = cin & 0b1
-	Sum = ctypes.c_uint64(a).value
-	Sum = Sum + ctypes.c_uint64(b).value + cin
-	Cout = (Sum >> 64) & 0b1
-	Sum = Sum & 0xffffffffffffffff
-	return Sum, Cout
-
-dut=DUTAdder("libDPIAdder.so")
-dut.Step(1)
-
-@given(
-    a=st.integers(min_value=0, max_value=0xffffffffffffffff),
-    b=st.integers(min_value=0, max_value=0xffffffffffffffff),
-    cin=st.integers(min_value=0, max_value=1)
-)
-def test_full_adder_with_hypothesis(a, b, cin):
-	sum_expected, cout_expected = full_adder(a, b, cin)
-	dut.a.value = a
-	dut.b.value = b
-	dut.cin.value = cin
-	dut.Step(1)
-	assert sum_expected == dut.sum.value
-	assert cout_expected == dut.cout.value
-
-if __name__=="__main__":
-    pytest.main(['-v', 'test_adder.py::test_full_adder_with_hypothesis'])
+# 使用 pytest fixture 来初始化和清理资源
+@pytest.fixture(scope="class")
+def adder():
+    # 创建 DUTAdder 实例，加载动态链接库
+    dut = DUTAdder("libDPIAdder.so")
+    # 执行一次时钟步进，准备 DUT
+    dut.Step(1)
+    # yield 语句之后的代码会在测试结束后执行，用于清理资源
+    yield dut
+    # 清理DUT资源，并生成测试覆盖率报告和波形
     dut.finalize()
 
-```
+class TestFullAdder:
+    # 将 full_adder 定义为静态方法，因为它不依赖于类实例
+    @staticmethod
+    def full_adder(a, b, cin):
+        cin = cin & 0b1
+        Sum = ctypes.c_uint64(a).value
+        Sum += ctypes.c_uint64(b).value + cin
+        Cout = (Sum >> 64) & 0b1
+        Sum &= 0xffffffffffffffff
+        return Sum, Cout
 
+    # 使用 hypothesis 自动生成测试用例
+    @given(
+        a=st.integers(min_value=0, max_value=0xffffffffffffffff),
+        b=st.integers(min_value=0, max_value=0xffffffffffffffff),
+        cin=st.integers(min_value=0, max_value=1)
+    )
+    # 定义测试方法，adder 参数由 pytest 通过 fixture 注入
+    def test_full_adder_with_hypothesis(self, adder, a, b, cin):
+        # 计算预期的和与进位
+        sum_expected, cout_expected = self.full_adder(a, b, cin)
+        # 设置 DUT 的输入
+        adder.a.value = a
+        adder.b.value = b
+        adder.cin.value = cin
+        # 执行一次时钟步进
+        adder.Step(1)
+        # 断言 DUT 的输出与预期结果相同
+        assert sum_expected == adder.sum.value
+        assert cout_expected == adder.cout.value
+
+if __name__ == "__main__":
+    # 以详细模式运行指定的测试
+    pytest.main(['-v', 'test_adder.py::TestFullAdder'])
+
+```
 >这个例子中，@given 装饰器和 strategies 用于生成符合条件的随机数据。st.integers() 是生成指定范围整数的策略，用于为 a 和 b 生成 0 到 0xffffffffffffffff 之间的数，以及为 cin 生成 0 或 1。Hypothesis会自动重复运行这个测试，每次都使用不同的随机输入，这有助于揭示潜在的边界条件或异常情况。
 - 运行测试，输出结果如下：
-```bash hl: title:
+```shell
+collected 1 item                                                               
+
  test_adder.py ✓                                                 100% ██████████
 
-Results (0.43s):
+Results (0.42s):
        1 passed
 ```
-

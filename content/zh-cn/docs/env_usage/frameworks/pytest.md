@@ -180,50 +180,69 @@ picker Adder.v -w Adder.fst -S Adder -t picker_out_adder -l python -c --sim veri
 ```
 
 - 此时在picker_out_adder目录下新建一个test_adder.py文件，内容如下：
-
-```bash hl：title
+```python 
+# 导入测试模块和所需的库
 from UT_Adder import *
 import pytest
 import ctypes
-from hypothesis import given, strategies as st
 import random
 
-def full_adder(a, b, cin):
-    cin = cin & 0b1
-    Sum = ctypes.c_uint64(a).value
-    Sum = Sum + ctypes.c_uint64(b).value + cin
-    Cout = (Sum >> 64) & 0b1
-    Sum = Sum & 0xffffffffffffffff
-    return Sum, Cout
-
-def test_adder():
-    dut=DUTAdder("libDPIAdder.so")
+# 使用 pytest fixture 来初始化和清理资源
+@pytest.fixture
+def adder():
+    # 创建 DUTAdder 实例，加载动态链接库
+    dut = DUTAdder("libDPIAdder.so")
+    # 执行一次时钟步进，准备 DUT
     dut.Step(1)
-    dut=DUTAdder("libDPIAdder.so")
-    dut.Step(1)
-    for _ in range(114514):
-        a = random.getrandbits(64)
-        b = random.getrandbits(64)
-        cin = random.getrandbits(1)
-        dut.a.value = a
-        dut.b.value = b
-        dut.cin.value = cin
-        dut.Step(1)
-        sum, cout = full_adder(a, b, cin)
-        assert sum == dut.sum.value
-        assert cout == dut.cout.value
+    # yield 语句之后的代码会在测试结束后执行，用于清理资源
+    yield dut
+    # 清理DUT资源，并生成测试覆盖率报告和波形
     dut.finalize()
 
-if __name__ == "__main__":
-    pytest.main(['-v', 'test_adder.py::test_adder'])
-```
->其中，full_adder函数是一个模拟全加器的函数，使用 ctypes.c_uint64 将 a, b 包装成64位无符号整数，保证数值在进行算术操作时不会因为Python的整数自动扩展而出错。
+class TestFullAdder:
+    # 将 full_adder 定义为静态方法，因为它不依赖于类实例
+    @staticmethod
+    def full_adder(a, b, cin):
+        cin = cin & 0b1
+        Sum = ctypes.c_uint64(a).value
+        Sum += ctypes.c_uint64(b).value + cin
+        Cout = (Sum >> 64) & 0b1
+        Sum &= 0xffffffffffffffff
+        return Sum, Cout
 
-- 运行python代码，可以看到输出如下：
-```bash hl：title
+    # 使用 pytest.mark.usefixtures 装饰器指定使用的 fixture
+    @pytest.mark.usefixtures("adder")
+    # 定义测试方法，adder 参数由 pytest 通过 fixture 注入
+    def test_adder(self, adder):
+        # 进行多次随机测试
+        for _ in range(114514):
+            # 随机生成 64 位的 a 和 b，以及 1 位的进位 cin
+            a = random.getrandbits(64)
+            b = random.getrandbits(64)
+            cin = random.getrandbits(1)
+            # 设置 DUT 的输入
+            adder.a.value = a
+            adder.b.value = b
+            adder.cin.value = cin
+            # 执行一次时钟步进
+            adder.Step(1)
+            # 使用静态方法计算预期结果
+            sum, cout = self.full_adder(a, b, cin)
+            # 断言 DUT 的输出与预期结果相同
+            assert sum == adder.sum.value
+            assert cout == adder.cout.value
+
+if __name__ == "__main__":
+    pytest.main(['-v', 'test_adder.py::TestFullAdder'])
+```
+
+- 运行测试之后输出如下：
+```shell
+collected 1 item                                                               
+
  test_adder.py ✓                                                 100% ██████████
 
-Results (4.71s):
-       1 passed
+Results (4.33s):
 ```
->说明经过114514次循环，暂时没有检测出我们的DUT有bug，但是用多次循环随机数来生成测试用例的话，会消耗大量的资源，而且随机出来的测试用例也不一定能有有效的覆盖各种边界条件，在下一节中我们会介绍一个强大的方法来生成测试用例。
+
+>测试成功！说明经过114514次循环，暂时没有检测出我们的DUT有bug，但是用多次循环随机数来生成测试用例的话，会消耗大量的资源，而且随机出来的测试用例也不一定能有有效的覆盖各种边界条件，在下一节中我们会介绍一个强大的方法来生成测试用例。

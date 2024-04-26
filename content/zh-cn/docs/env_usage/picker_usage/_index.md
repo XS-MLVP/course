@@ -1,6 +1,6 @@
 ---
 title: 基础使用
-description: Picker 工具的基础使用方法。
+description: 验证工具的基本使用。
 categories: [教程]
 tags: [docs]
 weight: 1
@@ -11,7 +11,7 @@ weight: 1
 {{% /pageinfo %}}
 
 ## Picker 简介
-> picker是一个芯片验证辅助工具，其目标是将RTL设计验证模块(.v/.scala/.sv)进行封装，并使用其他编程语言暴露Pin-Level的操作，未来计划支持自动化的Transaction-Level原语生成。其他编程语言包括 c++ (原生支持), python(已支持), java(todo), golang(todo) 等编程语言接口。该辅助工具让用户可以基于现有的软件测试框架，例如pytest, junit，TestNG, go test等，进行芯片UT验证。
+> `picker`是一个芯片验证辅助工具，其目标是将RTL设计验证模块(.v/.scala/.sv)进行封装，并使用其他编程语言暴露`Pin-Level`的操作，未来计划支持自动化的`Transaction-Level`原语生成。其他编程语言包括 c++ (原生支持), python(已支持), java(todo), golang(todo) 等编程语言接口。该辅助工具让用户可以基于现有的软件测试框架，例如pytest, junit，TestNG, go test等，进行芯片UT验证。
 
 基于picker进行验证具有如下**优点**：
     - 1.**不泄露RTL设计**。经过Picker转换后，原始的设计文件(.v)被转化成了二进制文件(.so)，脱离原始设计文件后，依旧可进行验证，且验证者无法获取RTL源代码。
@@ -20,86 +20,12 @@ weight: 1
     - 4.**可使用软件生态丰富**。能使用python3, java, golang等生态。
 
 >目前picker支持以下模拟器：
-verilator
-synopsys vcs
-### 1.Picker的工作原理
-Picker的主要功能就是将Verilog代码转换为C++或者Python代码，以处理器的仿真为例:
+`verilator`、`synopsys vcs`
+
+**Picker的工作原理**
+`Picker`的主要功能就是将`Verilog`代码转换为C++或者Python代码，以处理器的仿真为例:
 
 ![Picker的工作原理](Picker_working_principle.svg)
-### 2.使用Python访问Verilog信号
-
->Picker的使用xspcomm来为公用数据定义与操作接口，包括接口读/写、时钟、协程、SWIG回调函数定义等。xspcomm以基础组件的方式被 DUT、MLVP、OVIP等上层应用或者库使用。xspcomm需要用到C++20的特征，建议使用g++ 11 以上版本， cmake 版本大于等于3.11。当通过SWIG导出Python接口时，需要 swig 版本大于等于 4.2.0。
-
->在 Picker 生成的 Python 代码中，顶层模块会被转化为一个类，通常命名为 UT<top-module>。其输入/输出信号会被定义为公有的成员变量，因此我们可以直接访问这些信号。对于顶层的输入信号，我们可以对其进行赋值；对于顶层的输出信号，我们可以直接读取其值。
-
-例如，对于如下的Verilog顶层代码：  
-```verilog  
-module top (
-    input clk
-);
-endmodule
-```
-
-Picker会生成如下的Python代码：
-
-```python
-class DUTtop(DutUnifiedBase):
-
-    ## 初始化
-    def __init__(self, *a, **kw):
-        super().__init__(*a, **kw)
-        self.xclock = xsp.XClock(self.step)
-        self.port  = xsp.XPort()
-        self.xclock.Add(self.port)
-        self.event = self.xclock.getEvent()
-
-        ## all Pins
-        self.clk = xsp.XPin(xsp.XData(0, xsp.XData.In), self.event)
-
-
-        ## BindDPI
-        self.clk.BindDPIRW(DPIRclk, DPIWclk)
-
-        ## Add2Port
-        self.port.Add("clk", self.clk.xdata)
-
-
-    def __del__(self):
-        super().__del__()
-        self.finalize()
-
-    def init_clock(self,name:str):
-        self.xclock.Add(self.port[name])
-
-    def Step(self,i: int):
-        return self.xclock.Step(i)
-
-    def __getitem__(self, key):
-        return xsp.XPin(self.port[key], self.event)
-
-    async def astep(self,i: int):
-        return self.xclock.AStep(i)
-
-    async def acondition(self,fc_cheker):
-        return self.xclock.ACondition(fc_cheker)
-
-    async def runstep(self,i: int):
-        return self.xclock.RunSetp(i)
-```
-
-在导入DUT类之后我们可以直接通过对象的.value属性给信号赋值,以及.Step()方法来驱动，还可以调用finalize()函数来生成波形图和测试覆盖率，**但是要注意finalize函数会把对象销毁，不要重复调用**，下面是一个给信号赋值的简单例子：
-
-```python
-from UT_Top import *
-dut=DUTTop("libDPITop.so")
-dut.clk.value = 1
-dut.Step(1)
-## 模拟时钟信号
-dut.clk.value = ~clk
-dut.Step(1)
-dut.finalize()
-```
-关于信号访问的高级教程具体可以参考[xcomm文档](https://github.com/XS-MLVP/xcomm)，详细讲解了 Picker 的公用数据定义与操作接口，包括接口读/写、时钟、协程、SWIG回调函数定义等。
 
 
 ## Python 模块生成
@@ -119,9 +45,13 @@ dut.finalize()
 
 2. 该这个模块和标准的 Python 模块一样，可以被其他 Python 程序导入并调用，文件结构也与普通 Python 模块无异。
 
-### 使用该模块
+## Python 模块使用
 
-在本章节中，我们将介绍如何基于上一章节生成的 Python Module，编写测试用例，并导入该模块，以实现对硬件模块的操作。
+- 参数 `--language python` 或 `-l python` 用于指定生成C++基础库。
+- 参数 `-e` 用于生成包含示例项目的可执行文件。
+- 参数 `-v` 用于保留生成项目时的中间文件。
+
+### DUT
 
 1. 以前述的加法器为例，用户需要编写测试用例，即导入上一章节生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
 目录结构为：
@@ -145,24 +75,125 @@ dut.finalize()
     if __name__ == "__main__":
         dut = DUTAdder() # 初始化 DUT
         # dut.init_clock("clk") # 如果模块有时钟，需要初始化时钟，绑定时钟信号到模拟器的时钟，以自动驱动
-
+        # reset
+        # dut.reset.value = 1
+        # dut.Step(1) # 该步进行了初始化赋值操作
+        # dut.reset.value = 0 # 设置完成后需要记得复位原信号！
+        # 以加法器为例，对信号的操作
+        dut.a.value = 1 #对dut的输入信号赋值，需要用到.value
+        dut.b.value = 2
+        dut.cin.value = 0
+        dut.Step(1) #更新信号
         dut.finalize() # 清空对象，并完成覆盖率和波形文件的输出工作（写入到文件）
     ```
 
-## Python 模块使用
 
-- 参数 `--language cpp` 或 `-l cpp` 用于指定生成C++基础库。
-- 参数 `-e` 用于生成包含示例项目的可执行文件。
-- 参数 `-v` 用于保留生成项目时的中间文件。
-
-### DUT
-
+> DUT类有三种基本数据类型：XData、XPort、XClock,在下面我们会逐一的讲解他们的使用方法
 ### XDATA
+XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电路的IO接口。支持 0，1，Z，X 四种状态写入与读取。  
+**XData 主要方法：** 
+1. 初始化：
+    ```python
+    # 初始化使用XData，参数为位宽和数据方向(XData.In,XData.Out,XData.InOut)
+    a = XData(32,XData.In)
+    a.ReInit(16,XData.In)  #ReInit方法可以重新初始化XData实例
+    ``` 
+2. 访问信号：
+    ```python
+    # 使用.value可以进行访问，有多种赋值方法
+    a.value = 12345 # 十进制赋值
+    a.value = 0b11011 # 二进制赋值
+    a.value = 0o12345 # 八进制赋值
+    a.value = 0x12345 # 十六进制赋值
+    a.value = '::ffff'# 字符串赋值ASCII码
+    d = XData(32,XData.In)  # 同类型赋值
+    d = a
+    a.value = 0xffffffff
+    # 配合ctype库使用
+    a.W();  # 转 uint32
+    a.U();  # 转 uint64
+    a.S();  # 转 int64
+    a.B();  # 转 bool
+    a.String()  # 转 string
+
+    #a.value支持使用[]按下标访问，下标从0开始为最低位
+    a[31] = 0   # a.value = 0x7ffffffff
+    a.value = "x"   # 赋值高阻态
+    print(f"expected x, actual {a.String()}")   # 输出高阻和不定态的时候需要用字符串输出
+
+    a.value = "z"   # 赋值不定态
+    print(f"expected x, actual {a.String()}")
+
+    ``` 
 
 ### XPORT
+XPort是XData的封装，可对多个XData进行操作
 
+1. 初始化与添加引脚：
+    ```python
+    port = XPort("p") #创建XPort实例
+    ``` 
+2. 主要方法：
+    ```python
+    # 使用Add方法添加引脚
+    port.Add("a",a) #添加引脚
+    port.Add("b",b) #添加引脚
+
+    #使用[]访问引脚
+    port["b"]
+    # 使用[].value可以访问引脚的值
+    port["b"].value = 1
+
+    #返回引脚个数
+    port.PortCount()
+
+    # Connect方法连接两个XPort实例
+    port_1 = XPort("p1") #创建XPort实例
+    port_1.Add("a",a) #添加引脚
+    port_1.Add("b",b) #添加引脚
+    port.Connect(port_1)
+
+    # Flip方法翻转引脚
+    port.Flip()
+
+    # AsBiIo方法将引脚方向转换为双向
+    a.AsBiIO()
+
+    # 通过DPI刷入所有上升沿引脚的值
+    port.WriteOnRise()
+    # 通过DPI刷入所有下降沿引脚的值
+    port.WriteOnFall()
+
+    # 使用ReadFresh刷新读取引脚的值
+    port.ReadFresh(XData.In)
+
+    # 使用SetZero方法将引脚的值设为0
+    port.SetZero() 
+    print(f"expected 0, actual {port['a'].value}")
+    ``` 
 ### XClock
+1. 初始化与添加引脚：
+    ```python
+    clk = XClock(lambda a: 1 if print("lambda stp: ", a) else 0)  #参数stepfunc 为 DUT后端提供的电路推进方法，例如 verilaor 的 step_eval 等
+    ``` 
+2. 主要方法：
+    ```python
+    # 使用Add方法添加引脚
+    clk.Add(XData) # 添加clk引脚
+    clk.Add(XPort) # 添加Port
+    
+    # 更新状态
+    clk.Step(1) # 参数为UInt i，表示前进i步
 
+    #复位
+    clk.Reset()
+
+    # 添加上升沿回调，参数为回调函数
+    clk.StepRis(lambda c, x, y: print("lambda ris: ", c, x, y), (1, 2))
+    # 添加下降沿回调，参数为回调函数
+    clk.StepFal(lambda c, x, y: print("lambda fal: ", c, x, y), (3, 4))
+    ``` 
+    
 ### Async & Event
 
 **时钟事件 (Event)**
