@@ -86,9 +86,9 @@ if __name__ == "__main__":
 
 ### 1.4. Picker中使用回调函数
 
-下面的[代码](#test_random_generator_with_callback)是使用回调函数配合对进行测试随机数生成器。
+下面的[测试代码](#test_random_generator_with_callback)里，我们将在随机数生成器的测试中使用回调函数。
 
-整个测试在114514个时钟周期内验证随机数生成器的结果，并统计生成的随机数中大于中位数和小于等于中位数的数量。其中，结果的验证和数据的统计都在时钟上升沿进行。
+在整个测试过程中，我们会在114514个时钟周期内验证随机数生成器的结果，并统计生成的随机数中大于中位数和小于等于中位数的数量。其中，结果的验证和数据的统计都在时钟上升沿进行。
 
 `TestRandomGenerator`是对随机数生成器进行测试的类，在它的属性和方法中：
 
@@ -98,10 +98,12 @@ if __name__ == "__main__":
 + `callback2(self, clk)`会统计生成随机数的分布，也在时钟上升沿触发。
 + `test_rg(self, callback3)`方法会执行整个测试流程，最后执行`callback3`函数。
 
-Picker生成的DUT类会包含一个驱动电路的时钟源`self.xclock`，`DUTRandomGenerator`也同样如此，开始时先把测试模块的`clk`引脚接入时钟源：
+Picker生成的DUT类会包含一个驱动电路的时钟源`self.xclock`，`DUTRandomGenerator`也同样如此。
+
+测试前需要把待测模块的`clk`引脚接入时钟源，我们可以调用`dut`中已经封装好的方法：
 
 ```python
-self.dut.init_clock("clk")
+self.dut.init_clock("clk") # 等价于 self.xclock.Add(self.port["clk"])
 ```
 
 之后再对生成器进行复位，进行初始化赋值：
@@ -109,7 +111,7 @@ self.dut.init_clock("clk")
 ```python
 self.dut.reset.value = 1 
 self.dut.Step(1)  # 该步进行了初始化赋值操作
-self.dut.reset.value = 0  # # 设置完成后需要记得复位原信号！
+self.dut.reset.value = 0  # 设置完成后需要记得复位原信号！
 ```
 
 完成初始化后，在时钟源添加时钟上升沿触发的回调函数，用于验证与统计：
@@ -134,7 +136,7 @@ callback3(self.greater, self.less_equal, self.MEDIAN)
 
 至此，测试完成。
 
-#### 配合回调函数测试随机数生成器的代码{#test_random_generator_with_callback}
+#### 随机数生成器测试代码{#test_random_generator_with_callback}
 
 ```python
 from UT_RandomGenerator import *
@@ -171,7 +173,7 @@ class TestRandomGenerator:
         # reset
         self.dut.reset.value = 1 
         self.dut.Step(1)  # 该步进行了初始化赋值操作
-        self.dut.reset.value = 0  # # 设置完成后需要记得复位原信号！
+        self.dut.reset.value = 0  # 设置完成后需要记得复位原信号！
         # 设置回调函数
         self.dut.xclock.StepRis(self.callback1)  # 添加在时钟上升沿触发的回调函数
         self.dut.xclock.StepRis(self.callback2)  # 当然可也添加多个
@@ -207,6 +209,181 @@ if __name__ == "__main__":
 
 ### 1.5. 在验证加法器时添加回调函数
 
+在这里定义一个32位的加法器`RisAdder`，它只在时钟上升沿更新输出。RTL代码为：
+
+```verilog
+module RisAdder #(
+    parameter WIDTH = 32
+) (
+	input              clk,
+	input  [WIDTH-1:0] a,
+    input  [WIDTH-1:0] b,
+    input              cin,
+    output [WIDTH-1:0] sum,
+    output             cout
+);
+reg Cout;
+reg [WIDTH-1:0] Sum;
+
+always @(posedge clk) begin
+	{Cout, Sum} <= a + b + cin;
+end
+  
+assign {cout, sum} = {Cout, Sum};
+
+endmodule
+```
+
+下面的[测试代码](#test_ris_adder_with_callback)里，我们将在加法器的测试中使用回调函数。
+
+在测试开始前，先创建`DUTRisAdder`对象的实例`dut`和`SimpleRisAdder`对象的实例`ref`。其中，`ref`用于模拟加法器预期的行为，作为输出结果的参考。
+
+Picker生成的DUT类会包含一个驱动电路的时钟源`self.xclock`，`DUTRisAdder`也同样如此。
+
+在测试开始前，我们会把待测模块的`clk`引脚接入时钟源：
+
+```python3
+dut.init_clock("clk") # 等价于 self.xclock.Add(self.port[name])
+```
+
+之后初始化加法器的输入信号，推进一个周期使其输出为0：
+
+```python
+dut.a.value = 0
+dut.b.value = 0
+dut.cin.value = 0
+dut.Step(1) # 推进一个周期
+```
+
+随后，添加在时钟上升沿触发的回调函数`test_adder(clk: int, dut: DUTRisAdder, ref: SimpleRisAdder) -> None`，并向`test_adder`传入`dut`和`ref`对象：
+
+```python
+def test_adder(clk: int, dut: DUTRisAdder, ref: SimpleRisAdder) -> None:
+    # 加法器dut端口的信号
+    a = dut.a.value
+    b = dut.b.value
+    cin = dut.cin.value
+    cout = dut.cout.value
+    sum = dut.sum.value
+
+    # 验证输出是否符合预期
+    isEqual = (cout, sum) == (ref.cout, ref.sum)
+
+    print(f"Cycle: {clk}, Input(a, b, cin) = ({a:x}, {b:x}, {cin:x})")
+    print(
+        FONT_GREEN + "Pass."
+        if isEqual
+        else FONT_RED + f"MisMatch! Expect cout: {ref.cout:x}, sum: {ref.sum:x}.",
+        FONT_COLOR_RESET + f"Get cout: {cout:x}, sum: {sum:x}.",
+    )
+    assert isEqual
+
+
+if __name__ == "__main__":
+    ...
+    dut.xclock.StepRis(test_adder, (dut, ref))  # 添加在时钟上升沿触发的回调函数, 给回调函数传入dut和ref
+   	...
+```
+
+`test_adder`函数将会在时钟上升沿比较`dut`和`ref`的输出，验证RTL代码的实现是否符合我们的预期。
+
+最后，执行114514个周期的测试，每个测试数据的信号都会持续一个周期：
+
+```python
+# 测试114514个周期
+for _ in range(114514):
+	a = random.randint(0, (1<<WIDTH) - 1)
+	b = random.randint(0, (1<<WIDTH) - 1)
+	cin = random.randint(0, 1)
+	dut.a.value = a
+	dut.b.value = b
+	dut.cin.value = cin
+	ref.step(a, b, cin) # 更新状态 
+	dut.Step(1) # 推进时钟
+
+dut.finalize()
+```
+
+#### 测试代码{#test_ris_adder_with_callback}
+
+```python
+from UT_RisAdder import *
+import random
+
+# 控制字体颜色
+FONT_GREEN = "\033[0;32m"
+FONT_RED = "\033[0;31m"
+FONT_COLOR_RESET = "\033[0m"
+
+
+class SimpleRisAdder:
+    def __init__(self, width) -> None:
+        self.WIDTH = width
+        # 端口定义
+        self.a = 0
+        self.b = 0
+        self.cin = 0
+        self.cout = 0
+        self.sum = 0
+        pass
+
+    def step(self, a, b, cin):
+        sum = self.a + self.b + self.cin
+        self.cout = sum >> self.WIDTH
+        self.sum = sum & ((1 << self.WIDTH) - 1)
+
+        self.a = a
+        self.b = b
+        self.cin = cin
+        
+
+def test_adder(clk: int, dut: DUTRisAdder, ref: SimpleRisAdder)->None:
+    # 加法器dut端口的信号
+    a = dut.a.value
+    b = dut.b.value
+    cin = dut.cin.value
+    cout = dut.cout.value
+    sum = dut.sum.value
+
+    # 验证输出是否符合预期
+    isEqual = (cout, sum) == (ref.cout, ref.sum)
+
+    print(f"Cycle: {clk}, Input(a, b, cin) = ({a:x}, {b:x}, {cin:x})")
+    print(
+        FONT_GREEN + "Pass."
+        if isEqual
+        else FONT_RED + f"MisMatch! Expect cout: {ref.cout:x}, sum: {ref.sum:x}.",
+        FONT_COLOR_RESET + f"Get cout: {cout:x}, sum: {sum:x}.",
+    )
+    assert isEqual
+
+
+if __name__ == "__main__":
+    WIDTH = 32
+    ref = SimpleRisAdder(WIDTH)
+    dut = DUTRisAdder()
+    # 绑定时钟信号
+    dut.init_clock("clk") # 等价于 self.xclock.Add(self.port[name])
+    # dut输入信号置0
+    dut.a.value = 0
+    dut.b.value = 0
+    dut.cin.value = 0
+    dut.Step(1) # 推进一个周期
+    dut.xclock.StepRis(test_adder, (dut, ref)) # 添加在时钟上升沿触发的回调函数, 给回调函数传入dut和ref
+    # 测试114514个周期
+    for _ in range(114514):
+        a = random.randint(0, (1<<WIDTH) - 1)
+        b = random.randint(0, (1<<WIDTH) - 1)
+        cin = random.randint(0, 1)
+        dut.a.value = a
+        dut.b.value = b
+        dut.cin.value = cin
+        ref.step(a, b, cin) # 更新状态
+        dut.Step(1) # 推进时钟
+
+    dut.finalize()
+    pass
+```
 
 ## 2. Eventloop
 ### 2.1. 概述
