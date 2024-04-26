@@ -14,14 +14,10 @@ weight: 1
 > picker是一个芯片验证辅助工具，其目标是将RTL设计验证模块(.v/.scala/.sv)进行封装，并使用其他编程语言暴露Pin-Level的操作，未来计划支持自动化的Transaction-Level原语生成。其他编程语言包括 c++ (原生支持), python(已支持), java(todo), golang(todo) 等编程语言接口。该辅助工具让用户可以基于现有的软件测试框架，例如pytest, junit，TestNG, go test等，进行芯片UT验证。
 
 基于picker进行验证具有如下**优点**：
-
-1.**不泄露RTL设计**。经过Picker转换后，原始的设计文件(.v)被转化成了二进制文件(.so)，脱离原始设计文件后，依旧可进行验证，且验证者无法获取RTL源代码。
-
-2.**减少编译时间**。当DUT(Design Under Test)稳定时，只需要编译一次（打包成so）。
-
-3.**用户面广**。提供的编程接口多，可覆盖不同语言的开发者（传统IC验证，只用System Verilog）。
-
-4.**可使用软件生态丰富**。能使用python3, java, golang等生态。
+    - 1.**不泄露RTL设计**。经过Picker转换后，原始的设计文件(.v)被转化成了二进制文件(.so)，脱离原始设计文件后，依旧可进行验证，且验证者无法获取RTL源代码。
+    - 2.**减少编译时间**。当DUT(Design Under Test)稳定时，只需要编译一次（打包成so）。
+    - 3.**用户面广**。提供的编程接口多，可覆盖不同语言的开发者（传统IC验证，只用System Verilog）。
+    - 4.**可使用软件生态丰富**。能使用python3, java, golang等生态。
 
 >目前picker支持以下模拟器：
 verilator
@@ -35,63 +31,65 @@ Picker的主要功能就是将Verilog代码转换为C++或者Python代码，以�
 >Picker的使用xspcomm来为公用数据定义与操作接口，包括接口读/写、时钟、协程、SWIG回调函数定义等。xspcomm以基础组件的方式被 DUT、MLVP、OVIP等上层应用或者库使用。xspcomm需要用到C++20的特征，建议使用g++ 11 以上版本， cmake 版本大于等于3.11。当通过SWIG导出Python接口时，需要 swig 版本大于等于 4.2.0。
 
 >在 Picker 生成的 Python 代码中，顶层模块会被转化为一个类，通常命名为 UT<top-module>。其输入/输出信号会被定义为公有的成员变量，因此我们可以直接访问这些信号。对于顶层的输入信号，我们可以对其进行赋值；对于顶层的输出信号，我们可以直接读取其值。
-例如，对于如下的Verilog顶层代码：
-```
-module top (
-        input clk
-    );
 
+例如，对于如下的Verilog顶层代码：  
+```verilog  
+module top (
+    input clk
+);
 endmodule
 ```
 
 Picker会生成如下的Python代码：
-```
+
+```python
 class DUTtop(DutUnifiedBase):
 
-	## 初始化
-	def __init__(self, *a, **kw):
-		super().__init__(*a, **kw)
-		self.xclock = xsp.XClock(self.step)
-		self.port  = xsp.XPort()
-		self.xclock.Add(self.port)
-		self.event = self.xclock.getEvent()
+    ## 初始化
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.xclock = xsp.XClock(self.step)
+        self.port  = xsp.XPort()
+        self.xclock.Add(self.port)
+        self.event = self.xclock.getEvent()
 
-		## all Pins
-		self.clk = xsp.XPin(xsp.XData(0, xsp.XData.In), self.event)
-
-
-		## BindDPI
-		self.clk.BindDPIRW(DPIRclk, DPIWclk)
-
-		## Add2Port
-		self.port.Add("clk", self.clk.xdata)
+        ## all Pins
+        self.clk = xsp.XPin(xsp.XData(0, xsp.XData.In), self.event)
 
 
-	def __del__(self):
-		super().__del__()
-		self.finalize()
+        ## BindDPI
+        self.clk.BindDPIRW(DPIRclk, DPIWclk)
 
-	def init_clock(self,name:str):
-		self.xclock.Add(self.port[name])
+        ## Add2Port
+        self.port.Add("clk", self.clk.xdata)
 
-	def Step(self,i: int):
-		return self.xclock.Step(i)
 
-	def __getitem__(self, key):
-		return xsp.XPin(self.port[key], self.event)
+    def __del__(self):
+        super().__del__()
+        self.finalize()
 
-	async def astep(self,i: int):
-		return self.xclock.AStep(i)
+    def init_clock(self,name:str):
+        self.xclock.Add(self.port[name])
 
-	async def acondition(self,fc_cheker):
-		return self.xclock.ACondition(fc_cheker)
+    def Step(self,i: int):
+        return self.xclock.Step(i)
 
-	async def runstep(self,i: int):
-		return self.xclock.RunSetp(i)
+    def __getitem__(self, key):
+        return xsp.XPin(self.port[key], self.event)
+
+    async def astep(self,i: int):
+        return self.xclock.AStep(i)
+
+    async def acondition(self,fc_cheker):
+        return self.xclock.ACondition(fc_cheker)
+
+    async def runstep(self,i: int):
+        return self.xclock.RunSetp(i)
 ```
+
 在导入DUT类之后我们可以直接通过对象的.value属性给信号赋值,以及.Step()方法来驱动，还可以调用finalize()函数来生成波形图和测试覆盖率，**但是要注意finalize函数会把对象销毁，不要重复调用**，下面是一个给信号赋值的简单例子：
 
-```
+```python
 from UT_Top import *
 dut=DUTTop("libDPITop.so")
 dut.clk.value = 1
