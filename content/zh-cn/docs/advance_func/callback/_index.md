@@ -117,8 +117,8 @@ self.dut.reset.value = 0  # 设置完成后需要记得复位原信号！
 完成初始化后，在时钟源添加时钟上升沿触发的回调函数，用于验证与统计：
 
 ```python
-self.dut.xclock.StepRis(self.callback1)  # 添加在时钟上升沿触发的回调函数
-self.dut.xclock.StepRis(self.callback2)  # 当然可也添加多个
+self.dut.StepRis(self.callback1)  # 添加在时钟上升沿触发的回调函数
+self.dut.StepRis(self.callback2)  # 当然可也添加多个
 ```
 
 然后把时钟推进114514个周期，此后每个时钟的上升沿会结果进行验证并统计生成随机数的分布：
@@ -175,8 +175,8 @@ class TestRandomGenerator:
         self.dut.Step(1)  # 该步进行了初始化赋值操作
         self.dut.reset.value = 0  # 设置完成后需要记得复位原信号！
         # 设置回调函数
-        self.dut.xclock.StepRis(self.callback1)  # 添加在时钟上升沿触发的回调函数
-        self.dut.xclock.StepRis(self.callback2)  # 当然可也添加多个
+        self.dut.StepRis(self.callback1)  # 添加在时钟上升沿触发的回调函数
+        self.dut.StepRis(self.callback2)  # 当然可也添加多个
         # 测试，启动！
         self.dut.Step(114514)
         # 结束
@@ -281,7 +281,7 @@ def test_adder(clk: int, dut: DUTRisAdder, ref: SimpleRisAdder) -> None:
 
 if __name__ == "__main__":
     ...
-    dut.xclock.StepRis(test_adder, (dut, ref))  # 添加在时钟上升沿触发的回调函数, 给回调函数传入dut和ref
+    dut.StepRis(test_adder, (dut, ref))  # 添加在时钟上升沿触发的回调函数, 给回调函数传入dut和ref
    	...
 ```
 
@@ -369,7 +369,7 @@ if __name__ == "__main__":
     dut.b.value = 0
     dut.cin.value = 0
     dut.Step(1) # 推进一个周期
-    dut.xclock.StepRis(test_adder, (dut, ref)) # 添加在时钟上升沿触发的回调函数, 给回调函数传入dut和ref
+    dut.StepRis(test_adder, (dut, ref)) # 添加在时钟上升沿触发的回调函数, 给回调函数传入dut和ref
     # 测试114514个周期
     for _ in range(114514):
         a = random.randint(0, (1<<WIDTH) - 1)
