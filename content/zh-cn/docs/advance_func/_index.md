@@ -6,3 +6,4 @@ tags: [examples, docs]
 weight: 3
 ---
 
+picker目前已经支持使用vcs进行仿真，相关文档还在完善中

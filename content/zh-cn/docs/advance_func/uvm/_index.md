@@ -6,3 +6,4 @@ tags: [examples, docs]
 weight: 7
 ---
 
+picker目前已经支持和uvm对接，相关文档还在完善中
