@@ -29,7 +29,8 @@ weight: 3
 - **回调函数**：回调函数是一种常见的消息处理方式，其中一个函数被传递给另一个函数，然后在某个特定的事件发生时被调用。在 Python 中，可以使用回调函数来处理异步操作的结果或者事件的发生。
 
 ## 在python中使用消息驱动
-在python中，我们可以用队列来实现一个简单的消息驱动示例，队列的作用类似于简化版的**消息代理**，负责存储发送者产生的消息，并等待订阅者从中取走消息。
+在python中，我们可以用队列来实现一个简单的消息驱动示例，
+- **队列**的作用类似于简化版的**消息代理**，负责存储发送者产生的消息，并等待订阅者从中取走消息。
 - **publisher**将消息产生后就将其放入到消息代理中
 - **subscriber**会一直监听消息代理中的消息，当收到消息时就转去执行相应的处理消息的操作
 
@@ -63,9 +64,11 @@ subscriber_thread1.start()
 
 subscriber_thread2 = threading.Thread(target=subscriber, args=(msg_queue, 'topic2'))
 subscriber_thread2.start()
-
-
 ```
+- 发布者每隔1s就依次产生topic1,topic2消息，并将其放入队列中
+- 我们创建了两种订阅者subscriber_thread1，subscriber_thread2分别处理topic1,topic2两种消息
+- 每隔0.5s,两种订阅者就分别从队列中取出消息，并判断是否为自己的topic,若是，则将消息打印出来
+- 若队列为空，则订阅者什么都不做
 ## Picker中使用消息驱动
 
 
