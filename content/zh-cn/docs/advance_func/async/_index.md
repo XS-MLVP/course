@@ -38,7 +38,7 @@ RxJava 是一个基于观察者模式和迭代器模式的异步编程库。它�
 - **await**：用于在异步函数中等待异步操作的完成
 
 下面是一个简单的python代码，来演示async和await关键字的用法
-```
+```python
 async def my_async_function():
     print("Start async_function and wait some funcion ")
     await some_other_async_function()
@@ -51,7 +51,7 @@ async def my_async_function():
 - asyncio.sleep()：在异步操作中等待一段实际
 
 
-```
+```python
 import asyncio
 # 定义一个异步函数
 async def greet(name):
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 例如在picker中，我们可以通过如下方法通过周期来控制代码执行的流程
 - await clk.AStep(3)：等待时钟 clk 走 3 个时钟周期。await 关键字使得程序在这里暂停执行，直到时钟走完指定的时钟周期后才继续执行下一行代码。
 - await clk.ACondition(lambda: clk.clk == 20)：它等待条件 clk.clk == 20 成立。类似地，程序在这里暂停执行，直到条件成立后才继续执行下一行代码。
-```
+```python
 async def test_async():
     clk = XClock(lambda a: 0)
     clk.StepRis(lambda c : print("lambda ris: ", c))

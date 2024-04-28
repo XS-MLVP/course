@@ -422,7 +422,7 @@ python中的Asyncio模块提供了以下方法来管理事件循环
 - 在main方法中，首先我们先获取当前的事件循环loop，和当前的时间
 - 依次调用callback方法，设置不同的开始执行时间
 
-```
+```python
 import asyncio
 
 def callback(a, loop):
