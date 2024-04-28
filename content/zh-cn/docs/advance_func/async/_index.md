@@ -115,3 +115,126 @@ async def test_async():
 
 
 ### 验证加法器时使用异步
+
+继续使用的上升沿触发加法器的例子，测试的代码与[之前的代码](../callback/#test_ris_adder_with_callback)只有微小的变动。
+
+首先需要先设置产生多长时间的时钟信号:
+
+```python
+task = asyncio.create_task(dut.runstep(114514 + 1)) # 设置时钟信号产生多少个周期 
+
+"""
+test code
+"""
+
+await task  # 等待时钟结束
+```
+
+每个周期设置完`dut`的输入信号之后，再让时钟进入下个周期:
+
+```python
+for _ in range(114514):
+    # 设置输入
+    a = random.randint(0, (1 << WIDTH) - 1)
+    b = random.randint(0, (1 << WIDTH) - 1)
+    cin = random.randint(0, 1)
+    ref.step(a, b, cin)
+    dut.a.value = a
+    dut.b.value = b
+    dut.cin.value = cin
+    # 让时钟进入下个周期
+    await dut.astep(1) 
+```
+
+#### 测试代码
+
+```python
+from UT_RisAdder import *
+import random
+import asyncio
+
+# 控制字体颜色
+FONT_GREEN = "\033[0;32m"
+FONT_RED = "\033[0;31m"
+FONT_COLOR_RESET = "\033[0m"
+
+
+class SimpleRisAdder:
+    def __init__(self, width) -> None:
+        self.WIDTH = width
+        # 端口定义
+        self.a = 0
+        self.b = 0
+        self.cin = 0
+        self.cout = 0
+        self.sum = 0
+        pass
+
+    def step(self, a, b, cin):
+        sum = self.a + self.b + self.cin
+        self.cout = sum >> self.WIDTH
+        self.sum = sum & ((1 << self.WIDTH) - 1)
+
+        self.a = a
+        self.b = b
+        self.cin = cin
+
+
+def test_adder(clk: int, dut: DUTRisAdder, ref: SimpleRisAdder) -> None:
+    # 加法器dut端口的信号
+    a = dut.a.value
+    b = dut.b.value
+    cin = dut.cin.value
+    cout = dut.cout.value
+    sum = dut.sum.value
+
+    # 验证输出是否符合预期
+    isEqual = (cout, sum) == (ref.cout, ref.sum)
+
+    print(f"Cycle: {clk}, Input(a, b, cin) = ({a:x}, {b:x}, {cin:x})")
+    print(
+        FONT_GREEN + "Pass."
+        if isEqual
+        else FONT_RED + f"MisMatch! Expect cout: {ref.cout:x}, sum: {ref.sum:x}.",
+        FONT_COLOR_RESET + f"Get cout: {cout:x}, sum: {sum:x}.",
+    )
+    assert isEqual
+
+
+async def run_test():
+    WIDTH = 32
+    ref = SimpleRisAdder(WIDTH)
+    dut = DUTRisAdder()
+    # 绑定时钟信号
+    dut.init_clock("clk")
+    # dut输入信号置0
+    dut.a.value = 0
+    dut.b.value = 0
+    dut.cin.value = 0
+    task = asyncio.create_task(dut.runstep(114514 + 1)) # 设置时钟信号产生多少个周期
+    await dut.astep(1)  # 推进一个周期
+    dut.StepRis(test_adder, (dut, ref))  # 注册在时钟上升沿触发的函数
+    # 启动测试
+    for _ in range(114514):
+        # 设置输入
+        a = random.randint(0, (1 << WIDTH) - 1)
+        b = random.randint(0, (1 << WIDTH) - 1)
+        cin = random.randint(0, 1)
+        ref.step(a, b, cin)
+        dut.a.value = a
+        dut.b.value = b
+        dut.cin.value = cin
+        # 进入下个周期
+        await dut.astep(1)
+
+    await task  # 等待时钟结束
+    dut.finalize()
+
+    pass
+
+
+if __name__ == "__main__":
+    asyncio.run(run_test())
+    pass
+```
+
