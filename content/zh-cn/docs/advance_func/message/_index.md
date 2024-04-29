@@ -142,6 +142,7 @@ weight: 3
     ``` 
 
 ## 使用消息驱动进行验证
+下面我们将以果壳cache的验证过程为例，来介绍消息驱动在验证中的使用。
 [完整代码](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/tree/master)参见。  
 ```python
 from util.simplebus import SimpleBusWrapper
