@@ -11,14 +11,14 @@ weight: 1
 {{% /pageinfo %}}
 
 ## Picker 简介
-> `picker`是一个芯片验证辅助工具，其目标是将RTL设计验证模块(.v/.scala/.sv)进行封装，并使用其他编程语言暴露`Pin-Level`的操作，未来计划支持自动化的`Transaction-Level`原语生成。其他编程语言包括 c++ (原生支持), python(已支持), java(todo), golang(todo) 等编程语言接口。该辅助工具让用户可以基于现有的软件测试框架，例如pytest, junit，TestNG, go test等，进行芯片UT验证。
+> `picker`是一个芯片验证辅助工具，其目标是将RTL设计验证模块(.v/.scala/.sv)进行封装，并使用其他编程语言暴露`Pin-Level`的操作，未来计划支持自动化的`Transaction-Level`原语生成。其他编程语言包括 c++ (原生支持), python(已支持), java(待完善), golang(待完善) 等编程语言接口。该辅助工具让用户可以基于现有的软件测试框架，例如pytest, junit，TestNG, go test等，进行芯片UT验证。
 
 基于picker进行验证具有如下**优点**：  
  - 1.**不泄露RTL设计**。经过Picker转换后，原始的设计文件(.v)被转化成了二进制文件(.so)，脱离原始设计文件后，依旧可进行验证，且验证者无法获取RTL源代码。  
  - 2.**减少编译时间**。当DUT(Design Under Test)稳定时，只需要编译一次（打包成so）。  
  - 3.**用户面广**。提供的编程接口多，可覆盖不同语言的开发者（传统IC验证，只用System Verilog）。  
  - 4.**可使用软件生态丰富**。能使用python3, java, golang等生态。  
-  
+
 >目前picker支持以下模拟器：
 `verilator`、`synopsys vcs`
 
@@ -34,8 +34,8 @@ weight: 1
 
 在本章节中，我们将介绍如何使用Picker将RTL代码最终导出为Python Module。
 
-1. Picker 导出 Python Module 的方式是基于 C++ 的。
-    - **Picker 是 codegen 工具，它会先生成项目文件，再利用 make 编译出二进制文件。**
+- Picker 导出 Python Module 的方式是基于 C++ 的。
+    - **Picker 是 代码生成(codegen)工具，它会先生成项目文件，再利用 make 编译出二进制文件。**
     - Picker 首先会利用仿真器将 RTL 代码编译为 C++ Class，并编译为动态库。（见C++步骤详情）
     - 再基于 Swig 工具，利用上一步生成的 C++ 的头文件定义，将动态库导出为 Python Module。
     - 最终将生成的模块导出到目录，并按照需求清理或保留其他中间文件。
@@ -43,17 +43,17 @@ weight: 1
     > 如果希望详细了解生成过程，请参阅 [Swig 官方文档](http://www.swig.org/Doc4.2/SWIGDocumentation.html)。
     > 如果希望知道 Picker 如何生成 C++ Class，请参阅 [C++](docs/quick-start/multi-lang/cpp)。
 
-2. 该这个模块和标准的 Python 模块一样，可以被其他 Python 程序导入并调用，文件结构也与普通 Python 模块无异。
+- 该这个模块和标准的 Python 模块一样，可以被其他 Python 程序导入并调用，文件结构也与普通 Python 模块无异。
 
 ## Python 模块使用
 
-- 参数 `--language python` 或 `-l python` 用于指定生成C++基础库。
-- 参数 `-e` 用于生成包含示例项目的可执行文件。
-- 参数 `-v` 用于保留生成项目时的中间文件。
+- 参数 `--language python` 或 `-l python` 用于指定生成Python基础库。
+- 参数 `--example, -e` 用于生成包含示例项目的可执行文件。
+- 参数 `--verbose, -v` 用于保留生成项目时的中间文件。
 
 ### DUT
 
-1. 以前述的加法器为例，用户需要编写测试用例，即导入上一章节生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
+- 以前述的加法器为例，用户需要编写测试用例，即导入上一章节生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
 目录结构为：
     ```shell
         picker_out_adder
@@ -66,7 +66,7 @@ weight: 1
         |   `-- libUT_Adder.py
         `-- example.py # 用户需要编写的代码
     ```
-2. 用户使用 Python 编写测试用例，即导入上述生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
+- 用户使用 Python 编写测试用例，即导入上述生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
 
     ```python
     from UT_Adder import * # 从python软件包里导入模块
@@ -92,48 +92,58 @@ weight: 1
 ### XDATA
 XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电路的IO接口。支持 0，1，Z，X 四种状态写入与读取。  
 **XData 主要方法：** 
-1. 初始化：
+- 初始化：
     ```python
+    # 初始化的步骤picker会为我们自动完成，此处只是介绍下用法
     # 初始化使用XData，参数为位宽和数据方向(XData.In,XData.Out,XData.InOut)
     a = XData(32,XData.In)
     a.ReInit(16,XData.In)  #ReInit方法可以重新初始化XData实例
+    # 绑定DPI，以加法器为例，参数为C函数
+    self.a.BindDPIRW(DPIRa, DPIWa)
+    self.b.BindDPIRW(DPIRb, DPIWb)
+    self.cin.BindDPIRW(DPIRcin, DPIWcin)
+    self.sum.BindDPIRW(DPIRsum, DPIWsum)
+    self.cout.BindDPIRW(DPIRcout, DPIWcout)
     ``` 
-2. 访问信号：
+- 访问信号：
     ```python
     # 使用.value可以进行访问，有多种赋值方法
-    a.value = 12345 # 十进制赋值
-    a.value = 0b11011   # 二进制赋值
-    a.value = 0o12345   # 八进制赋值
-    a.value = 0x12345   # 十六进制赋值
-    a.value = '::ffff'  # 字符串赋值ASCII码
+    a.value = 12345         # 十进制赋值
+    a.value = 0b11011       # 二进制赋值
+    a.value = 0o12345       # 八进制赋值
+    a.value = 0x12345       # 十六进制赋值
+    a.value = '::ffff'      # 字符串赋值ASCII码
     d = XData(32,XData.In)  # 同类型赋值
     d = a
     a.value = 0xffffffff
     # 配合ctype库使用
-    a.W();  # 转 uint32
-    a.U();  # 转 uint64
-    a.S();  # 转 int64
-    a.B();  # 转 bool
-    a.String()  # 转 string
+    a.W();                  # 转 uint32
+    a.U();                  # 转 uint64
+    a.S();                  # 转 int64
+    a.B();                  # 转 bool
+    a.String()              # 转 string
 
     #a.value支持使用[]按下标访问，下标从0开始为最低位
-    a[31] = 0   # a.value = 0x7ffffffff
-    a.value = "x"   # 赋值高阻态
-    print(f"expected x, actual {a.String()}")   # 输出高阻和不定态的时候需要用字符串输出
-
-    a.value = "z"   # 赋值不定态
+    a[31] = 0               # a.value = 0x7ffffffff
+    a.value = "x"           # 赋值高阻态
+    # 输出高阻和不定态的时候需要用字符串输出
     print(f"expected x, actual {a.String()}")
+    # a.value = "000000??"
 
+    a.value = "z"           # 赋值不定态
+    print(f"expected x, actual {a.String()}")
+    # a.value = "000000??"
+    # 000000??表示不定态和高阻态，出现这种结果的时候电路一般是出问题了
     ``` 
 
 ### XPORT
-- XPort是XData的封装，可对多个XData进行操作
+- 我们对少量的XData引脚操作的时候直接使用XData比较清晰直观，但是有多个XData的时候进行批量管理不是很方便，XPort是XData的封装，可对多个XData进行操作，我们也提供了一些批量管理方法
 
-1. 初始化与添加引脚：
+- 初始化与添加引脚：
     ```python
     port = XPort("p") #创建XPort实例
     ``` 
-2. 主要方法：
+- 主要方法：
     ```python
     # 使用Add方法添加引脚
     port.Add("a",a) #添加引脚
@@ -153,7 +163,7 @@ XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电�
     port_1.Add("b",b) #添加引脚
     port.Connect(port_1)
 
-    # Flip方法翻转引脚
+    # Flip方法翻转引脚输入输出方式
     port.Flip()
 
     # AsBiIo方法将引脚方向转换为双向
@@ -174,11 +184,11 @@ XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电�
 ### XClock
 - XClock 基于XPort，对电路的时钟封装，用于驱动电路
 XClock 主要接口与成员变量：
-1. 初始化与添加引脚：
+- 初始化与添加引脚：
     ```python
     clk = XClock(lambda a: 1 if print("lambda stp: ", a) else 0)  #参数stepfunc 为 DUT后端提供的电路推进方法，例如 verilaor 的 step_eval 等
     ``` 
-2. 主要方法：
+- 主要方法：
     ```python
     # 使用Add方法添加引脚
     clk.Add(XData) # 添加clk引脚
