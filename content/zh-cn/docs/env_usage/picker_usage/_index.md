@@ -13,12 +13,12 @@ weight: 1
 ## Picker 简介
 > `picker`是一个芯片验证辅助工具，其目标是将RTL设计验证模块(.v/.scala/.sv)进行封装，并使用其他编程语言暴露`Pin-Level`的操作，未来计划支持自动化的`Transaction-Level`原语生成。其他编程语言包括 c++ (原生支持), python(已支持), java(todo), golang(todo) 等编程语言接口。该辅助工具让用户可以基于现有的软件测试框架，例如pytest, junit，TestNG, go test等，进行芯片UT验证。
 
-基于picker进行验证具有如下**优点**：
-    - 1.**不泄露RTL设计**。经过Picker转换后，原始的设计文件(.v)被转化成了二进制文件(.so)，脱离原始设计文件后，依旧可进行验证，且验证者无法获取RTL源代码。
-    - 2.**减少编译时间**。当DUT(Design Under Test)稳定时，只需要编译一次（打包成so）。
-    - 3.**用户面广**。提供的编程接口多，可覆盖不同语言的开发者（传统IC验证，只用System Verilog）。
-    - 4.**可使用软件生态丰富**。能使用python3, java, golang等生态。
-
+基于picker进行验证具有如下**优点**：  
+ - 1.**不泄露RTL设计**。经过Picker转换后，原始的设计文件(.v)被转化成了二进制文件(.so)，脱离原始设计文件后，依旧可进行验证，且验证者无法获取RTL源代码。  
+ - 2.**减少编译时间**。当DUT(Design Under Test)稳定时，只需要编译一次（打包成so）。  
+ - 3.**用户面广**。提供的编程接口多，可覆盖不同语言的开发者（传统IC验证，只用System Verilog）。  
+ - 4.**可使用软件生态丰富**。能使用python3, java, golang等生态。  
+  
 >目前picker支持以下模拟器：
 `verilator`、`synopsys vcs`
 
@@ -102,10 +102,10 @@ XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电�
     ```python
     # 使用.value可以进行访问，有多种赋值方法
     a.value = 12345 # 十进制赋值
-    a.value = 0b11011 # 二进制赋值
-    a.value = 0o12345 # 八进制赋值
-    a.value = 0x12345 # 十六进制赋值
-    a.value = '::ffff'# 字符串赋值ASCII码
+    a.value = 0b11011   # 二进制赋值
+    a.value = 0o12345   # 八进制赋值
+    a.value = 0x12345   # 十六进制赋值
+    a.value = '::ffff'  # 字符串赋值ASCII码
     d = XData(32,XData.In)  # 同类型赋值
     d = a
     a.value = 0xffffffff
@@ -127,7 +127,7 @@ XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电�
     ``` 
 
 ### XPORT
-XPort是XData的封装，可对多个XData进行操作
+- XPort是XData的封装，可对多个XData进行操作
 
 1. 初始化与添加引脚：
     ```python
@@ -172,6 +172,8 @@ XPort是XData的封装，可对多个XData进行操作
     print(f"expected 0, actual {port['a'].value}")
     ``` 
 ### XClock
+- XClock 基于XPort，对电路的时钟封装，用于驱动电路
+XClock 主要接口与成员变量：
 1. 初始化与添加引脚：
     ```python
     clk = XClock(lambda a: 1 if print("lambda stp: ", a) else 0)  #参数stepfunc 为 DUT后端提供的电路推进方法，例如 verilaor 的 step_eval 等

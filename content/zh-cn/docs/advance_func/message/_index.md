@@ -29,50 +29,240 @@ weight: 3
 - **发布-订阅模式**：发布-订阅模式是一种消息传递模型，其中消息的发送者（发布者）不直接发送消息给接收者（订阅者），而是通过一个消息中心（或者称为主题）来发布消息，然后订阅者可以订阅感兴趣的主题来接收消息。在 Python 中，可以使用第三方库如 pika 或者 kafka-python 来实现发布-订阅模式。
 - **回调函数**：回调函数是一种常见的消息处理方式，其中一个函数被传递给另一个函数，然后在某个特定的事件发生时被调用。在 Python 中，可以使用回调函数来处理异步操作的结果或者事件的发生。
 
-## 使用Queue实现消息驱动
-在python中，我们可以用队列来实现一个简单的消息驱动示例，
-- **队列**的作用类似于简化版的**消息代理**，负责存储发送者产生的消息，并等待订阅者从中取走消息。
-- **publisher**将消息产生后就将其放入到消息代理中
-- **subscriber**会一直监听消息代理中的消息，当收到消息时就转去执行相应的处理消息的操作
+## 使用Pub/Sub模式来实现消息驱动
+>发布/订阅模式是一种在软件架构中常见的消息通信方式。在这个模式中，发布者不直接将消息发送给特定的接收者，而是发布（发送）到一个中间层，即消息代理。订阅者通过订阅感兴趣的消息类型或主题，来表明他们希望接收哪些消息。消息代理的职责是确保所有订阅了特定主题的客户端都能收到相应的消息。
+这种模式的一个关键特点是发布者和订阅者之间的解耦。他们不需要知道对方的存在，也不需要直接通信。这提高了系统的灵活性和可扩展性，因为可以独立地添加或移除发布者和订阅者，而不会影响系统的其他部分。
 
+1. 使用 Python 的内置队列模块实现的基本发布/订阅模型：  
+- 此处 Publisher 类具有消息队列和订阅者列表。使用发布方法发布消息时，会将其添加到队列中，并通过调用其接收方法传递到所有订阅的客户端。Subscriber 类具有一个 receive 方法，该方法仅打印收到的消息。  
+    ```python
+    import queue
+    # 发布者类
+    class Publisher:
+        def __init__(self):
+            # 初始化消息队列和订阅者列表
+            self.message_queue = queue.Queue()
+            self.subscribers = []
+
+        def subscribe(self, subscriber):
+            # 添加一个新的订阅者到订阅者列表
+            self.subscribers.append(subscriber)
+
+        def publish(self, message):
+            # 将消息放入队列并通知所有订阅者
+            self.message_queue.put(message)
+            for subscriber in self.subscribers:
+                # 调用订阅者的接收方法
+                subscriber.receive(message)
+
+    # 订阅者类
+    class Subscriber:
+        def __init__(self, name):
+            # 初始化订阅者的名称
+            self.name = name
+
+        def receive(self, message):
+            # 打印接收到的消息
+            print(f"{self.name} received message: {message}")
+
+    # 创建一个发布者实例
+    publisher = Publisher()
+
+    # 创建两个订阅者实例
+    subscriber_1 = Subscriber("Subscriber 1")
+    subscriber_2 = Subscriber("Subscriber 2")
+
+    # 将订阅者添加到发布者的订阅者列表中
+    publisher.subscribe(subscriber_1)
+    publisher.subscribe(subscriber_2)
+
+    # 发布者发布一条消息
+    publisher.publish("Hello World") 
+    ``` 
+2. 使用 Python 的线程模块实现的发布/订阅模型：  
+- 在此示例中，Publisher 类有一个订阅者字典，其中键是主题，值是订阅者列表。subscribe 方法将订阅服务器添加到指定主题的列表中。publish 方法检查指定主题是否有任何订阅者，如果有，则设置事件并存储每个订阅者的消息。Subscriber 类和 receive 方法与前面的示例相同。
+    ```python
+    import threading
+
+    # 发布者类
+    class Publisher:
+        def __init__(self):
+            # 初始化订阅者字典，按主题组织
+            self.subscribers = {}
+
+        def subscribe(self, subscriber, topic):
+            # 订阅方法，将订阅者添加到特定主题
+            if topic not in self.subscribers:
+                self.subscribers[topic] = []
+            self.subscribers[topic].append(subscriber)
+
+        def publish(self, message, topic):
+            # 发布方法，向特定主题的所有订阅者发送消息
+            if topic in self.subscribers:
+                for subscriber in self.subscribers[topic]:
+                    # 设置事件标志，通知订阅者有新消息
+                    subscriber.event.set()
+                    # 将消息传递给订阅者
+                    subscriber.message = message
+
+    # 订阅者类
+    class Subscriber:
+        def __init__(self, name):
+            # 初始化订阅者名称和事件标志
+            self.name = name
+            self.event = threading.Event()
+            self.message = None
+
+        def receive(self):
+            # 接收方法，等待事件标志被设置
+            self.event.wait()
+            # 打印接收到的消息
+            print(f"{self.name} received message: {self.message}")
+            # 清除事件标志，准备接收下一个消息
+            self.event.clear()
+
+    # 创建发布者实例
+    publisher = Publisher()
+
+    # 创建三个订阅者实例
+    subscriber_1 = Subscriber("Subscriber 1")
+    subscriber_2 = Subscriber("Subscriber 2")
+    subscriber_3 = Subscriber("Subscriber 3")
+
+    # 将订阅者根据主题订阅到发布者
+    publisher.subscribe(subscriber_1, "sports")
+    publisher.subscribe(subscriber_2, "entertainment")
+    publisher.subscribe(subscriber_3, "sports")
+
+    # 发布者发布一条属于'sports'主题的消息
+    publisher.publish("Soccer match result", "sports")
+
+    # 订阅者1接收并处理消息
+    subscriber_1.receive()
+    ``` 
+
+## 使用消息驱动进行验证
+[完整代码](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/tree/master)参见。  
 ```python
-import threading
+from util.simplebus import SimpleBusWrapper
+from tools.colorprint import Color as cl
+import xspcomm as xsp
 import queue
-import time
-def publisher(queue, topics):
-    for topic in topics:
-        message = "Message for topic {}: {}".format(topic, time.ctime())
-        queue.put((topic, message))
-        print("Published:", message)
-        time.sleep(1)
 
-def subscriber(queue, topic):
-    while True:
-        message = queue.get()
-        if message[0] == topic:
-            print("Received:", message[1])
-        time.sleep(0.5)
+# 请求消息类，用于封装通信请求的详细信息
+class ReqMsg:
+    def __init__(self, addr, cmd, user=0x123, size=7, mask=0, data=0):
+        self.user = user
+        self.size = size
+        self.addr = addr
+        self.cmd = cmd
+        self.mask = mask
+        self.data = data
+    
+    def display(self):
+        print(f"[REQ MSG] user {self.user:x}, size {self.size}, addr 0x{self.addr:x} " 
+            f"cmd 0x{self.cmd:x}, mask {self.mask:b}, data {self.data:x}")
 
-msg_queue = queue.Queue()
+# 缓存包装器类，模拟缓存的行为并与外部总线通信
+class CacheWrapper:
+    def __init__(self, io_bus: SimpleBusWrapper, clk: xsp.XClock, cache_port: xsp.XPort):
+        self.xclk = clk
+        # 简单总线包装器，用于与外部通信
+        self.io_bus = io_bus
+        # 缓存端口，可能用于与外部组件交互
+        self.cache_port = cache_port
 
-# 创建发布者线程
-publisher_thread = threading.Thread(target=publisher, args=(msg_queue, ['topic1', 'topic2']))
-publisher_thread.start()
+        # 初始化请求队列，用于存储即将处理的请求消息
+        self.req_que = queue.Queue()
+        # 初始化响应队列，用于存储处理完的响应消息
+        self.resp_que = queue.Queue()
+        # 注册硬件时钟上升沿的回调方法，用于处理请求和响应
+        self.xclk.StepRis(self.__callback)
 
-# 创建订阅者线程
-subscriber_thread1 = threading.Thread(target=subscriber, args=(msg_queue, 'topic1'))
-subscriber_thread1.start()
+    # 发起一个读请求
+    def trigger_read_req(self, addr):
+        # 将读请求消息放入请求队列，不等待队列锁定
+        self.req_que.put_nowait(ReqMsg(addr=addr, cmd=self.io_bus.cmd_read))
 
-subscriber_thread2 = threading.Thread(target=subscriber, args=(msg_queue, 'topic2'))
-subscriber_thread2.start()
-```
-- 发布者每隔1s就依次产生topic1,topic2消息，并将其放入队列中
-- 我们创建了两种订阅者subscriber_thread1，subscriber_thread2分别处理topic1,topic2两种消息
-- 每隔0.5s,两种订阅者就分别从队列中取出消息，并判断是否为自己的topic,若是，则将消息打印出来
-- 若队列为空，则订阅者什么都不做
-## Picker中使用消息驱动
+    # 发起一个写请求
+    def trigger_write_req(self, addr, data, mask):
+        # 将写请求消息放入请求队列，不等待队列锁定
+        self.req_que.put_nowait(ReqMsg(addr=addr, cmd=self.io_bus.cmd_write, mask=mask, data=data))
 
+    # 接收响应
+    def recv(self):
+        # 等待响应队列非空，然后取出响应
+        while self.resp_que.empty():
+            self.xclk.Step(1)
+        return self.resp_que.get()
 
+    # 读取数据
+    def read(self, addr):
+        # 发起读请求，然后等待并返回响应
+        self.trigger_read_req(addr)
+        return self.recv()
+
+    # 写入数据
+    def write(self, addr, data, mask):
+        # 发起写请求，然后等待并返回响应
+        self.trigger_write_req(addr, data, mask)
+        return self.recv()
+
+    # 重置缓存
+    def reset(self):
+        # 设置复位信号，等待一定时钟周期，然后清除复位信号
+        self.cache_port["reset"].value = 1
+        self.xclk.Step(100)
+        self.cache_port["reset"].value = 0
+        self.cache_port["io_flush"].value = 0
+        # 等待请求准备就绪信号
+        while not self.io_bus.IsReqReady():
+            self.xclk.Step(1)
+
+    # 硬件时钟上升沿的回调方法
+    def __callback(self, *a, **b):
+        # 处理请求
+        if self.io_bus.IsReqSend():
+            # 如果有请求发送，从请求队列取出一个请求
+            self.req_que.get()
+        # 检查请求队列是否为空
+        if self.req_que.empty():
+            # 如果请求队列为空，向io_bus发送无效请求信号
+            self.io_bus.ReqUnValid()
+        else:
+            # 如果请求队列不为空，向io_bus发送有效请求信号
+            self.io_bus.ReqSetValid()
+            # 取出队首的请求消息
+            msg: ReqMsg = self.req_que.queue[0]
+            # 根据请求命令类型，执行读或写操作
+            if msg.cmd == self.io_bus.cmd_read:
+                self.io_bus.ReqReadData(msg.addr)
+            if msg.cmd == self.io_bus.cmd_write:
+                self.io_bus.ReqWriteData(msg.addr, msg.data, msg.mask)
+
+        # 处理接收
+        self.io_bus.port["resp_ready"].value = 1
+        # 如果响应有效，从io_bus获取响应数据，并放入响应队列
+        if self.io_bus.IsRespValid():
+            res = self.io_bus.get_resp_rdata()
+            self.resp_que.put_nowait(res)
+``` 
+1. 封装软件激励：  
+- 软件激励首先被封装进ReqMsg对象中，这个对象包含了所有必要的信息，如地址、命令、数据等。此处以果壳cache的验证为例。
+
+2. 使用消息队列存储请求：
+- 封装后的请求被放入CacheWrapper类的请求队列req_que中。这个队列作为软件激励的缓冲区，允许软件在任何时刻发送请求，而不必等待硬件的即时响应。
+
+3. 解耦的回调机制：
+- 在硬件时钟上升沿，CacheWrapper类的__callback方法被触发。这个方法检查请求队列中是否有待处理的请求，并根据当前的硬件状态决定是否处理这些请求。这是解耦过程中的关键步骤，因为它将软件激励的发送与硬件时序的处理分离开来。
+
+4. 模拟硬件响应：
+- 封装后的请求被放入CacheWrapper类的请求队列req_que中。这个队列作为软件激励的缓冲区，允许软件在任何时刻发送请求，而不必等待硬件的即时响应。
+
+5. 软件接收响应：
+- 软件可以通过CacheWrapper类的recv方法从响应队列中取出响应。这个过程是同步的，但它允许软件在任何时刻检查响应队列，而不是必须在特定的硬件时序点上。
+
+>通过上述过程，软件的请求（激励）和硬件的响应（时序）被有效地解耦。软件可以自由地发送请求，而硬件则在适当的时序下处理这些请求，生成响应。这种解耦使得软件的开发和测试可以独立于硬件的实际行为，从而提高了开发效率和系统的灵活性。
 
 ## 事件驱动
 > 事件驱动严格上属于异步编程中的概念，不过其目的用法与消息驱动有些许类似，因此我们将其放到这一小节来进行讲解。、
@@ -122,6 +312,7 @@ async def main(loop):
 ```
 
 ## 3. picker 中使用事件驱动
+ - 下面我将会用一个简单的例子展示如何在picker中使用事件驱动
 在picker 使用事件驱动和上一小节的用法的用法类似，例如在下面这段代码中，定义两个函数 awaited_func 和 set_event，两个事件event 1,event 2，在执行时
 - 创建event 1,event 2
 - 调用awaited_func, 此时需要等待event 事件的发生
