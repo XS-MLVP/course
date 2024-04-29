@@ -116,37 +116,9 @@ async def test_async():
 
 ### 验证加法器时使用异步
 
-继续使用的上升沿触发加法器的例子，测试的代码与[之前的代码](../callback/#test_ris_adder_with_callback)只有微小的变动。
+这里继续用在上升沿触发的加法器作为例子，我们对[之前的代码](../callback/#test_ris_adder_with_callback)做了一些微小的变动，把时钟信号的产生和等待时钟周期换成了`picker`提供的异步方法:
 
-首先需要先设置产生多长时间的时钟信号:
-
-```python
-task = asyncio.create_task(dut.runstep(114514 + 1)) # 设置时钟信号产生多少个周期 
-
-"""
-test code
-"""
-
-await task  # 等待时钟结束
-```
-
-每个周期设置完`dut`的输入信号之后，再让时钟进入下个周期:
-
-```python
-for _ in range(114514):
-    # 设置输入
-    a = random.randint(0, (1 << WIDTH) - 1)
-    b = random.randint(0, (1 << WIDTH) - 1)
-    cin = random.randint(0, 1)
-    ref.step(a, b, cin)
-    dut.a.value = a
-    dut.b.value = b
-    dut.cin.value = cin
-    # 让时钟进入下个周期
-    await dut.astep(1) 
-```
-
-#### 测试代码
+#### 使用异步的测试代码
 
 ```python
 from UT_RisAdder import *
@@ -154,87 +126,93 @@ import random
 import asyncio
 
 # 控制字体颜色
-FONT_GREEN = "\033[0;32m"
-FONT_RED = "\033[0;31m"
-FONT_COLOR_RESET = "\033[0m"
-
+FONT_GREEN = "\033[0;32m"  # 绿色
+FONT_RED = "\033[0;31m"    # 红色
+FONT_COLOR_RESET = "\033[0m"  # 重置颜色
 
 class SimpleRisAdder:
+    """
+    SimpleRisAdder 类是一个作为参考的加法器类，
+    它模拟了我们预期的RisAdder的行为 
+    """
     def __init__(self, width) -> None:
-        self.WIDTH = width
+        self.WIDTH = width  # 加法器的位宽
         # 端口定义
-        self.a = 0
-        self.b = 0
-        self.cin = 0
-        self.cout = 0
-        self.sum = 0
-        pass
+        self.a = 0  # 输入端口a
+        self.b = 0  # 输入端口b
+        self.cin = 0  # 输入端口cin
+        self.cout = 0  # 输出端口cout
+        self.sum = 0   # 输出端口sum
 
     def step(self, a, b, cin):
+        """
+        模拟上升沿更新输出: 先用上个周期的输入更新输出，之后再更新输入
+        """
         sum = self.a + self.b + self.cin
-        self.cout = sum >> self.WIDTH
-        self.sum = sum & ((1 << self.WIDTH) - 1)
+        self.cout = sum >> self.WIDTH  # 计算进位
+        self.sum = sum & ((1 << self.WIDTH) - 1)  # 计算和
 
-        self.a = a
-        self.b = b
-        self.cin = cin
+        self.a = a  # 更新输入a
+        self.b = b  # 更新输入b
+        self.cin = cin  # 更新输入cin
 
-
+# 测试函数，验证加法器的输出是否正确
 def test_adder(clk: int, dut: DUTRisAdder, ref: SimpleRisAdder) -> None:
-    # 加法器dut端口的信号
+    # 获取加法器的输入和输出
     a = dut.a.value
     b = dut.b.value
     cin = dut.cin.value
     cout = dut.cout.value
     sum = dut.sum.value
 
-    # 验证输出是否符合预期
+    # 检查加法器的输出是否与预期一致
     isEqual = (cout, sum) == (ref.cout, ref.sum)
 
+    # 输出测试结果
     print(f"Cycle: {clk}, Input(a, b, cin) = ({a:x}, {b:x}, {cin:x})")
     print(
-        FONT_GREEN + "Pass."
+        FONT_GREEN + "Pass."  # 输出绿色的“Pass.”，如果测试通过
         if isEqual
-        else FONT_RED + f"MisMatch! Expect cout: {ref.cout:x}, sum: {ref.sum:x}.",
-        FONT_COLOR_RESET + f"Get cout: {cout:x}, sum: {sum:x}.",
+        else FONT_RED + f"MisMatch! Expect cout: {ref.cout:x}, sum: {ref.sum:x}." +
+        FONT_COLOR_RESET + f"Get cout: {cout:x}, sum: {sum:x}."
     )
-    assert isEqual
+    assert isEqual  # 如果测试失败，触发断言异常
 
 
+# 异步函数，用于运行测试
 async def run_test():
-    WIDTH = 32
-    ref = SimpleRisAdder(WIDTH)
-    dut = DUTRisAdder()
+    WIDTH = 32  # 设置加法器的位宽
+    ref = SimpleRisAdder(WIDTH)  # 创建一个参考加法器
+    dut = DUTRisAdder()  # 创建被测试的加法器
     # 绑定时钟信号
     dut.init_clock("clk")
     # dut输入信号置0
     dut.a.value = 0
     dut.b.value = 0
     dut.cin.value = 0
-    task = asyncio.create_task(dut.runstep(114514 + 1)) # 设置时钟信号产生多少个周期
-    await dut.astep(1)  # 推进一个周期
+    task = asyncio.create_task(
+        dut.runstep(114514 + 1) # 创建一个异步任务，用于模拟时钟信号持续(114514+1)个周期
+    )
+    await dut.astep(1)  # 等待时钟进入下个周期
     dut.StepRis(test_adder, (dut, ref))  # 注册在时钟上升沿触发的函数
     # 启动测试
     for _ in range(114514):
-        # 设置输入
+        # 随机生成输入
         a = random.randint(0, (1 << WIDTH) - 1)
         b = random.randint(0, (1 << WIDTH) - 1)
         cin = random.randint(0, 1)
-        ref.step(a, b, cin)
-        dut.a.value = a
-        dut.b.value = b
-        dut.cin.value = cin
-        # 进入下个周期
-        await dut.astep(1)
+        ref.step(a, b, cin)  # 更新参考加法器的状态
+        dut.a.value = a  # 设置被测试加法器的输入a
+        dut.b.value = b  # 设置被测试加法器的输入b
+        dut.cin.value = cin  # 设置被测试加法器的输入cin
+        await dut.astep(1)  # 等待时钟进入下个周期
 
     await task  # 等待时钟结束
     dut.finalize()
 
-    pass
-
 
 if __name__ == "__main__":
-    asyncio.run(run_test())
+    asyncio.run(run_test()) # 运行测试
     pass
 ```
 
