@@ -9,7 +9,7 @@ weight: 2
 ## 使用方法
 
 在使用 Picker 工具封装 DUT 时，使用选项`-w [wave_file]`指定需要保存的波形文件。
-我们针对不同仿真器，我们支持不同的文件类型：
+针对不同的后端仿真器，支持不同的波形文件类型，具体如下：
 
 1. [Verilator](https://www.veripool.org/wiki/verilator)
     - `.vcd`格式的波形文件。
@@ -43,40 +43,6 @@ if __name__ == "__main__":
 ```
 运行结束后即可生成指定文件名的波形文件。
 
-### C++ 示例
-
-在C++中，dut 的析构函数会自动调用 `dut.finalize()`，因此只需要在测试结束后 `delete dut` 即可进行后处理工作（写入波形、覆盖率等文件）。
-
-```cpp
-#include "UT_Adder.hpp"
-
-int main()
-{
-    UTAdder *dut = new UTAdder("libDPIAdder.so");
-    printf("Initialized UTAdder\n");
-
-    for (int c = 0; c < 114514; c++) {
-    
-        auto dut_cal = [&]() {
-            dut->a   = c * 2;
-            dut->b   = c / 2;
-            dut->cin = i.cin;
-            dut->xclk.Step(1);
-            o_dut.sum  = (uint64_t)dut->sum;
-            o_dut.cout = (uint64_t)dut->cout;
-        };
-
-        dut_cal();
-        printf("[cycle %llu] a=0x%lx, b=0x%lx, cin=0x%lx\n", dut->xclk.clk, i.a,
-            i.b, i.cin);
-        printf("DUT: sum=0x%lx, cout=0x%lx\n", o_dut.sum, o_dut.cout);
-    }
-
-    delete dut; // automatically call dut.finalize() in ~UTAdder()
-    printf("Simulation finished\n");
-    return 0;
-}
-```
 
 ## 查看结果
 

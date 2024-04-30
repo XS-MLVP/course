@@ -46,11 +46,11 @@ weight: 1
 
 ### 工具介绍
 
-本学习材料用到的核心工具为 picker （url：），它的作用是将RTL编写的设计模块转换成高级软件编程语言（Python/C++/Java/Golang）第三方库的工具。基于该工具，软件开发（测试）背景的验证人员可以不用去学习 Verilog/VHDL 等硬件描述语言。
+本学习材料用到的核心工具为 picker （[https://github.com/XS-MLVP/picker](https://github.com/XS-MLVP/picker)），它的作用是将RTL编写的设计模块自动提供高级编程语言接口（Python/C++等）。基于该工具，软件开发（测试）背景的验证人员可以不用去学习 Verilog/VHDL 等硬件描述语言进行芯片验证。
 
 ### 系统需求
 
-操作系统：Ubuntu 22.04 LTS
+建议操作系统：Ubuntu 22.04 LTS
 
 <blockquote><p>
 在系统结构开发、科研的过程中，Linux 是最为常用的平台，这主要是因为 Linux 拥有丰富的软件、工具资源：由于 Linux 的开源性，各大重要工具软件（如 Verilator）可以很容易地面向 Linux 进行开发。

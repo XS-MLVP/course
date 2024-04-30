@@ -10,7 +10,7 @@ weight: 20
 {{% /pageinfo %}}
 
 
-**<span style="color:red;">学习本材料前，假定您已经拥有linux、python等相关的基础知识。</span>**
+**<span style="color:red;">学习本材料前，假定您已经拥有linux、python等相关基础知识。</span>**
 
 
 相关学习材料：
@@ -21,4 +21,4 @@ weight: 20
 1. <a href="https://www.javatpoint.com/git" target="_blank">Javatpoint上的Git基础</a>
 
 
-若计划参与本平台上发布的“开源开放验证项目”，建议提前完成了一生一芯计划中“<a href="https://ysyx.oscc.cc/docs/2306/prestudy/prestudy.html" target="_blank">预学习阶段</a>”的学习。
+若计划参与本平台上发布的“开源开放验证项目”，建议提前完本材料的学习。

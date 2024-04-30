@@ -11,11 +11,11 @@ weight: 1
 ### 依赖安装
 
 1.  [cmake](https://cmake.org/download/) ( >=3.11 )
-2.  [gcc](https://gcc.gnu.org/) ( 支持c++20,至少为10, **最好为11及以上** )
+2.  [gcc](https://gcc.gnu.org/) ( 支持c++20,至少为gcc版本10, **建议11及以上** )
 3.  [python3](https://www.python.org/downloads/) ( >=3.8 )
 4.  [verilator](https://verilator.org/guide/latest/install.html#git-quick-install) ( **==4.218** )
 5.  [verible-verilog-format](https://github.com/chipsalliance/verible) ( >=0.0-3428-gcfcbb82b )
-6.  [swig](http://www.swig.org/) ( >=**4.2.0**, 目前为master分支， 仅在需要python支持时使用 )
+6.  [swig](http://www.swig.org/) ( >=**4.2.0**, 用于多语言支持 )
 
 > 请注意，请确保`verible-verilog-format`等工具的路径已经添加到环境变量`$PATH`中，可以直接命令行调用。
 
@@ -31,7 +31,7 @@ make init
 
 ```bash
 cd picker
-export BUILD_XSPCOMM_SWIG=python # 仅在需要python支持时使用
+export BUILD_XSPCOMM_SWIG=python # 通过BUILD_XSPCOMM_SWIG指定支持语言
 make
 sudo -E make install
 ```
@@ -119,16 +119,13 @@ Usage:
 
 ### 功能测试
 
-项目提供完整的加法器和随机数生成器测试项目，可以用一行命令测试 Picker 功能是否正常。
-
-#### 加法器测试
 
 ```bash
 cd picker # 进入项目根目录，即git clone的目录
 ./example/Adder/release-verilator.sh -l cpp -e
 ```
 
-程序应当输出**类似**的内容：
+程序应当输出**类似**的内容，表示安装成功：
 
 ```bash
 ...
@@ -139,25 +136,4 @@ Test Passed, destory UTAdder
 ...
 ```
 
-#### 随机数生成器测试
-
-```bash
-cd picker
-./example/RandomGenerator/release-verilator.sh -l cpp -e
-```
-
-程序应当输出**类似**的内容：
-
-```bash
-...
-[cycle 114521] DUT: cout=0x9a4c , REF: cout=0x9a4c
-[cycle 114522] DUT: cout=0x3499 , REF: cout=0x3499
-[cycle 114523] DUT: cout=0x6932 , REF: cout=0x6932
-[cycle 114524] DUT: cout=0xd265 , REF: cout=0xd265
-[cycle 114525] DUT: cout=0xa4ca , REF: cout=0xa4ca
-[cycle 114526] DUT: cout=0x4995 , REF: cout=0x4995
-Test Passed, destory UTRandomGenerator
-...
-```
-
-至此，可以确定picker工具安装完成。
+至此，picker工具安装完成。

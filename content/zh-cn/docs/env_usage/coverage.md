@@ -6,7 +6,7 @@ tags: [examples, docs]
 weight: 4
 ---
 
-> Picker 工具支持生成代码行覆盖率报告，MLVP 项目支持生成功能覆盖率报告。
+> Picker 工具支持生成代码行覆盖率报告，MLVP（[https://github.com/XS-MLVP/mlvp](https://github.com/XS-MLVP/mlvp)） 项目支持生成功能覆盖率报告。
 
 ## 代码行覆盖率
 
@@ -78,4 +78,4 @@ coverage:
 
 ## VCS
 
-
+VCS对应的文档正在完善当中。
