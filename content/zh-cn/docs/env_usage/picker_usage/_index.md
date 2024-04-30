@@ -22,11 +22,10 @@ weight: 1
 >目前picker支持以下模拟器：
 `verilator`、`synopsys vcs`
 
-**Picker的工作原理**
+**Picker的工作原理**  
 `Picker`的主要功能就是将`Verilog`代码转换为C++或者Python代码，以处理器的仿真为例:
 
 ![Picker的工作原理](Picker_working_principle.svg)
-
 
 ## Python 模块生成
 
@@ -84,7 +83,8 @@ weight: 1
         dut.b.value = 2
         dut.cin.value = 0
         dut.Step(1)                 #更新信号
-        print()
+        print(f"sum = {dut.sum.value}, cout = {dut.cout.value}") #读取dut的输出信号，需要用到.value
+        # 
         dut.finalize()              # 清空对象，并完成覆盖率和波形文件的输出工作（写入到文件）
     ```
 
@@ -205,7 +205,9 @@ XClock 主要接口与成员变量：
     # 添加下降沿回调，参数为回调函数
     clk.StepFal(lambda c, x, y: print("lambda fal: ", c, x, y), (3, 4))
     ``` 
-    
+
+虽然在
+
 ### Async & Event
 
 **时钟事件 (Event)**
