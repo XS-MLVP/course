@@ -50,7 +50,7 @@ Picker 导出 Python Module 的方式是基于 C++ 的。
 - 参数 `--verbose, -v` 用于保留生成项目时的中间文件。
 
 
-### DUT
+### 使用工具生成Python的DUT类
 - 在键入Picker的编译命令后，会自动生成Python的一个基础类，我们称之为DUT类，以前述的加法器为例，用户需要编写测试用例，即导入上一章节生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
 目录结构为：
 ```shell
@@ -88,8 +88,7 @@ if __name__ == "__main__":
     dut.finalize()              
 ```
 
-
-> DUT类有三种基本数据类型：XData、XPort、XClock,在下面我们会逐一的讲解他们的来源和使用方法
+- DUT类中封装了三种基本数据类型：XData、XPort和XClock，对应于电路中的各种信号。通过这些数据类型，我们能够接触并操纵电路的多样信号，以便进行仿真测试。后续的内容，将详细阐述这些数据类型的定义来源以及它们的具体应用方式。
 ### XDATA
 - 通常，电路有四种状态：0、1、Z和X。我们定义一种名为XData的数据类型，将其与电路的引脚绑定，并通过DPI读写电路的IO接口。这样，我们就能够使用软件来激励电路。 
 
@@ -98,7 +97,7 @@ if __name__ == "__main__":
 # 初始化的步骤picker会为我们自动完成，此处只是介绍下用法
 # 初始化使用XData，参数为位宽和数据方向(XData.In,XData.Out,XData.InOut)
 a = XData(32,XData.In)
-a.ReInit(16,XData.In)       #ReInit方法可以重新初始化XData实例
+a.ReInit(16,XData.In)           #ReInit方法可以重新初始化XData实例
 # 绑定DPI，以加法器为例，参数为C函数
 self.a.BindDPIRW(DPIRa, DPIWa)
 self.b.BindDPIRW(DPIRb, DPIWb)
@@ -134,7 +133,8 @@ a.value = "x"                   # 赋值高阻态
 a.value = "z"                   # 赋值不定态
 # a.value = "000000??"
 
-# 设置引脚模式: XData.Imme 立即写入,XData.Rise 上升沿写入,XData.Fall 下降沿写入。XData默认情况下为上升沿写入。立即写入模式下，可以真正的模拟时序电路，不需要Step方法便能直接更新值
+# 设置引脚模式: XData.Imme 立即写入,XData.Rise 上升沿写入,XData.Fall
+#下降沿写入。XData默认情况下为上升沿写入。立即写入模式下，可以真正的模拟时序电路，不需要Step方法便能直接更新值
 a.SetWriteMode(XData.Imme)
 ``` 
 
@@ -156,7 +156,8 @@ port["b"]
 # 使用[].value可以访问引脚的值
 port["b"].value = 1
 
-# Connect方法对两个Port进行连接如果连接的两个port都是InOut类型的，那么数据流通方向就是Port_2->Port_1,如果一个是In一个是Out，那么数据流向是Out->In,连接的命名要求为：xxx_A Connect yyy_A
+# Connect方法对两个Port进行连接如果连接的两个port都是InOut类型的，那么数据流通方向就是Port_2->Port_1
+# 如果一个是In一个是Out，那么数据流向是Out->In,连接的命名要求为：xx_A Connect yy_A
 a = XData(32,XData.In)
 b = XData(32,XData.Out)
 

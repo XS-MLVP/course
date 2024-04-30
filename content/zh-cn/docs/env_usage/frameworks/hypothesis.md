@@ -19,7 +19,7 @@ weight: 52
 ## 安装
 
 使用pip安装，在python中导入即可使用
-```bash hl: title:
+```shell
 pip install hypothesis
 
 import hypothesis
@@ -31,7 +31,7 @@ import hypothesis
 ### 属性和策略   
 Hypothesis 使用属性装饰器来定义测试函数的属性。最常用的装饰器是 @given，它指定了测试函数应该满足的属性。    
 我们可以通过@given 装饰器定义了一个测试函数 test_addition。并给x 添加对应的属性，测试生成器会自动为测试函数生成测试数据，并将其作为参数传递给函数，例如
-```bash hl: title:
+```python
 def addition(number: int) -> int:
     return number + 1
 
@@ -41,7 +41,7 @@ def test_addition(x, y):　　
 ```
 
 其中integers () 是一个内置的策略，用于生成整数类型的测试数据。Hypothesis 提供了丰富的内置策略，用于生成各种类型的测试数据。除了integers ()之外，还有字符串、布尔值、列表、字典等策略。例如使用 text () 策略生成字符串类型的测试数据，使用 lists (text ()) 策略生成字符串列表类型的测试数据
-```bash hl: title:
+```python
 @given(s=text(), l=lists(text()))
 def test_string_concatenation(s, l):　　   
 	result = s + "".join(l)　　   
@@ -49,7 +49,7 @@ def test_string_concatenation(s, l):　　
 ```
 
 除了可以使用内置的策略以外，还可以使用自定义策略来生成特定类型的测试数据，例如我们可以生产一个非负整形的策略
-```bash hl: title:
+```python
 def non_negative_integers():
 　　return integers(min_value=0)
 @given(x=non_negative_integers())
@@ -59,7 +59,7 @@ def non_negative_integers():
 
 ### 期望
 我们可以通过expect 来指明需要的函数期待得到的结果
-```bash hl: title:
+```python
 @given(x=integers())
 def test_addition(x):
     expected = x + 1
@@ -69,7 +69,7 @@ def test_addition(x):
 在使用 Hypothesis 进行测试时，我们可以使用标准的 Python 断言来验证测试函数的属性。Hypothesis 会自动为我们生成测试数据，并根据属性装饰器中定义的属性来运行测试函数。如果断言失败，Hypothesis 会尝试缩小测试数据的范围，以找出导致失败的最小样例。
 
 假如我们有一个字符串反转函数，我们可以通过assert 来判断翻转两次后他是不是等于自身
-```bash hl: title:
+```python
 def test_reverse_string(s):
     expected = x + 1
     actual = addition(x)
@@ -82,7 +82,7 @@ def test_reverse_string(s):
 
 - 在上一节的代码基础上，我们进行一些修改，将生成测试用例的方法从随机数修改为integers ()方法，修改后的代码如下：
 
-```bash hl: title:
+```python
 from UT_Adder import *
 import pytest
 import ctypes
