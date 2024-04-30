@@ -57,19 +57,19 @@ weight: 1
 目录结构为：
     ```shell
         picker_out_adder
-        |-- UT_Adder # Picker 工具生成的项目
+        |-- UT_Adder                # Picker 工具生成的项目
         |   |-- Adder.fst.hier
         |   |-- _UT_Adder.so
         |   |-- __init__.py
         |   |-- libDPIAdder.a
         |   |-- libUTAdder.so
         |   `-- libUT_Adder.py
-        `-- example.py # 用户需要编写的代码
+        `-- example.py              # 用户需要编写的代码
     ```
 - 用户使用 Python 编写测试用例，即导入上述生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
 
     ```python
-    from UT_Adder import * # 从python软件包里导入模块
+    from UT_Adder import *          # 从python软件包里导入模块
     import random
 
     if __name__ == "__main__":
@@ -80,11 +80,12 @@ weight: 1
         # dut.Step(1) # 该步进行了初始化赋值操作
         # dut.reset.value = 0 # 设置完成后需要记得复位原信号！
         # 以加法器为例，对信号的操作
-        dut.a.value = 1 #对dut的输入信号赋值，需要用到.value
+        dut.a.value = 1             #对dut的输入信号赋值，需要用到.value
         dut.b.value = 2
         dut.cin.value = 0
-        dut.Step(1) #更新信号
-        dut.finalize() # 清空对象，并完成覆盖率和波形文件的输出工作（写入到文件）
+        dut.Step(1)                 #更新信号
+        print()
+        dut.finalize()              # 清空对象，并完成覆盖率和波形文件的输出工作（写入到文件）
     ```
 
 
@@ -108,32 +109,31 @@ XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电�
 - 访问信号：
     ```python
     # 使用.value可以进行访问，有多种赋值方法
-    a.value = 12345         # 十进制赋值
-    a.value = 0b11011       # 二进制赋值
-    a.value = 0o12345       # 八进制赋值
-    a.value = 0x12345       # 十六进制赋值
-    a.value = '::ffff'      # 字符串赋值ASCII码
-    d = XData(32,XData.In)  # 同类型赋值
+    a.value = 12345             # 十进制赋值
+    a.value = 0b11011           # 二进制赋值
+    a.value = 0o12345           # 八进制赋值
+    a.value = 0x12345           # 十六进制赋值
+    a.value = '::ffff'          # 字符串赋值ASCII码
+    d = XData(32,XData.In)      # 同类型赋值
     d = a
     a.value = 0xffffffff
     # 配合ctype库使用
-    a.W();                  # 转 uint32
-    a.U();                  # 转 uint64
-    a.S();                  # 转 int64
-    a.B();                  # 转 bool
-    a.String()              # 转 string
+    a.W();                      # 转 uint32
+    a.U();                      # 转 uint64
+    a.S();                      # 转 int64
+    a.B();                      # 转 bool
+    a.String()                  # 转 string
 
     #a.value支持使用[]按下标访问，下标从0开始为最低位
-    a[31] = 0               # a.value = 0x7ffffffff
-    a.value = "x"           # 赋值高阻态
+    a[31] = 0                   # a.value = 0x7ffffffff
+    a.value = "x"               # 赋值高阻态
     # 输出高阻和不定态的时候需要用字符串输出
-    print(f"expected x, actual {a.String()}")
-    # a.value = "000000??"
-
-    a.value = "z"           # 赋值不定态
-    print(f"expected x, actual {a.String()}")
+    # print(f"expected x, actual {a.String()}")
     # a.value = "000000??"
     # 000000??表示不定态和高阻态，出现这种结果的时候电路一般是出问题了
+    a.value = "z"               # 赋值不定态
+    # a.value = "000000??"
+
     ``` 
 
 ### XPORT
@@ -146,8 +146,8 @@ XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电�
 - 主要方法：
     ```python
     # 使用Add方法添加引脚
-    port.Add("a",a) #添加引脚
-    port.Add("b",b) #添加引脚
+    port.Add("a",a)             # 添加引脚
+    port.Add("b",b)             # 添加引脚
 
     #使用[]访问引脚
     port["b"]
@@ -158,9 +158,9 @@ XData 电路的IO接口数据（与电路引脚绑定），通过 DPI 读写电�
     port.PortCount()
 
     # Connect方法连接两个XPort实例
-    port_1 = XPort("p1") #创建XPort实例
-    port_1.Add("a",a) #添加引脚
-    port_1.Add("b",b) #添加引脚
+    port_1 = XPort("p1")        # 创建XPort实例
+    port_1.Add("a",a)           # 添加引脚
+    port_1.Add("b",b)           # 添加引脚
     port.Connect(port_1)
 
     # Flip方法翻转引脚输入输出方式
@@ -191,11 +191,11 @@ XClock 主要接口与成员变量：
 - 主要方法：
     ```python
     # 使用Add方法添加引脚
-    clk.Add(XData) # 添加clk引脚
-    clk.Add(XPort) # 添加Port
+    clk.Add(XData)              # 添加clk引脚
+    clk.Add(XPort)              # 添加Port
     
     # 更新状态
-    clk.Step(1) # 参数为UInt i，表示前进i步
+    clk.Step(1)                 # 参数为UInt i，表示前进i步
 
     #复位
     clk.Reset()
