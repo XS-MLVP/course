@@ -13,7 +13,6 @@ weight: 51
 >- 系统测试：将整个软件系统看成一个整体进行测试，包括对功能、性能以及软件所运行的软硬件环境进行测试
 >- 验收测试：指按照项目任务书或合同、供需双方约定的验收依据文档进行的对整个系统的测试与评审，决定是否接收或拒收系统
 
-
 pytest最初是作为一个单元测试框架而设计的，但它也提供了许多功能，使其能够进行更广泛的测试，包括集成测试，系统测试，他是一个非常成熟的全功能的python 测试框架。
 它通过收集测试函数和模块，并提供丰富的断言库来简化测试的编写和运行，是一个非常成熟且功能强大的 Python 测试框架，具有以下几个特点：
 - **简单灵活**：Pytest 容易上手，且具有灵活性。
@@ -52,24 +51,21 @@ pip install pytest-html
 ## 3. Pytest使用
 
 ### 3.1. 命名规则
-- 首先在使用pytest 时我们的模块名通常是以test 开头或者test 结尾
-```bash hl: title:
-#test_*.py 或 *_test.py
+```python
+# 首先在使用pytest 时我们的模块名通常是以test开头或者test结尾，也可以修改配置文件，自定义命名规则
+# test_*.py 或 *_test.py
 test_demo1
 demo2_test
-```
-- 模块中的类名要以Test 开始且不能有init 方法
-```bash hl: title:
+
+# 模块中的类名要以Test 开始且不能有init 方法
 class TestDemo1:
 class TestLogin:
-```
-- 类中定义的测试方法名要以test_开头
-```bash hl: title:
+
+# 类中定义的测试方法名要以test_开头
 test_demo1(self)
 test_demo2(self)
-```
-- 测试用例
-```bash hl: title:
+
+# 测试用例
 class test_one:
     def test_demo1(self):
         print("测试用例1")
@@ -108,78 +104,35 @@ pytest test_se.py -s
 **在 Pytest 中，您可以按照测试文件夹、测试文件、测试类和测试方法的不同维度来选择执行测试用例。**
 
 - 按照测试文件夹执行
-```
+```python
 # 执行所有当前文件夹及子文件夹下的所有测试用例
 pytest .
 # 执行跟当前文件夹同级的tests文件夹及子文件夹下的所有测试用例
 pytest ../tests
-```
 
-- 按照测试文件执行
-```
+# 按照测试文件执行
 # 运行test_se.py下的所有的测试用例
 pytest test_se.py
-```
 
-- 按照测试类执行
-```
 # 按照测试类执行，必须以如下格式：
 pytest 文件名 .py:: 测试类，其中“::”是分隔符，用于分割测试module和测试类。
 # 运行test_se.py文件下的，类名是TestSE下的所有测试用例
 pytest test_se.py::TestSE
-```
 
-- 按照测试方法执行
-```
-# 同样的测试方法执行，必须以如下格式：
+# 测试方法执行，必须以如下格式：
 pytest 文件名 .py:: 测试类 :: 测试方法，其中 “::” 是分隔符，用于分割测试module、测试类，以及测试方法。
 # 运行test_se.py文件下的，类名是TestSE下的，名字为test_get_new_message的测试用例 
 pytest test_se.py::TestSE::test_get_new_message
-```
-- 以上选择测试用例的方法均是在**命令行**，如果您想直接在测试程序里执行可以直接在main函数中**调用pytest.main()**,其格式为：
-```
+
+# 以上选择测试用例的方法均是在**命令行**，如果您想直接在测试程序里执行可以直接在main函数中**调用pytest.main()**,其格式为：
 pytest.main([模块.py::类::方法])
 ```
 
-此外，Pytest 还支持控制测试用例执行的多种方式，例如过滤执行、多进程运行、重试运行等。
+> 此外，Pytest 还支持控制测试用例执行的多种方式，例如过滤执行、多进程运行、重试运行等。
 
 
 ## 4. 使用Pytest编写验证
-- 在测试过程中，我们使用之前验证过的加法器，进入Adder文件夹，删除之前生成的文件夹，执行如下命令：
-```bash
-picker Adder.v -w Adder.fst -S Adder -t picker_out_adder -l python -c --sim verilator
-```
-
-- 该命令的含义是：
-
-1. 将Adder.v作为 Top 文件，并将Adder作为 Top Module，利用verilator仿真器将其编译为Python Class
-3. 输出覆盖测试率(-c)
-4. 最终的文件输出路径是 picker_out_adder
-
-- make编译之后Adder目录结构如下：
-
-```bash hl: title:
-├── Adder.v 
-└── picker_out_adder
-    └── UT_Adder
-        ├── Adder.fst.hier
-        ├── __init__.py 
-        ├── libDPIAdder.a
-        ├── libUT_Adder.py  //picker导出的封装
-        ├── libUTAdder.so
-        ├── _UT_Adder.so
-        └── xspcomm // xscomm库的python版本(picker生成)
-            ├── info.py
-            ├── __init__.py
-            ├── __pycache__
-            │   ├── __init__.cpython-310.pyc
-            │   └── pyxspcomm.cpython-310.pyc
-            ├── pyxspcomm.py    
-            ├── _pyxspcomm.so -> _pyxspcomm.so.0.0.1
-            └── _pyxspcomm.so.0.0.1
-```
-
-- 此时在picker_out_adder目录下新建一个test_adder.py文件，内容如下：
+- 在测试过程中，我们使用之前验证过的加法器，进入Adder文件夹，在picker_out_adder目录下新建一个test_adder.py文件，内容如下：
 ```python 
 # 导入测试模块和所需的库
 from UT_Adder import *
