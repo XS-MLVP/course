@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
 使用 GTKWave 打开 `fst` 或 `vcd` 波形文件，即可查看波形图。
 
-![GTKWave](gtkwave.jpg)
+![GTKWave](GTKwave.png)
 
 ### Verdi
 

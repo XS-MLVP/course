@@ -73,7 +73,7 @@ coverage:
     ...
 ```
 
-其会根据生成的.dat文件生成coverage.info，再使用`genhtml`再coverage目录下生成html报告。
+在shell中输入`make coverage`,其会根据生成的.dat文件生成coverage.info，再使用`genhtml`再coverage目录下生成html报告。
 
 
 ## VCS

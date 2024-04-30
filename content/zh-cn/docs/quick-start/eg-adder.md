@@ -8,13 +8,13 @@ weight: 3
 ---
 
 ## RTL源码
-在本案例中，我们驱动一个 256 位的加法器，其源码如下：
+在本案例中，我们驱动一个 64 位的加法器，其源码如下：
 
 ```verilog
-// A verilog 256-bit full adder with carry in and carry out
+// A verilog 64-bit full adder with carry in and carry out
 
 module Adder #(
-    parameter WIDTH = 256
+    parameter WIDTH = 64
 ) (
     input [WIDTH-1:0] a,
     input [WIDTH-1:0] b,
@@ -27,7 +27,7 @@ assign {cout, sum}  = a + b + cin;
 
 endmodule
 ```
-该加法器包含一个 256 位的加法器，其输入为两个 256 位的数和一个进位信号，输出为一个 256 位的和和一个进位信号。
+该加法器包含一个 64 位的加法器，其输入为两个 64 位的数和一个进位信号，输出为一个 64 位的和和一个进位信号。
 
 ## 测试过程
 在测试过程中，我们将创建一个名为 Adder 的文件夹，其中包含一个 Adder.v 文件。该文件内容即为上述的 RTL 源码。
@@ -136,7 +136,7 @@ class output_t:
         self.cout = 0
 
 def random_int(): # 需要将数据以无符号数的形式传入dut
-    return random.randint(-(2**255), 2**255 - 1) & ((1 << 255) - 1)
+    return random.randint(-(2**63), 2**63 - 1) & ((1 << 63) - 1)
 
 def as_uint(x, nbits): # 将数据转换为无符号数
     return x & ((1 << nbits) - 1)
@@ -159,7 +159,7 @@ def main():
             o_dut.cout = dut.cout.value
 
         def ref_cal():
-            sum = as_uint( i.a + i.b, 256 )
+            sum = as_uint( i.a + i.b, 64 )
             carry = sum < i.a
             sum += i.cin
             carry = carry or sum < i.cin
@@ -172,13 +172,13 @@ def main():
         print(f"DUT: sum=0x{o_dut.sum:x}, cout=0x{o_dut.cout:x}")
         print(f"REF: sum=0x{o_ref.sum:x}, cout=0x{o_ref.cout:x}")
 
-        assert o_dut.sum == o_ref.sum, "sum mismatch"
-
+    assert o_dut.sum == o_ref.sum, "sum mismatch"
     dut.finalize() # 必须显式调用finalize方法，否则会导致内存泄漏，并无法生成波形和覆盖率
     print("Test Passed, destroy UTAdder")
 
 if __name__ == "__main__":
     main()
+
 ```
 
 ### 运行测试
@@ -187,11 +187,11 @@ if __name__ == "__main__":
 
 ```
 [...]
-[cycle 114513] a=0x6b57b425d7b07128bac8b8ba5ec5e4fe8b14cd20a496657902741622f2e91799, b=0x3046e344d56a4e799e8f2235f0200d356d438cf619aa93a3964b850fc1c22109, cin=0x0
-DUT: sum=0x9b9e976aad1abfa25957daf04ee5f233f8585a16be40f91c98bf9b32b4ab38a2, cout=0x0
-REF: sum=0x9b9e976aad1abfa25957daf04ee5f233f8585a16be40f91c98bf9b32b4ab38a2, cout=0x0
-[cycle 114514] a=0x52c53bd3f8a23b0a9513d551aa0f7e93484c04c3649c594fb0d72700cb62e3ef, b=0x300b8c30293bb564592b18e811846d8237ea9e6fdb3f515d373208c99ff5617c, cin=0x0
-DUT: sum=0x82d0c80421ddf06eee3eee39bb93ec158036a3333fdbaaace8092fca6b58456b, cout=0x0
-REF: sum=0x82d0c80421ddf06eee3eee39bb93ec158036a3333fdbaaace8092fca6b58456b, cout=0x0
+[cycle 114513] a=0x6defb0918b94495d, b=0x72348b453ae6a7a8, cin=0x0 
+DUT: sum=0xe0243bd6c67af105, cout=0x0
+REF: sum=0xe0243bd6c67af105, cout=0x0
+[cycle 114514] a=0x767fa8cbfd6bbfdc, b=0x4486aa3a9b29719a, cin=0x1 
+DUT: sum=0xbb06530698953177, cout=0x0
+REF: sum=0xbb06530698953177, cout=0x0
 Test Passed, destroy UTAdder
 ```

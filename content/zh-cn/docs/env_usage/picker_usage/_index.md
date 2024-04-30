@@ -23,7 +23,7 @@ weight: 1
 `verilator`、`synopsys vcs`
 
 **Picker的工作原理**  
-`Picker`的主要功能就是将`Verilog`代码转换为C++或者Python代码，以Chisel开发的处理器为例:先通过Chisel自带的工具将其转换为Verilog代码，再通Picker自动提供高级编程语言接口。
+`Picker`的主要功能就是将`Verilog`代码转换为C++或者Python代码，以Chisel开发的处理器为例:先通过Chisel自带的工具将其转换为Verilog代码，再通Picker提供高级编程语言接口。
 
 ![Picker的工作原理](Picker_working_principle.svg)
 
