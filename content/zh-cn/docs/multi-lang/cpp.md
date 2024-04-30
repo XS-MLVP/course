@@ -125,3 +125,38 @@ int main()
     return 0;
 }
 ```
+
+### 生成波形
+
+在C++中，dut 的析构函数会自动调用 `dut.finalize()`，因此只需要在测试结束后 `delete dut` 即可进行后处理工作（写入波形、覆盖率等文件）。
+
+```cpp
+#include "UT_Adder.hpp"
+
+int main()
+{
+    UTAdder *dut = new UTAdder("libDPIAdder.so");
+    printf("Initialized UTAdder\n");
+
+    for (int c = 0; c < 114514; c++) {
+    
+        auto dut_cal = [&]() {
+            dut->a   = c * 2;
+            dut->b   = c / 2;
+            dut->cin = i.cin;
+            dut->xclk.Step(1);
+            o_dut.sum  = (uint64_t)dut->sum;
+            o_dut.cout = (uint64_t)dut->cout;
+        };
+
+        dut_cal();
+        printf("[cycle %llu] a=0x%lx, b=0x%lx, cin=0x%lx\n", dut->xclk.clk, i.a,
+            i.b, i.cin);
+        printf("DUT: sum=0x%lx, cout=0x%lx\n", o_dut.sum, o_dut.cout);
+    }
+
+    delete dut; // automatically call dut.finalize() in ~UTAdder()
+    printf("Simulation finished\n");
+    return 0;
+}
+```
