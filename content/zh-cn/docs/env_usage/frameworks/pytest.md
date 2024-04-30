@@ -6,7 +6,7 @@ tags: [examples, docs]
 weight: 51
 ---
 
-## 1. 软件测试
+## 软件测试
 >在正式开始pytest 之间我们先了解一下软件的测试，软件测试一般分为如下四个方面
 >- 单元测试：称模块测试，针对软件设计中的最小单位——程序模块，进行正确性检查的测试工作
 >- 集成测试：称组装测试，通常在单元测试的基础上，将所有程序模块进行有序的、递增测试，重点测试不同模块的接口部分
@@ -27,7 +27,7 @@ pytest最初是作为一个单元测试框架而设计的，但它也提供了�
 - **支持 Allure 报告框架**。
 
 本文将基于测试需求简单介绍pytest的用法，其[完整手册](https://learning-pytest.readthedocs.io/zh/latest/)在这里，供同学们进行深入学习。
-## 2. Pytest安装
+## Pytest安装
 
 ```bash hl: title:
 # 安装pytest：
@@ -48,9 +48,9 @@ pip install pytest-assume
 pip install pytest-html
 ```
 
-## 3. Pytest使用
+## Pytest使用
 
-### 3.1. 命名规则
+### 命名规则
 ```python
 # 首先在使用pytest 时我们的模块名通常是以test开头或者test结尾，也可以修改配置文件，自定义命名规则
 # test_*.py 或 *_test.py
@@ -73,7 +73,7 @@ class test_one:
     def test_demo2(self):
         print("测试用例2")
 ```
-### 3.2. Pytest 参数
+### Pytest 参数
 pytest支持很多参数，可以通过help命令查看
 ```bash hl :title
 pytest -help
@@ -99,7 +99,7 @@ pytest test_se.py -s
 ```
 
 
-### 3.3. Pytest 选择测试用例执行
+### Pytest 选择测试用例执行
 
 **在 Pytest 中，您可以按照测试文件夹、测试文件、测试类和测试方法的不同维度来选择执行测试用例。**
 
@@ -131,7 +131,7 @@ pytest.main([模块.py::类::方法])
 > 此外，Pytest 还支持控制测试用例执行的多种方式，例如过滤执行、多进程运行、重试运行等。
 
 
-## 4. 使用Pytest编写验证
+## 使用Pytest编写验证
 - 在测试过程中，我们使用之前验证过的加法器，进入Adder文件夹，在picker_out_adder目录下新建一个test_adder.py文件，内容如下：
 ```python 
 # 导入测试模块和所需的库
