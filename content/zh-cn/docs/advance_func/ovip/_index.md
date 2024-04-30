@@ -5,17 +5,7 @@ categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 4
 ---
-> 相关的VIP库目前正在开发中，当前已有[openVIP](https://gitee.com/XS-MLVP/open-vip)库，可以提供AIX4-light、TileLink-Master、SimpleBus-Slave、SimpleBus-RAM等功能。
-> Open-source chip Verification IPs (OVIP) 是一组 C++ 实现的验证 IP库，并提供其他语言（Python，Java等）编程接口。
-
-OVIP库计划包含以下内容：
-- 总线：AXI、TileLink、APB、SPI、IIC、SimpleBus、JTag、
-- 外设：UART、RAM、VGA、Flash、DMA、Disk、SSD
-- 参考模型：spike，nemu
-- 监控：通用监控模块，总线、外设
-- 转换：TBD
-
-## 1. 概述 
+## 概述 
 > **验证环境并不是全部由verifier编写的，可以用到很多已经编写好的，复用程度高的验证模板，例如某些agent，而这些模板就是VIP。**
 >VIP（Verfication IP）代码确认与验证技术，是预先验证过的内建验证结构，提供了完整的、灵活的应用机制，可以方便地插入到基于仿真的确认测试中，可以大大提高验证可重用性和验证效率。
 
@@ -24,7 +14,7 @@ VIP 提供一套全面测试环境，帮助设计者和验证者确认其设计�
 大型项目中，涉及到众多协议和标准，所以会涉及到很多VIP，还涉及C++等跨平台联合仿真
 
 
-### 1.1. 使用场景
+### 使用场景
 
 **● 验证设计IP**
 就是IC设计者会通过购买稳定VIP来对自己的设计进行验证。
@@ -37,7 +27,7 @@ VIP 提供一套全面测试环境，帮助设计者和验证者确认其设计�
 **● 子系统、SoC系统开发者**
 设计的IP向上层集成时，也涉及到VIP的使用和集成，例如使用什么样的sequence进行定向测试
 
-### 1.2. VIP  的优势和特点
+### VIP  的优势和特点
 
 **● 不断更新的标准**
 什么PCIe、DDR、USB、AMBA等各种协议呀，经常不断更新。
@@ -52,10 +42,13 @@ VIP 提供一套全面测试环境，帮助设计者和验证者确认其设计�
 
 **● 提供各种详细的错误报告*
 
-### 1.3. VIP 的集成
+### VIP 的集成
 - **模块级**： module级别的验证其实就是之前一直讲的验证框架，只不过将验证框架的内容替换成VIP
 
 - **子系统级**： 对于多个module集成之后的子系统而言，可将VIP嵌入系统中，替换子系统中的某些控制module或响应module，进行含有driver、sequencer的UVM_ACTIVE测试。如果驱动测试没问题，就可以接上真正的硬件模块了，然后**将VIP中相应的agent设定为UVM_PASSIVE**，只保留monitor监测就好。
 
 - **芯片级**： 系统级别，集成程度更高，就会涉及到系统级别的VIP，系统中某些Process、Memory等硬件，并不是真的硬件而是VIP提供的
 这是一种虚拟的处理器，可通过SystemC、SystemVerilog实现这样的核，这是为了加快仿真速度
+
+> [openVIP](https://gitee.com/XS-MLVP/open-vip) 是picker提供的一组 C++ 实现的验证IP库，并提供其他语言（Python，Java等）编程接口。
+> 当前该库还在开发中，只提供了一些简单的接口。
