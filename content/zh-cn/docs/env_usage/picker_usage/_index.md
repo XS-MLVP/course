@@ -224,9 +224,15 @@ clk.StepRis(lambda c, x, y: print("lambda ris: ", c, x, y), (1, 2))
 clk.StepFal(lambda c, x, y: print("lambda fal: ", c, x, y), (3, 4))
 ```
 
-虽然通过上升沿或下降沿的回调可以有效地进行验证，但正如之前所述，如果代码中的回调函数太多，会使得代码变得复杂且难以阅读。因此，我们还提供了异步方法来进行验证，这样可以简化代码结构，提高可读性。
+虽然通过上升沿或下降沿的回调可以有效地进行验证，但正如之前所述，传统的回调模式，尤其是在嵌套多层时，会导致代码难以阅读和维护，这通常被称为“回调地狱”（Callback Hell）。因此，我们还提供了异步方法来进行验证，这样可以简化代码结构，提高可读性。
 
 ### Async & Event
+
+在Python中，异步编程通过asyncio库和async/await语法取代了传统的回调模式。这种方法提供了一种更加直观和简洁的方式来处理异步操作，尤其是在涉及到多个需要按顺序执行的异步操作时。  
+
+asyncio库引入了协程（coroutines），它们是一种通过生成器实现的轻量级线程。协程允许单个Python线程中的并发执行，而不需要多线程或多进程，从而避免了线程切换的开销和进程间通信的复杂性。如果您想更深入的学习asyncio库，可以去参考[asyncio库的官方文档](https://docs.python.org/zh-cn/3/library/asyncio.html)。
+
+使用async/await语法，可以将异步代码写得像同步代码一样直观。你可以用async定义一个函数为协程，然后在函数内部用await挂起等待一个异步操作的完成。这样，当一个协程等待时，事件循环可以继续执行其他协程，直到当前协程可以继续执行。下面我们来简单介绍一下如何使用异步编程来进行验证。
 
 **时钟事件 (Event)**
 
@@ -250,9 +256,13 @@ asyncio.create_task(dut.xclock.RunStep(10))
 
 ```python
 async def other_task():
-	for _ in range(10):
-		await dut.xclock.AStep(1)
-		print(f"Clock has been ticked")
+    # 循环10次
+    for _ in range(10):
+        # 等待时钟的一个步进
+        await dut.xclock.AStep(1)
+        # 每次步进后打印消息
+        print(f"Clock has been ticked")
+
 ```
 
 `dut.xclock.AStep` 中封装了对时钟事件的等待，当时钟事件被触发时，程序才会继续向下执行。我们也可以直接使用 `await dut.event.wait()` 来等待直接时钟事件的触发。通过这种异步的方式，我们便可以同时创建多个任务，每个任务中都可以等待时钟事件的触发，从而实现多任务的并发执行。
@@ -264,19 +274,29 @@ async def other_task():
 ```python
 import asyncio
 
+# 创建设备实例
 dut = UT_mydut()
+# 初始化设备时钟
 dut.init_clock("clk")
 
+# 定义一个异步函数来模拟其他任务
 async def other_task():
 	for _ in range(10):
+		# 等待时钟步进
 		await dut.xclock.AStep(1)
+		# 打印时钟已经步进的消息
 		print(f"Clock has been ticked")
 
+# 定义一个异步测试函数
 async def my_test():
+	# 创建并启动一个时钟任务
 	clock_task = asyncio.create_task(dut.xclock.RunStep(10))
+	# 创建并启动其他任务
 	asyncio.create_task(other_task())
 
+	# 等待时钟任务完成
 	await clock_task
+
 
 asyncio.run(my_test())
 ```
