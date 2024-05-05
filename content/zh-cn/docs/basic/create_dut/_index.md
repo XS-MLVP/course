@@ -14,7 +14,7 @@ weight: 3
 
 传统的硬件描述语言包括Verilog、System Verilog、VHDL等。同时，作为新兴的RTL设计语言，Chisel（[https://www.chisel-lang.org/](https://www.chisel-lang.org/)）也以其面向对象的特征和便捷性，逐渐在RTL设计中扮演越来越重要的角色。
 
-以[加法器DUT的创建]("/zh-cn/docs/quick-start/")为例，进行解释。
+以**简单加法器**为例，进行解释。
 
 ## Chisel
 准确来说，Chisel是基于Scala语言的高级硬件构造（HCL）语言。传统HDL是描述电路，而HCL则是生成电路，更加抽象和高级。同时Chisel中提供的Stage包则可以将HCL设计转化成Verilog、System Verilog等传统的HDL语言设计。配合上Mill、Sbt等Scala工具则可以实现自动化的开发。
