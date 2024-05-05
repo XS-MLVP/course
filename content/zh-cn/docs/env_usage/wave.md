@@ -56,4 +56,4 @@ if __name__ == "__main__":
 
 使用 Verdi 打开 `fsdb` 或 `vcd` 波形文件，即可查看波形图。
 
-![Verdi](verdi.jpg)
+![Verdi](verdiwave.jpg)
