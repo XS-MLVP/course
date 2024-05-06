@@ -29,16 +29,126 @@ weight: 5
 ### 6. 评估测试结果
 最后您需要评估得到的结果，如是否存在错误的设计、某功能是否无法被触发、设计文档表述是否与DUT行为一致、设计文档是否表述清晰等。
 
-
+---
 接下来我们以**果壳Cache的MMIO读写为例**，介绍一般验证流程：
 
-1. 确定验证对象，目标
-1. 构建基本验证环境
-1. 列出功能点、测试点
-1. 编写测试用例
-1. 编码实现&执行测试
-1. 收集测试结果并进行分析
+**1 确定验证对象和目标**：  
+果壳Cache的MMIO读写功能。MMIO是一类特殊的IO映射，其支持通过访问内存地址的方式访问IO设备寄存器。由于IO设备的寄存器状态是随时可能改变的，因此不适合将其缓存在cache中。当收到MMIO请求时，果壳cache不会在普通的cache行中查询命中/缺失情况，而是会直接访问MMIO的内存区域来读取或者写入数据。
 
+**2 构建基本验证环境**：  
+我们可以将验证环境大致分为五个部分：
+![env](env.png)
+> **1. Testcase Driver**：负责由用例产生相应的信号驱动  
+> **2. Monitor**：监听信号，判断功能是否被覆盖以及功能是否正确  
+> **3. Ref Cache**：一个简单的参考模型  
+> **4. Memory/MMIO Ram**：外围设备的模拟，用于模拟相应cache的请求  
+> **5. Nutshell Cache Dut**：由Picker生成的DUT  
+
+此外，您可能还需要对DUT的接口做进一步封装以实现更方便的读写请求操作，具体可以参考[Nutshll cachewrapper](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/blob/master/UT_Cache/util/cachewrapper.py)。
+
+**3 功能点与测试点分解**：  
+果壳cache可以响应MMIO请求，进一步分解可以得到一下测试点：  
+> **测试点1**：MMIO请求会被转发到MMIO端口上  
+> **测试点2**：cache响应MMIO请求时，不会发出突发传输（Burst Transfer）的请求  
+> **测试点3**：cache响应MMIO请求时，会阻塞流水线
+
+
+**4 构造测试用例**：
+测试用例的构造是简单的，已知通过[创建DUT](/zh-cn/docs/basic/create_dut)得到的Nutshell cache的MMIO地址范围是`0x30000000`~`0x7fffffff`，则我们只需访问这段内存区间，应当就能获得MMIO的预期结果。需要注意的是，为了触发阻塞流水线的测试点，您可能需要连续地发起请求。  
+以下是一个简单的测试用例：  
+```python
+# import CacheWrapper here
+
+def mmio_test(cache: CacheWrapper):
+	mmio_lb	= 0x30000000
+	mmio_rb	= 0x30001000
+	
+	print("\n[MMIO Test]: Start MMIO Serial Test")
+	for addr in range(mmio_lb, mmio_rb, 16):
+		addr &= ~(0xf)
+		addr1 = addr
+		addr2 = addr + 4
+		addr3 = addr + 8
+
+		cache.trigger_read_req(addr1)
+		cache.trigger_read_req(addr2)
+		cache.trigger_read_req(addr3)
+
+		cache.recv()
+		cache.recv()
+		cache.recv()
+		
+	print("[MMIO Test]: Finish MMIO Serial Test")
+```  
+
+**5 收集测试结果**：  
+```python
+'''
+    In tb_cache.py
+'''
+
+# import packages here
+
+class TestCache():
+    def setup_class(self):
+        color.print_blue("\nCache Test Start")
+
+        self.dut = DUTCache("libDPICache.so")
+        self.dut.init_clock("clock")
+
+        # Init here
+        # ...
+
+        self.testlist = ["mmio_serial"]
+    
+    def teardown_class(self):
+        self.dut.finalize()
+        color.print_blue("\nCache Test End")
+
+    def __reset(self):
+        # Reset cache and devices
+            
+    # MMIO Test
+    def test_mmio(self):
+        if ("mmio_serial" in self.testlist):
+            # Run test
+            from ..test.test_mmio import mmio_test
+            mmio_test(self.cache, self.ref_cache)
+        else:
+            print("\nmmio test is not included")
+
+    def run(self):
+        self.setup_class()
+        
+        # test
+        self.test_mmio()
+
+        self.teardown_class()
+    pass
+
+if __name__ == "__main__":
+	tb = TestCache()
+	tb.run()
+
+```
+运行：
+```bash
+    python3 tb_cache.py
+```
+以上仅为大致的运行流程，具体可以参考：[Nutshell Cache Verify](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache)。
+
+
+**6 评估运行结果**  
+运行结束之后可以得到以下数据：  
+行覆盖率：
+![line_cov](line_cov.png)
+
+功能覆盖率：
+![func_cov](func_cov.png)
+
+可以看到预设的MMIO功能均被覆盖且被正确触发。
 .....
 
 (嘉怡、俊宇、泽辰)
+
+(**TBD**：将cache验证移植到MLVP平台)
