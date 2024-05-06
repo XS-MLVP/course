@@ -7,7 +7,7 @@ weight: 3
 ---
 
 {{% pageinfo %}}
-以果壳cache为例，介绍如何创建基于chisel的DUT
+以果壳cache为例，介绍如何创建基于Chisel的DUT
 {{% /pageinfo %}}
 
 在本文档中，DUT（Design Under Test）是指在芯片验证过程中，被验证的对象电路或系统。DUT是验证的主体，在基于picker工具创建DUT时，需要考虑被测对象的功能、性能要求和验证目标，例如是需要更快的执行速度，还是需要更详细的测试信息。通常情况下DUT，即RTL编写的源码，与外围环境一起构成验证环境（test_env），然后基于该验证环境编写测试用例。在本项目中，DUT是需要测试的Python模块，需要通过RTL进行转换。传统的RTL语言包括Verilog、System Verilog、VHDL等，然而作为新兴的RTL设计语言，Chisel（[https://www.chisel-lang.org/](https://www.chisel-lang.org/)）也以其面向对象的特征和便捷性，逐渐在RTL设计中扮演越来越重要的角色。本章以[果壳处理器-NutShell](https://github.com/OSCPU/NutShell)中的cache源代码到Python模块的转换为例进行介绍如何创建DUT。
@@ -21,11 +21,13 @@ weight: 3
 
 ## 果壳 cache
 
-TBD
+果壳cache（Nutshell Cache）是果壳处理器中使用的缓存模块。其采用三级流水设计，当第三级流水检出当前请求为MMIO或者发生重填（refill）时，会阻塞流水线。同时，果壳cache采用可定制的模块化设计，通过改变参数可以生成存储空间大小不同的一级cache（L1 Cache）或者二级cache（L2 Cache）。此外，果壳cache留有一致性（coherence）接口，可以处理一致性相关的请求。
+
+![nt_cache](nt_cache.png)
 
 ## Chisel 转 Verilog
 
-把基于Chisel实现的Cache代码，转换成对应的Verilog电路描述。
+Chisel中的`stage`库可以帮助由Chisel代码生成Verilog、System Verilog等传统的HDL代码。以下将简单介绍如何由基于Chisel的cache实现转换成对应的Verilog电路描述。
 
 ### 初始化果壳环境
 首先从源仓库下载整个果壳源代码，并进行初始化：
@@ -94,7 +96,7 @@ object CacheMain extends App {
 
 ```bash
 mkdir build
-mill --no-server -d ut.runMain ut_nutshell.CacheMain -td build --output-file Cache
+mill --no-server -d ut.runMain ut_nutshell.CacheMain --target-dir build --output-file Cache
 ```
 
 注：mill环境的配置请参考 [https://mill-build.com/mill/Intro_to_Mill.html](https://mill-build.com/mill/Intro_to_Mill.html)
