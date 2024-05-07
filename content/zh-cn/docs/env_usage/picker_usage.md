@@ -64,7 +64,38 @@ Picker 导出 Python Module 的方式是基于 C++ 的。
     |   `-- libUT_Adder.py
     `-- example.py              # 用户需要编写的代码
 ```
-用户使用 Python 编写测试用例，即导入上述生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
+- 用户使用 Python 编写测试用例，即导入上述生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。下面我们简单的介绍一下DUT的方法和属性。
+
+```python
+# 初始化DUT,DUT()有两个参数:
+# DUT(waveform_filename="report/uftb_with_ftq.fst", coverage_filename="report/uftb_with_ftq_coverage.dat")
+# 缺省的时候为使用Picker生成Python类的时候指定的名称，如果命令里面没有指定则参数则不会生成测试报告和波形
+dut = DUT()
+
+# 访问信号，假如引脚的名称为a
+dut.a.value = 1                 # 等价于dut.xdata.a.value
+
+# 绑定clk到模拟器的时钟
+dut.init_clock("clk")           # 等价于self.xclock.Add(“clk”)
+
+# 时钟推进
+dut.Step(n)                     # 等价于dut.xclock.Step(n)
+
+# 添加上升沿回调，参数为回调函数     # 等价于dut.xclock.StepRis(...)
+dut.StepRis(lambda c, x, y: print("lambda ris: ", c, x, y), (1, 2))
+# 添加下降沿回调，参数为回调函数     # 等价于dut.xclock.StepFal(...)
+dut.StepFal(lambda c, x, y: print("lambda fal: ", c, x, y), (3, 4))
+
+# 异步方法，对时钟事件的等待，当时钟事件被触发时，程序才会继续向下执行。
+dut.astep(n)                    # 等价于 await self.xclock.AStep(n)
+
+# 异步方法，每次时钟事件触发时检查条件是否满足，如果满足才继续向下执行。
+dut.acondition(lambda: dut.signal_1.value == 1) # 等价于 await dut.xclock.ACondition(lambda: dut.signal_1.value == 1)
+
+# 异步方法，时钟事件，每驱动一次时钟，都会对时钟事件进行一次触发，其他协程可以通过监听时钟事件来得知时钟被驱动了。
+dut.runstep(n)                  # 等价于 dut..xclock.RunStep(n)
+```
+- DUT类是电路封装完成后创建的一个可直接使用的类。要使用DUT类，首先需要初始化。对于时序电路，还需要把时钟信号与模拟时钟相连。这让我们可以通过调用Step方法来控制电路，而信号的访问则可以通过信号.value来实现，下面我们将以前一章验证过的加法器为例，来详细说明如何使用生成的DUT类。
 
 ```python
 from UT_Adder import *          # 从python软件包里导入模块
@@ -87,7 +118,7 @@ if __name__ == "__main__":
     # 清空对象，并完成覆盖率和波形文件的输出工作（写入到文件）
     dut.finalize()              
 ```
-- DUT类是电路封装完成后创建的一个可直接使用的类。要使用DUT类，首先需要初始化。对于时序电路，还需要把时钟信号与模拟时钟相连。这让我们可以通过调用Step方法来控制电路，而信号的访问则可以通过信号.value来实现。DUT类内部封装了三种主要的数据类型：XData、XPort和XClock，它们分别对应电路中的不同信号类型。利用这些数据类型，我们可以接触和操作电路中的多种信号，从而进行仿真测试。在接下来的内容中，我们会详细介绍这些数据类型的定义、来源以及它们在实际中的应用方法。
+- 我们可以直接通过DUT访问某些方法，但大多数方法被封装在DUT类的三个主要数据类型：XData、XPort和XClock中。这些类型分别代表电路中的不同类型的信号。通过这些数据类型，我们能够接触和操纵电路中的各种信号，以便进行仿真测试。在后续的内容中，我们将深入探讨这些数据类型的定义、来源，以及它们在实际仿真中的使用方式。
 ### XDATA
 - 通常，电路有四种状态：0、1、Z和X。我们定义一种名为XData的数据类型，将其与电路的引脚绑定，并通过DPI读写电路的IO接口。这样，我们就能够使用软件来激励电路。 
 
