@@ -15,7 +15,6 @@ weight: 20
 
 相关学习材料：
 
-1. <a href="https://ysyx.oscc.cc/docs/2306/prestudy/0.2.html" target="_blank">一生一芯的Linux基础</a>
 1. <a href="https://101.ustclug.org/" target="_blank">《Linux 101》在线讲义</a>
 1. <a href="https://docs.python.org/3/tutorial/index.html" target="_blank">Python官方教程</a>
 1. <a href="https://www.javatpoint.com/git" target="_blank">Javatpoint上的Git基础</a>
