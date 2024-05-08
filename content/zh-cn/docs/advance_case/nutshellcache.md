@@ -8,7 +8,7 @@ weight: 1
 
 ## 验证报告
 
-TBD
+<https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/blob/master/report/nutshell_cache_report_demo.pdf>
 
 ## 验证环境&用例代码
 
