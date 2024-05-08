@@ -24,7 +24,7 @@ weight: 6
 >1. 测试结论
 
 
-以下内容对列表进行进一步解释，具体示例可以参考（link to cache_report.pdf，TBD）
+以下内容对列表进行进一步解释，具体示例可以参考[nutshell_cache_report_demo.pdf](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/blob/master/report/nutshell_cache_report_demo.pdf)
 
 ------------------------------------------------------
 
