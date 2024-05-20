@@ -91,7 +91,7 @@ picker_out_rmg
 from UT_RandomGenerator import *
 import random
 
-class LSRF_16:
+class LFSR_16:
     def __init__(self, seed):
         self.state = seed & ((1 << 16) - 1)
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     seed = random.randint(0, 2**16 - 1)
 
     dut.seed.value = seed
-    ref = LSRF_16(seed)
+    ref = LFSR_16(seed)
 
     # reset
     dut.reset.value = 1

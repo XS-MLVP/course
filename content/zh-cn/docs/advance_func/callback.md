@@ -93,7 +93,7 @@ if __name__ == "__main__":
 `TestRandomGenerator`是对随机数生成器进行测试的类，在它的属性和方法中：
 
 + `self.dut`是用于测试的实例化`DUTRandomGenerator`对象。
-+ `self.ref`是用于验证结果的实例化`LSRF_16`对象。
++ `self.ref`是用于验证结果的实例化`LFSR_16`对象。
 + `callback1(self, clk)`会对随机数生成器进行验证，在时钟上升沿触发。
 + `callback2(self, clk)`会统计生成随机数的分布，也在时钟上升沿触发。
 + `test_rg(self, callback3)`方法会执行整个测试流程，最后执行`callback3`函数。
@@ -148,7 +148,7 @@ def median_distribution_stats(gt, le, mid) -> None:
     print(f"There are {gt} numbers > {mid} and {le} numbers <= {mid}")
 
 # 16位线性移位寄存器模拟类
-class LSRF_16:
+class LFSR_16:
     def __init__(self, seed):
         self.state = seed & ((1 << 16) - 1)
 
@@ -163,7 +163,7 @@ class TestRandomGenerator:
         self.SEED = random.randint(0, 2**16 - 1)
         self.greater = 0
         self.less_equal = 0
-        self.ref = LSRF_16(self.SEED)
+        self.ref = LFSR_16(self.SEED)
         self.dut = DUTRandomGenerator()
 
     def test_rg(self, callback3) -> None:
