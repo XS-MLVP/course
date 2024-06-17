@@ -36,8 +36,8 @@ weight: 5
 果壳Cache的MMIO读写功能。MMIO是一类特殊的IO映射，其支持通过访问内存地址的方式访问IO设备寄存器。由于IO设备的寄存器状态是随时可能改变的，因此不适合将其缓存在cache中。当收到MMIO请求时，果壳cache不会在普通的cache行中查询命中/缺失情况，而是会直接访问MMIO的内存区域来读取或者写入数据。
 
 **2 构建基本验证环境**：  
-我们可以将验证环境大致分为五个部分：
-![env](env.png)
+我们可以将验证环境大致分为五个部分：  
+<img src="env.png" alt="env" width="800" height="600">
 > **1. Testcase Driver**：负责由用例产生相应的信号驱动  
 > **2. Monitor**：监听信号，判断功能是否被覆盖以及功能是否正确  
 > **3. Ref Cache**：一个简单的参考模型  
@@ -140,11 +140,10 @@ if __name__ == "__main__":
 
 **6 评估运行结果**  
 运行结束之后可以得到以下数据：  
-行覆盖率：
-![line_cov](line_cov.png)
+行覆盖率：  
+<img src="line_cov.png" alt="line_cov" width="800" height="600">
 
-功能覆盖率：
-![func_cov](func_cov.png)
+功能覆盖率：  
+<img src="func_cov.png" alt="func_cov" width="400" height="300">
 
 可以看到预设的MMIO功能均被覆盖且被正确触发。
-.....
