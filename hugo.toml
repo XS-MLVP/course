@@ -61,12 +61,12 @@ languageName ="中文"
 weight = 100
 title = "开放验证平台学习资源"
 
-#[languages.en]
-#languageName ="English"
-#weight = 2
-#title = "OpenVerify Courses"
-#description = "Quickly join the open verification platform trial"
-#contentDir = "content/en"
+[languages.en]
+languageName ="English"
+weight = 2
+title = "OpenVerify Courses"
+description = "Quickly join the open verification platform trial"
+contentDir = "content/en"
 
 [markup]
   [markup.goldmark]

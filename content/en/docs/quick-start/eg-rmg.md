@@ -1,5 +1,5 @@
 ---
-title: Case 2: Random Number Generator
+title: "Case 2: Random Number Generator"
 description: Demonstrating the tool usage with a 16-bit LFSR random number generator, which includes a clock signal, sequential logic, and registers.
 categories: [Example Projects, Tutorials]
 tags: [examples, docs]

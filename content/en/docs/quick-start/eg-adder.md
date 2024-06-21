@@ -1,5 +1,5 @@
 ---
-title: Case 1: Adder
+title: "Case: 1 Adder"
 date: 2017-01-05
 description: Demonstrates the principles and usage of the tool based on a simple adder verification. This adder is implemented using simple combinational logic.
 categories: [Example Projects, Tutorials]
