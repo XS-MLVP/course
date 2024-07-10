@@ -63,7 +63,7 @@ In this case, the module under test is Cache, which is in `Cache.sv`. You can ge
 #### Command Line Specification
 
 ```bash
-picker Cache.sv -f CacheStage.sv,CacheMeta.sv -S Cache
+picker export Cache.sv --fs CacheStage.sv,CacheMeta.sv --sname Cache
 ```
 
 #### Specification through a File List File
@@ -71,7 +71,7 @@ picker Cache.sv -f CacheStage.sv,CacheMeta.sv -S Cache
 You can also use a .txt file to specify multiple input files:
 
 ```bash
-picker Cache.sv -f src.txt -S Cache
+picker export Cache.sv --fs src.txt --sname Cache
 ```
 
 Where the contents of `src.txt` are:

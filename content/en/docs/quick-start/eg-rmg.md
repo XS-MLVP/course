@@ -47,7 +47,7 @@ During testing, we will create a folder named RandomGenerator containing a file 
 Navigate to the RandomGenerator folder and execute the following command:
 
 ```bash
-picker --autobuild=false RandomGenerator.v -w RandomGenerator.fst -S RandomGenerator -t picker_out_rmg -l python -e --sim verilator
+picker export --autobuild=false RandomGenerator.v -w RandomGenerator.fst --sname RandomGenerator --tdir picker_out_rmg --lang python -e --sim verilator
 ```
 
 This command performs the following actions:

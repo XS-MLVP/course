@@ -39,7 +39,7 @@ During the testing process, we will create a folder named Adder, containing an A
 Enter the Adder folder and execute the following command:
 
 ```bash
-picker --autobuild=false Adder.v -w Adder.fst -S Adder -t picker_out_adder -l python -e --sim verilator
+picker export --autobuild=false Adder.v -w Adder.fst -sname Adder -tdir picker_out_adder --lang python -e --sim verilator
 ```
 The meaning of this command is:
 

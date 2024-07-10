@@ -48,7 +48,7 @@ endmodule
 进入 RandomGenerator 文件夹，执行如下命令：
 
 ```bash
-picker --autobuild=false RandomGenerator.v -w RandomGenerator.fst -S RandomGenerator -t picker_out_rmg -l python -e --sim verilator
+picker export --autobuild=false RandomGenerator.v -w RandomGenerator.fst --sname RandomGenerator --tdir picker_out_rmg --lang python -e --sim verilator
 ```
 
 该命令的含义是：

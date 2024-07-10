@@ -63,7 +63,7 @@ endmodule
 #### 命令行指定
 
 ```bash
-picker Cache.sv -f CacheStage.sv,CacheMeta.sv -S Cache
+picker export Cache.sv --fs CacheStage.sv,CacheMeta.sv --sname Cache
 ```
 
 #### 通过文件列表文件指定
@@ -71,7 +71,7 @@ picker Cache.sv -f CacheStage.sv,CacheMeta.sv -S Cache
 您也可以通过传入.txt文件的方式来实现多文件输入：
 
 ```bash
-picker Cache.sv -f src.txt -S Cache
+picker export Cache.sv --fs src.txt --sname Cache
 ```
 
 其中`src.txt`的内容为:

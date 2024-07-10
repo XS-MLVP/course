@@ -45,7 +45,7 @@ Picker 导出 Python Module 的方式是基于 C++ 的。
 - 该这个模块和标准的 Python 模块一样，可以被其他 Python 程序导入并调用，文件结构也与普通 Python 模块无异。
 
 ## Python 模块使用
-- 参数 `--language python` 或 `-l python` 用于指定生成Python基础库。
+- 参数 `--language python` 或 `--lang python` 用于指定生成Python基础库。
 - 参数 `--example, -e` 用于生成包含示例项目的可执行文件。
 - 参数 `--verbose, -v` 用于保留生成项目时的中间文件。
 

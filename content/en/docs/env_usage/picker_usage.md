@@ -46,7 +46,7 @@ The way Picker exports Python Modules is based on C++.
 - This module is the same as a standard Python module, can be imported and called by other Python programs, and the file structure is no different from a normal Python module.
 
 ## Using Python Modules
-- The parameter `--language python` or `-l python` is used to specify the generation of the Python base library.
+- The parameter `--language python` or `--lang python` is used to specify the generation of the Python base library.
 - The parameter `--example, -e` is used to generate an executable file that includes example projects.
 - The parameter `--verbose, -v` is used to retain intermediate files generated during project generation.
 

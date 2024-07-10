@@ -39,7 +39,7 @@ endmodule
 进入 Adder 文件夹，执行如下命令：
 
 ```bash
-picker --autobuild=false Adder.v -w Adder.fst -S Adder -t picker_out_adder -l python -e --sim verilator
+picker export --autobuild=false Adder.v -w Adder.fst --sname Adder --tdir picker_out_adder --lang python -e --sim verilator
 ```
 
 该命令的含义是：
