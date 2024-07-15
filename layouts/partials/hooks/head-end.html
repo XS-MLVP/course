@@ -18,3 +18,44 @@
         gtag('config', '{{ .Site.Params.googleAnalytics }}');
     </script>
 {{ end }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function() {
+        $('a[name="multi-lang-toggle"]').on('click', function(event) {
+            var language = $(this).attr('lang');
+            var codeDiv = $(this).closest('.highlight');
+            var preNodes = codeDiv.find('pre');
+            preNodes.each(function(index, preNode) {
+                if ($(preNode).attr("name").toLowerCase().indexOf(language.toLowerCase()) !== -1) {
+                    preNode.style.display = 'block';
+                } else {
+                    preNode.style.display = 'none';
+                }
+            });
+            var alist = codeDiv.find('a[name="multi-lang-toggle"]');
+            alist.each(function(index, aNode) {
+                if ($(aNode).attr('lang').toLowerCase() === language.toLowerCase()) {
+                    aNode.style.fontWeight = 'bold';
+                } else {
+                    aNode.style.fontWeight = 'normal';
+                }
+            });
+        })
+        $(this).find('pre[name^="group-lang-code-"]').each(function(index, preNode) {
+            if (preNode.style.display !== 'none') {
+                var language = $(preNode).attr("name").replace('group-lang-code-', '');
+                var alist = $(this).closest('.highlight').find('a[name="multi-lang-toggle"]');
+                alist.each(function(index, aNode) {
+                    if ($(aNode).attr('lang').toLowerCase() === language.toLowerCase()) {
+                        aNode.style.fontWeight = 'bold';
+                    } else {
+                        aNode.style.fontWeight = 'normal';
+                    }
+                });
+            }
+        });
+    });
+</script>
+    
