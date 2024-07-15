@@ -1,5 +1,5 @@
 ---
-title: 案例一：加法器
+title: 案例一：简单加法器
 date: 2017-01-05
 description: 基于一个简单的加法器验证展示工具的原理和使用方法，这个加法器内部是简单的组合逻辑。
 categories: [示例项目, 教程]
@@ -8,7 +8,7 @@ weight: 3
 ---
 
 ## RTL源码
-在本案例中，我们驱动一个 64 位的加法器，其源码如下：
+在本案例中，我们驱动一个 64 位的加法器（组合电路），其源码如下：
 
 ```verilog
 // A verilog 64-bit full adder with carry in and carry out
@@ -32,7 +32,7 @@ endmodule
 ## 测试过程
 在测试过程中，我们将创建一个名为 Adder 的文件夹，其中包含一个 Adder.v 文件。该文件内容即为上述的 RTL 源码。
 
-### 将RTL构建为 Python Module
+### 将RTL导出为 Python Module
 
 #### 生成中间文件
 
@@ -117,81 +117,69 @@ picker_out_adder
 
 ### 配置测试代码
 
-> 注意需要替换 `example.py` 中的内容，才能保证 example 示例项目按预期运行。
+> 通过以下python测试代码替换 `example.py` 中的内容。
 
-```python
+{{< lang-group languages="python" >}}
+{{< lang lang="python" show="block" >}}
+
 from UT_Adder import *
-
 import random
 
-class input_t:
-    def __init__(self, a, b, cin):
-        self.a = a
-        self.b = b
-        self.cin = cin
-
-class output_t:
-    def __init__(self):
-        self.sum = 0
-        self.cout = 0
-
-def random_int(): # 需要将数据以无符号数的形式传入dut
+# 生成无符号随机数
+def random_int(): 
     return random.randint(-(2**63), 2**63 - 1) & ((1 << 63) - 1)
 
-def as_uint(x, nbits): # 将数据转换为无符号数
-    return x & ((1 << nbits) - 1)
+# 通过python实现的加法器参考模型
+def referce_adder(a, b, cin):
+    sum = (a + b) & ((1 << 64) - 1)
+    carry = sum < a
+    sum += cin
+    carry = carry or sum < cin
+    return sum, 1 if carry else 0
 
-def main():
-    dut = DUTAdder()  # Assuming USE_VERILATOR
-
-    print("Initialized UTAdder")
-
-    for c in range(114514):
-        i = input_t(random_int(), random_int(), random_int() & 1)
-        o_dut, o_ref = output_t(), output_t()
-
-        def dut_cal():
-            # 针对 DUT 的输入赋值，必须使用 .value
-            dut.a.value, dut.b.value, dut.cin.value = i.a, i.b, i.cin
-            # 驱动电路运行一个周期
-            dut.Step(1)
-            o_dut.sum = dut.sum.value
-            o_dut.cout = dut.cout.value
-
-        def ref_cal():
-            sum = as_uint( i.a + i.b, 64 )
-            carry = sum < i.a
-            sum += i.cin
-            carry = carry or sum < i.cin
-            o_ref.sum, o_ref.cout = sum, carry
-
-        dut_cal()
-        ref_cal()
-
-        print(f"[cycle {dut.xclock.clk}] a=0x{i.a:x}, b=0x{i.b:x}, cin=0x{i.cin:x} ")
-        print(f"DUT: sum=0x{o_dut.sum:x}, cout=0x{o_dut.cout:x}")
-        print(f"REF: sum=0x{o_ref.sum:x}, cout=0x{o_ref.cout:x}")
-
-    assert o_dut.sum == o_ref.sum, "sum mismatch"
-    dut.finalize() # 必须显式调用finalize方法，否则会导致内存泄漏，并无法生成波形和覆盖率
-    print("Test Passed, destroy UTAdder")
+def random_test():
+    # 创建DUT
+    dut = DUTAdder()
+    # 默认情况下，引脚赋值不会立马写入，而是在下一次时钟上升沿写入，这对于时序电路适用，但是Adder为组合电路，所以需要立即写入
+    #   因此需要调用AsImmWrite()方法更改引脚赋值行为
+    dut.a.AsImmWrite()
+    dut.b.AsImmWrite()
+    dut.cin.AsImmWrite()
+    # 循环测试
+    for i in range(114514):
+        a, b, cin = random_int(), random_int(), random_int() & 1
+        # DUT：对Adder电路引脚赋值，然后驱动组合电路 （对于时序电路，或者需要查看波形，可通过dut.Step()进行驱动）
+        dut.a.value, dut.b.value, dut.cin.value = a, b, cin
+        dut.RefreshComb()
+        # 参考模型：计算结果
+        ref_sum, ref_cout = referce_adder(a, b, cin)
+        # 检查结果
+        assert dut.sum.value == ref_sum, "sum mismatch: 0x{dut.sum.value:x} != 0x{ref_sum:x}"
+        assert dut.cout.value == ref_cout, "cout mismatch: 0x{dut.cout.value:x} != 0x{ref_cout:x}"
+        print(f"[test {i}] a=0x{a:x}, b=0x{b:x}, cin=0x{cin:x} => sum: 0x{ref_sum}, cout: 0x{ref_cout}")
+    # 完成测试
+    dut.Finish()
+    print("Test Passed")
 
 if __name__ == "__main__":
-    main()
+    random_test()
 
-```
+{{< /lang >}}
+{{< /lang-group >}}
+
 
 ### 运行测试
 
-在 `picker_out_adder` 目录下执行 `python example.py` 命令，即可运行测试。在测试完成后我们即可看到 example 示例项目的输出。波形文件会被保存在 `Adder.fst` 中。
+在 `picker_out_adder` 目录下执行 `python3 example.py` 命令，即可运行测试。在测试完成后我们即可看到 example 示例项目的输出。
 
 ```
 [...]
-[cycle 114513] a=0x6defb0918b94495d, b=0x72348b453ae6a7a8, cin=0x0 
-DUT: sum=0xe0243bd6c67af105, cout=0x0
-REF: sum=0xe0243bd6c67af105, cout=0x0
-[cycle 114514] a=0x767fa8cbfd6bbfdc, b=0x4486aa3a9b29719a, cin=0x1 
-DUT: sum=0xbb06530698953177, cout=0x0
-REF: sum=0xbb06530698953177, cout=0x0
-Test Passed, destroy UTAdder
+[test 114507] a=0x7adc43f36682cffe, b=0x30a718d8cf3cc3b1, cin=0x0 => sum: 0x12358823834579604399, cout: 0x0
+[test 114508] a=0x3eb778d6097e3a72, b=0x1ce6af17b4e9128, cin=0x0 => sum: 0x4649372636395916186, cout: 0x0
+[test 114509] a=0x42d6f3290b18d4e9, b=0x23e4926ef419b4aa, cin=0x1 => sum: 0x7402657300381600148, cout: 0x0
+[test 114510] a=0x505046adecabcc, b=0x6d1d4998ed457b06, cin=0x0 => sum: 0x7885127708256118482, cout: 0x0
+[test 114511] a=0x16bb10f22bd0af50, b=0x5813373e1759387, cin=0x1 => sum: 0x2034576336764682968, cout: 0x0
+[test 114512] a=0xc46c9f4aa798106, b=0x4d8f52637f0417c4, cin=0x0 => sum: 0x6473392679370463434, cout: 0x0
+[test 114513] a=0x3b5387ba95a7ac39, b=0x1a378f2d11b38412, cin=0x0 => sum: 0x6164045699187683403, cout: 0x0
+Test Passed
 ```

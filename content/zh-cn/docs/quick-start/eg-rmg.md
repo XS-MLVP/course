@@ -85,48 +85,49 @@ picker_out_rmg
 
 ### 配置测试代码
 
-> 注意需要替换 `example.py` 中的内容，才能保证 example 示例项目按预期运行。
+> 复制以下代码替换 `example.py` 中的内容。
 
 ```python
 from UT_RandomGenerator import *
 import random
 
+# 定义参考模型
 class LFSR_16:
     def __init__(self, seed):
         self.state = seed & ((1 << 16) - 1)
 
-    def step(self):
+    def Step(self):
         new_bit = (self.state >> 15) ^ (self.state >> 14) & 1
         self.state = ((self.state << 1) | new_bit ) & ((1 << 16) - 1)
 
 if __name__ == "__main__":
-    dut = DUTRandomGenerator()
-    dut.init_clock("clk")
+    dut = DUTRandomGenerator()            # 创建DUT 
+    dut.InitClock("clk")                  # 指定时钟引脚，初始化时钟
+    seed = random.randint(0, 2**16 - 1)   # 生成随机种子
+    dut.seed.value = seed                 # 设置DUT种子
+    ref = LFSR_16(seed)                   # 创建参考模型用于对比
 
-    seed = random.randint(0, 2**16 - 1)
+    # reset DUT
+    dut.reset.value = 1                   # reset 信号置1
+    dut.Step()                            # 推进一个时钟周期（DUTRandomGenerator是时序电路，需要通过Step推进）
+    dut.reset.value = 0                   # reset 信号置0
+    dut.Step()                            # 推进一个时钟周期
 
-    dut.seed.value = seed
-    ref = LFSR_16(seed)
-
-    # reset
-    dut.reset.value = 1
-    dut.Step(1) # 该步进行了初始化赋值操作
-    dut.reset.value = 0 # 设置完成后需要记得复位原信号！
-    dut.Step(1)
-
-    for i in range(65536):
-        print(f"Cycle {i}, DUT: {dut.random_number.value:x}, REF: {ref.state:x}")
-        assert dut.random_number.value == ref.state, "Mismatch"
-        dut.Step(1)
-        ref.step()
-
-    print("Test Passed, destroy UT_RandomGenerator")
-    dut.finalize()
+    for i in range(65536):                # 循环65536次
+        dut.Step()                        # dut 推进一个时钟周期，生成随机数
+        ref.Step()                        # ref 推进一个时钟周期，生成随机数
+        assert dut.random_number.value == ref.state, "Mismatch"  # 对比DUT和参考模型生成的随机数
+        print(f"Cycle {i}, DUT: {dut.random_number.value:x}, REF: {ref.state:x}") # 打印结果
+    # 完成测试
+    print("Test Passed")
+    dut.Finish()    # Finish函数会完成波形、覆盖率等文件的写入
 ```
 
 ### 运行测试程序
 
-在 `picker_out_rmg` 目录下执行 `python example.py` 即可运行测试程序。在运行完成后，若输出 `Test Passed, destroy UT_RandomGenerator`，则表示测试通过。
+在 `picker_out_rmg` 目录下执行 `python example.py` 即可运行测试程序。在运行完成后，若输出 `Test Passed`，则表示测试通过。完成运行后，会生成波形文件：RandomGenerator.fst，可在bash中通过以下命令进行查看。
+
+>gtkwave RandomGenerator.fst
 
 输出示例：
 
