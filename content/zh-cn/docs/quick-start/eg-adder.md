@@ -119,8 +119,7 @@ picker_out_adder
 
 > 通过以下python测试代码替换 `example.py` 中的内容。
 
-{{< lang-group languages="python" >}}
-{{< lang lang="python" show="block" >}}
+```python
 
 from UT_Adder import *
 import random
@@ -164,8 +163,7 @@ def random_test():
 if __name__ == "__main__":
     random_test()
 
-{{< /lang >}}
-{{< /lang-group >}}
+```
 
 
 ### 运行测试

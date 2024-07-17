@@ -31,56 +31,62 @@ make init
 
 ```bash
 cd picker
-export BUILD_XSPCOMM_SWIG=python # 通过BUILD_XSPCOMM_SWIG指定支持语言
 make
+# 可通过 make BUILD_XSPCOMM_SWIG=python,java,scala,golang 开启其他语言支持。
+# 各语言需要自己的开发环境，需要自行配置，例如javac等
 sudo -E make install
 ```
 
-> 默认的安装的目标路径是 `/usr/local`， 二进制文件被置于 `/usr/local/bin`，模板文件被置于 `/usr/local/share/picker`。
-> 安装时会自动安装 `xspcomm` 基础库，该基础库是用于封装 `RTL` 模块的基础类型，位于 `/usr/local/lib/libxspcomm.so`。 **可能需要手动设置编译时的链接目录参数(-L)**
-> 同时如果开启了python支持，还会安装 `xspcomm` 的python包，位于 `/usr/local/share/picker/python/xspcomm/`。
-> 为了后续生成测试覆盖率html文件，还需要安装lcov(genhtml)。直接使用apt-get安装即可。
+>默认的安装的目标路径是 /usr/local， 二进制文件被置于 /usr/local/bin，模板文件被置于 /usr/local/share/picker。
+>安装时会自动安装 xspcomm基础库（https://github.com/XS-MLVP/xcomm），该基础库是用于封装 RTL 模块的基础类型，位于 /usr/local/lib/libxspcomm.so。 可能需要手动设置编译时的链接目录参数(-L)
+>如果开启了Java等语言支持，还会安装 xspcomm 对应的多语言软件包。
 
 ### 安装测试
 
 执行命令并检查输出：
+>picker export --help
 
 ```bash
-➜  picker git:(master) picker export
-Export RTL Projects Sources as Software libraries such as C++/Python
-Usage: picker export [OPTIONS] file
+Export RTL Projects Sources as Software libraries such as C++/Python Usage: picker
+export [OPTIONS] file
 
 Positionals:
   file TEXT REQUIRED          DUT .v/.sv source file, contain the top module
 
 Options:
   -h,--help                   Print this help message and exit
-  --fs,--filelist TEXT        DUT .v/.sv source files, contain the top module, split by comma.
-                              Or use '*.txt' file  with one RTL file path per line to specify the file list
+  --fs,--filelist TEXT        DUT .v/.sv source files, contain the top module, 
+                              split by comma. Or use '*.txt' file  with one RTL 
+                              file path per line to specify the file list
   --sim TEXT [verilator]      vcs or verilator as simulator, default is verilator
-  --lang,--language TEXT [python]
-                              Build example project, default is python, choose cpp, java or python
-  --sdir,--source_dir TEXT [/usr/local/share/picker/template]
+  --lang,--language TEXT:{python,cpp,java,scala,golang} [python] 
+                              Build example project, default is python, choose 
+                              cpp, java or python
+  --sdir,--source_dir TEXT [/usr/local/share/picker/template] 
                               Template Files Dir, default is ${picker_install_path}/../picker/template
-  --tdir,--target_dir TEXT [./picker_out]
+  --tdir,--target_dir TEXT [./picker_out] 
                               Codegen render files to target dir, default is ./picker_out
   --sname,--source_module_name TEXT
-                              Pick the module in DUT .v file, default is the last module in the -f marked file
+                              Pick the module in DUT .v file, default is the last 
+                              module in the --fs marked file
   --tname,--target_module_name TEXT
-                              Set the module name and file name of target DUT, default is the same as source. For example, -T top, will generate UTtop.cpp and UTtop.hpp with UTtop class
-  --internal TEXT             Exported internal signal config file, default is empty, means no internal pin
-  -F,--frequency TEXT [100MHz]
-                              Set the frequency of the **only VCS** DUT, default is 100MHz, use Hz, KHz, MHz, GHz as unit
+                              Set the module name and file name of target DUT, 
+                              default is the same as source. For example, --tname top, 
+                              will generate UTtop.cpp and UTtop.hpp with UTtop class
+  --internal TEXT             Exported internal signal config file, default is empty, 
+                              means no internal pin
+  -F,--frequency TEXT [100MHz] 
+                              Set the frequency of the **only VCS** DUT, default 
+                              is 100MHz, use Hz, KHz, MHz, GHz as unit
   -w,--wave_file_name TEXT    Wave file name, emtpy mean don't dump wave
   -c,--coverage               Enable coverage, default is not selected as OFF
-  -V,--vflag TEXT             User defined simulator compile args, passthrough. Eg: '-v -x-assign=fast -Wall --trace' || '-C vcs -cc -f filelist.f'
-  -C,--cflag TEXT             User defined gcc/clang compile command, passthrough. Eg:'-O3 -std=c++17 -I./include'
+  -V,--vflag TEXT             User defined simulator compile args, passthrough. 
+                              Eg: '-v -x-assign=fast -Wall --trace' || '-C vcs -cc -f filelist.f'
+  -C,--cflag TEXT             User defined gcc/clang compile command, passthrough. 
+                              Eg:'-O3 -std=c++17 -I./include'
   --verbose                   Verbose mode
   -e,--example                Build example project, default is OFF
-  --autobuild [1]             Auto build the generated project, default is true
-
-file is required
-Run with --help for more information.
+  --autobuild BOOLEAN [1]     Auto build the generated project, default is true
 ```
 
 #### 参数解释
@@ -103,6 +109,23 @@ Run with --help for more information.
 * `--example, -e`: 可选。构建示例项目，默认是 OFF。
 * `--autobuild`: 可选。自动构建生成的项目，默认是true。
 * `--help, -h`: 可选。打印使用帮助。
+
+### 安装检测
+
+可以通过\--check参数进行picker的安装检测，输出能够支持的编程语言，以及对于的依赖库位置。
+
+>picker \--check
+
+```bash
+[OK ] Version: 0.1.0-develop-e3b38d5
+[OK ] Exec path: /usr/local/bin/picker
+[OK ] Template path: /usr/local/share/picker/template
+[OK ] Support    Cpp (find: '/usr/local/share/picker/include' success)
+[OK ] Support   Java (find: '/usr/local/share/picker/java/xspcomm-java.jar' success)
+[Err] Support  Scala (find: 'scala/xspcomm-scala.jar' fail)
+[OK ] Support Python (find: '/usr/local/share/picker/python' success)
+[OK ] Support Golang (find: '/usr/local/share/picker/golang' success)
+```
 
 ### 功能测试
 

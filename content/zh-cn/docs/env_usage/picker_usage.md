@@ -1,5 +1,5 @@
 ---
-title: 基础使用
+title: 工具介绍
 description: 验证工具的基本使用。
 categories: [教程]
 tags: [docs]
@@ -11,16 +11,27 @@ weight: 1
 {{% /pageinfo %}}
 
 ## Picker 简介
-> `picker`是一个芯片验证辅助工具，其目标是将RTL设计验证模块(.v/.scala/.sv)进行封装，并使用其他编程语言暴露`Pin-Level`的操作，未来计划支持自动化的`Transaction-Level`原语生成。其他编程语言包括 c++ (原生支持), python(已支持), java(待完善), golang(待完善) 等编程语言接口。该辅助工具让用户可以基于现有的软件测试框架，例如pytest, junit，TestNG, go test等，进行芯片UT验证。
 
-基于picker进行验证具有如下**优点**：  
- - **不泄露RTL设计**。经过Picker转换后，原始的设计文件(.v)被转化成了二进制文件(.so)，脱离原始设计文件后，依旧可进行验证，且验证者无法获取RTL源代码。  
- - **减少编译时间**。当DUT(Design Under Test)稳定时，只需要编译一次（打包成so）。  
- - **用户面广**。提供的编程接口多，可覆盖不同语言的开发者（传统IC验证，只用System Verilog）。  
- - **可使用软件生态丰富**。能使用python3, java, golang等生态。  
 
->目前picker支持以下模拟器：
-`verilator`、`synopsys vcs`
+picker 是一个芯片验证辅助工具，具有两个主要功能：
+
+1. **打包RTL设计验证模块：** picker 可以将 RTL 设计验证模块（.v/.scala/.sv）打包成动态库，并提供多种高级语言（目前支持 C++、Python、Java、Scala、Golang）的编程接口来驱动电路。
+1. **UVM-TLM代码自动生成：** picker 能够基于用户提供的 UVM sequence_item 进行自动化的 TLM 代码封装，提供 UVM 与其他高级语言（如 Python）的通信接口。
+该工具允许用户基于现有的软件测试框架，例如 pytest、junit、TestNG、go test 等，进行芯片单元测试。
+
+基于 Picker 进行验证的优点:
+
+1. 不泄露 RTL 设计：经过 Picker 转换后，原始的设计文件（.v）被转化成了二进制文件（.so），脱离原始设计文件后，依旧可进行验证，且验证者无法获取 RTL 源代码。
+1. 减少编译时间：当 DUT（设计待测）稳定时，只需要编译一次（打包成 .so 文件）。
+1. 用户范围广：提供的编程接口多，覆盖不同语言的开发者。
+1. 使用丰富的软件生态：支持 Python3、Java、Golang 等生态系统。
+1. 自动化的 UVM 事务封装：通过自动化封装 UVM 事务，实现 UVM 和 Python 的通信。
+
+Picker 目前支持的 RTL 仿真器：
+
+1. Verilator
+1. Synopsys VCS
+
 
 **Picker的工作原理**  
 `Picker`的主要功能就是将`Verilog`代码转换为C++或者Python代码，以Chisel开发的处理器为例:先通过Chisel自带的工具将其转换为Verilog代码，再通Picker提供高级编程语言接口。
@@ -51,7 +62,10 @@ Picker 导出 Python Module 的方式是基于 C++ 的。
 
 
 ### 使用工具生成Python的DUT类
-- 在键入Picker的编译命令后，会自动生成Python的一个基础类，我们称之为DUT类，以前述的加法器为例，用户需要编写测试用例，即导入上一章节生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
+
+以案例一中的[简单加法器](../quick-start/eg-adder/)为例：
+
+- Picker会自动生成Python的一个基础类，我们称之为DUT类，以前加法器为例，用户需要编写测试用例，即导入上一章节生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
 目录结构为：
 ```shell
     picker_out_adder
@@ -64,282 +78,190 @@ Picker 导出 Python Module 的方式是基于 C++ 的。
     |   `-- libUT_Adder.py
     `-- example.py              # 用户需要编写的代码
 ```
-- 用户使用 Python 编写测试用例，即导入上述生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。下面我们简单的介绍一下DUT的方法和属性。
+- 在DUT对应的DUTAdder类中共有8个方法，具体如下：
 
 ```python
-# 初始化DUT,DUT()有两个参数:
-# DUT(waveform_filename="report/uftb_with_ftq.fst", coverage_filename="report/uftb_with_ftq_coverage.dat")
-# 缺省的时候为使用Picker生成Python类的时候指定的名称，如果命令里面没有指定则参数则不会生成测试报告和波形
+class DUTAdder:
+    def InitClock(name: str)    # 初始化时钟，参数时钟引脚对应的名称，例如clk
+    def Step(i:int = 1)         # 推进电路i个周期
+    def StepRis(callback: Callable, args=None,  args=(), kwargs={})  # 设置上升沿回调函数
+    def StepFal(callback: Callable, args=None,  args=(), kwargs={})  # 设置下降沿回调函数
+    def SetWaveform(filename)   # 设置波形文件
+    def SetCoverage(filename)   # 设置代码覆盖率文件
+    def RefreshComb()           # 推进组合电路
+    def Finish()                # 销毁电路
+```
+
+
+- DUT对应的引脚，例如reset，clock等在DUTAdder类中以成员变量的形式呈现。如下所示，可以通过value进行引脚的读取和写入。
+
+```python
+from UT_Adder import * 
+dut = DUTAdder()
+dut.a.value = 1  # 通过给引脚的.value属性赋值完成对引脚的赋值
+dut.a[12] = 1    # 对引脚输入a的第12bit进行赋值
+x = dut.a.value  # 读取引脚a的值
+y = dut.a[12]    # 读取引脚a的第12bit的值
+```
+
+#### 驱动DUT的一般流程
+
+1. **创建DUT，设置引脚模式**。默认情况下，引脚是在一下个周期的上升沿进行赋值，如果是组合逻辑，需要设置赋值模式为立即赋值。
+1. **初始化时钟**。其目的是将时钟引脚与DUT内置的xclock进行绑定。组合逻辑没有时钟可以忽略。
+1. **reset电路**。大部分时序电路都需要reset。
+1. **给DUT输入引脚写入数据**。通过“pin.Set(x)”接口，或者pin.vaulue=x进行赋值。
+1. **驱动电路**。时序电路用Step，组合电路用RefreshComb。
+1. **获取DUT各个引脚的输出进行检测**。例如和参考模型进行的结果进行assert对比。
+1. **完成验证，销毁DUT**。调用Finish()时，会把波形，覆盖率等写入到文件。
+
+对应伪代码如下：
+
+```python
+
+from UT_DUT import *
+
+# 1 创建
 dut = DUT()
 
-# 访问信号，假如引脚的名称为a
-dut.a.value = 1                 # 等价于dut.xdata.a.value
+# 2 初始化
+dut.SetWaveform("test.fst")
+dut.InitClock("clock")
 
-# 绑定clk到模拟器的时钟
-dut.init_clock("clk")           # 等价于self.xclock.Add(“clk”)
+# 3 reset
+dut.reset = 1
+dut.Step(1)
+dut.reset = 0
+dut.Step(1)
 
-# 时钟推进
-dut.Step(n)                     # 等价于dut.xclock.Step(n)
+# 4 输入数据
+dut.input_pin1.value = 0x123123
+dut.input_pin3.value = "0b1011"
 
-# 添加上升沿回调，参数为回调函数     # 等价于dut.xclock.StepRis(...)
-dut.StepRis(lambda c, x, y: print("lambda ris: ", c, x, y), (1, 2))
-# 添加下降沿回调，参数为回调函数     # 等价于dut.xclock.StepFal(...)
-dut.StepFal(lambda c, x, y: print("lambda fal: ", c, x, y), (3, 4))
+# 5 驱动电路 
+dut.Step(1)
 
-# 异步方法，对时钟事件的等待，当时钟事件被触发时，程序才会继续向下执行。
-dut.astep(n)                    # 等价于 await self.xclock.AStep(n)
+# 6 得到结果
+x = dut.output_pin.value
+print("result:", x)
 
-# 异步方法，每次时钟事件触发时检查条件是否满足，如果满足才继续向下执行。
-dut.acondition(lambda: dut.signal_1.value == 1) # 等价于 await dut.xclock.ACondition(lambda: dut.signal_1.value == 1)
-
-# 异步方法，时钟事件，每驱动一次时钟，都会对时钟事件进行一次触发，其他协程可以通过监听时钟事件来得知时钟被驱动了。
-dut.runstep(n)                  # 等价于 dut..xclock.RunStep(n)
+# 7 销毁
+dut.Finish()
 ```
-- DUT类是电路封装完成后创建的一个可直接使用的类。要使用DUT类，首先需要初始化。对于时序电路，还需要把时钟信号与模拟时钟相连。这让我们可以通过调用Step方法来控制电路，而信号的访问则可以通过信号.value来实现，下面我们将以前一章验证过的加法器为例，来详细说明如何使用生成的DUT类。
+
+### 其他数据类型
+
+一般情况下，通过上述DUT类自带的接口就能完成绝大部分DUT的验证，但一些特殊情况需要其他对应的接口，例如自定义时钟、异步操作、推进组合电路并写入波形、修改引脚属性等。
+
+在picker生成的DUT类中，除了**XData类型的引脚成员变量**外，还有**XClock类型的xclock**和**XPort类型的xport**。
 
 ```python
-from UT_Adder import *          # 从python软件包里导入模块
-import random
-
-if __name__ == "__main__":
-    dut = DUTAdder() # 初始化 DUT
-    # dut.init_clock("clk")     # 如果模块有时钟，需要初始化时钟，绑定时钟信号到模拟器的时钟，以自动驱动
-    # reset
-    # dut.reset.value = 1
-    # dut.Step(1)               # 该步进行了初始化赋值操作
-    # dut.reset.value = 0       # 设置完成后需要记得复位原信号！
-    # 以加法器为例，对信号的操作
-    dut.a.value = 1             #对dut的输入信号赋值，需要用到.value
-    dut.b.value = 2
-    dut.cin.value = 0
-    dut.Step(1)                 #更新信号
-    print(f"sum = {dut.sum.value}, cout = {dut.cout.value}") #读取dut的输出信号，需要用到.value
-    
-    # 清空对象，并完成覆盖率和波形文件的输出工作（写入到文件）
-    dut.finalize()              
+class DUTAdder(object):
+    xport: XPort         # 成员变量 xport，用于管理DUT中的所有引脚
+    xclock: XClock       # 成员变量 xclock，用于管理时钟
+    # DUT 引脚
+    a: XData
+    b: XData
+    cin: XData
+    cout: XData
 ```
-- 我们可以直接通过DUT访问某些方法，但大多数方法被封装在DUT类的三个主要数据类型：XData、XPort和XClock中。这些类型分别代表电路中的不同类型的信号。通过这些数据类型，我们能够接触和操纵电路中的各种信号，以便进行仿真测试。在后续的内容中，我们将深入探讨这些数据类型的定义、来源，以及它们在实际仿真中的使用方式。
-### XDATA
-- 通常，电路有四种状态：0、1、Z和X。我们定义一种名为XData的数据类型，将其与电路的引脚绑定，并通过DPI读写电路的IO接口。这样，我们就能够使用软件来激励电路。 
 
-**初始化**
-```python
-# 初始化的步骤picker会为我们自动完成，此处只是介绍下用法
-# 初始化使用XData，参数为位宽和数据方向(XData.In,XData.Out,XData.InOut)
-a = XData(32,XData.In)
-a.ReInit(16,XData.In)           #ReInit方法可以重新初始化XData实例
-# 绑定DPI，以加法器为例，参数为C函数
-self.a.BindDPIRW(DPIRa, DPIWa)
-self.b.BindDPIRW(DPIRb, DPIWb)
-self.cin.BindDPIRW(DPIRcin, DPIWcin)
-self.sum.BindDPIRW(DPIRsum, DPIWsum)
-self.cout.BindDPIRW(DPIRcout, DPIWcout)
-``` 
+#### XData 类
+- DUT引脚中的数据通常位宽不确定，且有四种状态：0、1、Z和X。为此picker提供了XData进行电路引脚数据表示。
+
 **主要方法**
 ```python
-# 使用.value可以进行访问，有多种赋值方法
-a.value = 12345                 # 十进制赋值
-a.value = 0b11011               # 二进制赋值
-a.value = 0o12345               # 八进制赋值
-a.value = 0x12345               # 十六进制赋值
-a.value = '::ffff'              # 字符串赋值ASCII码
-d = XData(32,XData.In)          # 同类型赋值
-d = a
-a.value = 0xffffffff
-# 配合ctype库使用
-a.W();                          # 转 uint32
-a.U();                          # 转 uint64
-a.S();                          # 转 int64
-a.B();                          # 转 bool
-a.String()                      # 转 string
+class XData:
+    #拆分XData，例如把一个32位XData中的第7-10位创建成为一个独立XData
+    #  name：名称，start：开始位，width：位宽，例如auto sub = a.SubDataRef("sub_pin", 0, 4)
+    def SubDataRef(name, start, width): XData
+    def GetWriteMode():WriteMode     #获取XData的写模式，写模式有三种：Imme立即写，Rise上升沿写，Fall下降沿写
+    def SetWriteMode(mode:WriteMode) #设置XData的写模式 eg: a.SetWriteMode(WriteMode::Imme)
+    def DataValid():bool             #检测数据是否有效（Value中含有X或者Z态返回false否者true）
+    def W():int             #获取XData的位宽（如果为0，表示XData为verilog中的logic类型，否则为Vec类型的位宽）
+    def U():int             #获取XData的值（无符号，同 x = a.value）
+    def S():int             #获取XData的值（有符号类型）
+    def String():str        #将XData转位16进制的字符串类型，eg: "0x123ff"，如果出现?，表现对应的4bit中有x或z态
+    def Equal(xdata):bool   #判断2个XData是否相等
+    def Set(value)          #对XData进行赋值，value类型可以为：XData, string, int, bytes等
+    def GetBytes(): bytes   #以bytes格式获取XData中的数
+    def Connect(xdata):bool #连接2个XData，只有In和Out类型的可以连接，当Out数据发生变化时，In类型的XData会自动写入
+    def IsInIO():bool       #判断XData是否为In类型，改类型可读可写
+    def IsOutIO():bool      #判断XData是否为Out类型，改类型只可读
+    def IsBiIO():bool       #判断XData是否为Bi类型，改类型可读可写
+    def IsImmWrite(): bool  #判断XData是否为Imm写入模式
+    def IsRiseWrite(): bool #判断XData是否为Rise写入模式
+    def IsFallWrite(): bool #判断XData是否为Fall写入模式
+    def AsImmWrite()        #更改XData的写模式为Imm
+    def AsRiseWrite()       #更改XData的写模式为Rise
+    def AsFallWrite()       #更改XData的写模式为Fall
+    def AsBiIO()            #更改XData为Bi类型
+    def AsInIO()            #更改XData为In类型
+    def AsOutIO()           #更改XData为Out类型
+    def FlipIOType()        #将XData的IO类型进行取反，例如In变为Out或者Out变为In
+    def Invert()            #将XData中的数据进行取反
+    def At(index): PinBind  #获取第index, eg: x = a.At(12).Get() or a.At(12).Set(1)
+    def AsBinaryString()    #将XData的数据变为二进制字符串，eg: "1001011"
+```
 
-#a.value支持使用[]按下标访问，下标从0开始为最低位
-a[31] = 0                       # a.value = 0x7ffffffff
-a.value = "x"                   # 赋值高阻态
-# 输出高阻和不定态的时候需要用字符串输出
-# print(f"expected x, actual {a.String()}")
-# a.value = "000000??"
-# 000000??表示不定态和高阻态，出现这种结果的时候电路一般是出问题了
-a.value = "z"                   # 赋值不定态
-# a.value = "000000??"
+为了简化赋值操作，XData 对 Set(value) 和 U() 方法进行了属性赋值重载，可以通过`pin.value=x` 和 `x=pin.value`进行赋值和取值。
 
-# 设置引脚模式: XData.Imme 立即写入,XData.Rise 上升沿写入,XData.Fall
-#下降沿写入。XData默认情况下为上升沿写入。立即写入模式下，可以真正的模拟时序电路，不需要Step方法便能直接更新值
-a.SetWriteMode(XData.Imme)
-``` 
+```python
+# 使用.value可以进行访问
+# a 为XData类型
+a.value = 12345        # 十进制赋值
+a.value = 0b11011      # 二进制赋值
+a.value = 0o12345      # 八进制赋值
+a.value = 0x12345      # 十六进制赋值
+a.value = -1           # 所有bit赋值1, a.value = x 与 a.Set(x) 等价
+a[31] = 0              # 对第31位进行赋值
+a.value = "x"          # 赋值高阻态
+a.value = "z"          # 赋值不定态
+x = a.value            # 获取值，与 x = a.U() 等价
+```
 
-### XPORT
+### XPort 类
 - 在处理少数几个XData引脚时，直接操作XData是比较清晰和直观的。但是，当涉及到多个XData时，进行批量管理就不太方便了。XPort是对XData的一种封装，它允许我们对多个XData进行集中操作。我们还提供了一些方法来方便地进行批量管理。
 
 **初始化与添加引脚**
 ```python
-port = XPort("p") #创建XPort实例
+port = XPort("p") #创建前缀为p的XPort实例
 ``` 
+
 **主要方法**
 ```python
-# 使用Add方法添加引脚
-port.Add("a",a)             # 添加引脚
-port.Add("b",b)             # 添加引脚
-
-#使用[]访问引脚
-port["b"]
-# 使用[].value可以访问引脚的值
-port["b"].value = 1
-
-# Connect方法对两个Port进行连接如果连接的两个port都是InOut类型的，那么数据流通方向就是Port_2->Port_1
-# 如果一个是In一个是Out，那么数据流向是Out->In,连接的命名要求为：xx_A Connect yy_A
-a = XData(32,XData.In)
-b = XData(32,XData.Out)
-
-port_1 = XPort("p")
-port_2 = XPort("p1")
-
-port_1.Add("c",a)
-port_2.Add("c",b)
-
-port_2.Connect(port_1)
-
-#返回引脚个数
-port.PortCount()
-
-# Flip方法翻转引脚输入输出方式
-port.Flip()
-
-# AsBiIo方法将引脚方向转换为双向
-a.AsBiIO()
-
-# 通过DPI刷入所有上升沿引脚的值
-port.WriteOnRise()
-# 通过DPI刷入所有下降沿引脚的值
-port.WriteOnFall()
-
-# 使用ReadFresh刷新读取引脚的值
-port.ReadFresh(XData.In)
-
-# 使用SetZero方法将引脚的值设为0
-port.SetZero() 
-print(f"expected 0, actual {port['a'].value}")
-# port['a'].value = 0
+class XPort:
+    def XPort(prefix = "")      #创建前缀为prefix的port， eg：p = XPort("tile_link_")
+    def PortCount(): int        #获取端口中的Pin数量（即绑定的XData个数）
+    def Add(pin_name, XData)    #添加Pin, eg：p.Add("reset", dut.reset)
+    def Del(pin_name)           #删除Pin
+    def Connect(xport2)         #链接2个Port
+    def NewSubPort(std::string subprefix): XPort # 创建子Port，以subprefix开头的所有Pin构成子Port
+    def Get(key, raw_key = False): XData         # 获取XData
+    def SetZero()                                #设置Port中的所有XData为0
 ``` 
-### XClock
+
+### XClock 类
 - XClock是电路时钟的封装，用于驱动电路。在传统仿真工具（例如Verilator）中，需要手动为clk赋值，并通过step_eval函数更新状态。但在我们的工具中，我们提供了相应的方法，可以将时钟直接绑定到XClock上。只需使用我们的Step()方法，就可以同时更新clk和电路状态。
 
 **初始化与添加引脚**
 ```python
 # 初始化
-clk = XClock(lambda a: 1 if print("lambda stp: ", a) else 0)  #参数stepfunc为DUT后端提供的电路推进方法，例如verilaor的step_eval等
+clk = XClock(stepfunc)  #参数stepfunc为DUT后端提供的电路推进方法，例如verilaor的step_eval等
 ``` 
 **主要方法**    
 
 ```python
-# 使用Add方法添加引脚
-clk.Add(XData)              # 添加clk引脚
-# 在生成的DUT中，我们自动生成了init_clock(self,name:str)函数，调用dut.init_clock(name:str),也可以进行绑定，例如：dut.init_clock(clk)
-
-clk.Add(XPort)              # 添加Port
-
-# 更新状态
-clk.Step(1)                 # 参数为UInt i，表示前进i步
-
-#复位
-clk.Reset()
-# 推动电路执行，不更新波形（仅用于组合逻辑，慎用）
-clk.eval()
-# 推动电路执行，更新波形（不建议使用）        
-clk.eval_t()
-
-# 添加上升沿回调，参数为回调函数
-clk.StepRis(lambda c, x, y: print("lambda ris: ", c, x, y), (1, 2))
-# 添加下降沿回调，参数为回调函数
-clk.StepFal(lambda c, x, y: print("lambda fal: ", c, x, y), (3, 4))
+class XClock:
+    def Add(xdata)       #将Clock和时钟进行绑定， eg：clock.Add(dut.clk)
+    def Add(xport)       #将Clock和XData进行绑定
+    def RefreshComb()                     #推进电路状态，不推进时间，不dump波形
+    def RefreshCombT()                    #推进电路状态（推进时间，dump波形）
+    def Step(int s = 1)                   #推进电路s个时钟周期，  DUT.Step = DUT.xclock.Step
+    def StepRis(func, args=(), kwargs={}) #设置上升沿回调函数，DUT.StepRis = DUT.xclock.StepRis
+    def StepFal(func, args=(), kwargs={}) #设置下降沿回调函数，DUT.StepFal = DUT.xclock.StepFal
+    # 异步方法
+    async AStep(cycle: int)      #异步推进cycle个时钟， eg：await dut.AStep(5)
+    async ACondition(condition)  #异步等待conditon()为true
+    async ANext()                #异步推进一个时钟周期，等同AStep(1)
+    async RunStep(cycle: int)    #持续推进时钟cycle个时钟，用于最外层
 ```
-
-虽然通过上升沿或下降沿的回调可以有效地进行验证，但正如之前所述，传统的回调模式，尤其是在嵌套多层时，会导致代码难以阅读和维护，这通常被称为“回调地狱”（Callback Hell）。因此，我们还提供了异步方法来进行验证，这样可以简化代码结构，提高可读性。
-
-### Async & Event
-
-在Python中，异步编程通过asyncio库和async/await语法取代了传统的回调模式。这种方法提供了一种更加直观和简洁的方式来处理异步操作，尤其是在涉及到多个需要按顺序执行的异步操作时。  
-
-asyncio库引入了协程（coroutines），它们是一种通过生成器实现的轻量级线程。协程允许单个Python线程中的并发执行，而不需要多线程或多进程，从而避免了线程切换的开销和进程间通信的复杂性。如果您想更深入的学习asyncio库，可以去参考[asyncio库的官方文档](https://docs.python.org/zh-cn/3/library/asyncio.html)。
-
-使用async/await语法，可以将异步代码写得像同步代码一样直观。你可以用async定义一个函数为协程，然后在函数内部用await挂起等待一个异步操作的完成。这样，当一个协程等待时，事件循环可以继续执行其他协程，直到当前协程可以继续执行。下面我们来简单介绍一下如何使用异步编程来进行验证。
-
-**时钟事件 (Event)**
-
-生成的 Python 模块中提供了基础的异步功能，以方便用户编写异步测试用例。
-
-具体地，我们在每一个由 Picker 生成的 Python 模块中设置了一个时钟事件（Event），并围绕这一事件提供了异步的接口。该时钟事件可通过实例化对象的 `event` 属性获取，例如 `dut.event`。
-
-同时，该事件也可以从 dut 的每一个接口中获取。这是因为我们将接口定义为了 `XPin`，其中包含了该接口的 `xdata` 和全局时钟事件 `event`，因此可以通过 `dut.signal_1.event` 这样的方式获取到全局的时钟事件。这有助于我们在仅能访问到一个接口的情况下，获取到该接口对应的全局时钟信号。
-
-**使用异步**
-
-上文介绍的时钟事件是异步功能的核心，在这里我们将介绍如何使用时钟事件来实现异步功能。
-
-首先我们需要创建一个协程(Coroutine)对象，并将其加入到事件循环(EventLoop)中，以实现全局时钟的驱动，方法如下：
-
-```python
-asyncio.create_task(dut.xclock.RunStep(10))
-```
-
-这将会使得时钟在“后台”被驱动 10 次，而不会阻塞当前正在执行的代码。但是其他的协程如何得知时钟被驱动了一次呢？这就要用到时钟事件了。在 `RunStep` 函数中，每驱动一次时钟，都会对时钟事件进行一次触发，其他协程可以通过监听时钟事件来得知时钟被驱动了。例如：
-
-```python
-async def other_task():
-    # 循环10次
-    for _ in range(10):
-        # 等待时钟的一个步进
-        await dut.xclock.AStep(1)
-        # 每次步进后打印消息
-        print(f"Clock has been ticked")
-
-```
-
-`dut.xclock.AStep` 中封装了对时钟事件的等待，当时钟事件被触发时，程序才会继续向下执行。我们也可以直接使用 `await dut.event.wait()` 来等待直接时钟事件的触发。通过这种异步的方式，我们便可以同时创建多个任务，每个任务中都可以等待时钟事件的触发，从而实现多任务的并发执行。
-
-我们做了相应的工作，以确保在下一次时钟事件到来之前，所有能够执行的任务都将会被执行，并由下一次时钟事件进行阻塞。
-
-以下是一个完整的示例：
-
-```python
-import asyncio
-
-# 创建设备实例
-dut = UT_mydut()
-# 初始化设备时钟
-dut.init_clock("clk")
-
-# 定义一个异步函数来模拟其他任务
-async def other_task():
-	for _ in range(10):
-		# 等待时钟步进
-		await dut.xclock.AStep(1)
-		# 打印时钟已经步进的消息
-		print(f"Clock has been ticked")
-
-# 定义一个异步测试函数
-async def my_test():
-	# 创建并启动一个时钟任务
-	clock_task = asyncio.create_task(dut.xclock.RunStep(10))
-	# 创建并启动其他任务
-	asyncio.create_task(other_task())
-
-	# 等待时钟任务完成
-	await clock_task
-
-
-asyncio.run(my_test())
-```
-
-除了 `RunStep` 和 `AStep` 之外，我们还提供了一个实用函数 `xclock.ACondition` 来实现更复杂的条件等待，例如 `await dut.xclock.ACondition(lambda: dut.signal_1.value == 1)`。这将会在每次时钟事件触发时检查条件是否满足，如果满足才继续向下执行。
-
-**自定义异步事件**
-
-如果你需要在异步的使用过程中，需要实例化若干 `Event` 或 `Queue` 来实现相应的功能，你需要使用 `xspcomm` 库中提供的 `Event` 和 `Queue` 的实现，而不是使用 Python 标准库中的 `asyncio.Event` 和 `asyncio.Queue`，这会使自定义事件和时钟触发的先后顺序得不到保证。
-
-使用 `xspcomm` 库中的实现可以保证在当前周期所有可被触发的自定义事件都会在下一个周期到来之前被触发。
-
-**更方便的异步使用**
-
-picker 提供的 dut 当中仅提供了最基础的异步功能，如果你需要更加方便的使用异步，可以参考`mlvp`库的[文档](https://github.com/XS-MLVP/mlvp)，该库提供了更加丰富的异步接口。
-
