@@ -6,30 +6,9 @@ tags: [examples, docs]
 weight: 6
 ---
 
-## 双端口栈简介
+## 双端口栈简介与环境构建
 
-本案例中使用的双端口栈与案例三中的实现完全相同，请查看案例三中的[双端口栈简介](../eg-stack-callback#双端口栈简介)。
-
-## 构建驱动环境
-
-与案例一和案例二类似，在对双端口栈进行测试之前，我们首先需要利用 Picker 工具将 RTL 代码构建为 Python Module。在构建完成后，我们将通过 Python 脚本驱动 RTL 代码进行测试。
-
-首先，创建名为 `dual_port_stack.v` 的文件，并将上述的 RTL 代码复制到该文件中，接着在相同文件夹下执行以下命令：
-
-```bash
-picker export --autobuild=true dual_port_stack.v -w dual_port_stack.fst --sname dual_port_stack --tdir picker_out_dual_port_stack --lang python -e --sim verilator
-```
-
-生成好的驱动环境位于 `picker_out_dual_port_stack` 文件夹中, 其中 `UT_dual_port_stack` 为生成的 Python Module，`example.py` 为测试脚本。
-
-可以通过以下命令运行测试脚本：
-
-```bash
-cd picker_out_dual_port_stack
-python3 example.py
-```
-
-若运行过程中无错误发生，则代表环境被正确构建。
+本案例中使用的双端口栈与案例三中的实现完全相同，请查看案例三中的[双端口栈简介](../eg-stack-callback#双端口栈简介)及[构建驱动环境](../eg-stack-callback#构建驱动环境)。
 
 ## 利用协程驱动 DUT
 
