@@ -93,9 +93,9 @@ class SinglePortDriver:
         self.port_dict["in_cmd"].value = self.BusCMD.PUSH.value if is_push else self.BusCMD.POP.value
         self.port_dict["in_data"].value = random.randint(0, 2**8-1)
 
-        await self.dut.astep(1)
+        await self.dut.AStep(1)
         while self.port_dict["in_ready"].value != 1:
-            await self.dut.astep(1)
+            await self.dut.AStep(1)
         self.port_dict["in_valid"].value = 0
 
         if is_push:
@@ -103,9 +103,9 @@ class SinglePortDriver:
 
     async def receive_resp(self):
         self.port_dict["out_ready"].value = 1
-        await self.dut.astep(1)
+        await self.dut.AStep(1)
         while self.port_dict["out_valid"].value != 1:
-            await self.dut.astep(1)
+            await self.dut.AStep(1)
         self.port_dict["out_ready"].value = 0
 
         if self.port_dict["out_cmd"].value == self.BusCMD.POP_OKAY.value:
@@ -115,7 +115,7 @@ class SinglePortDriver:
         await self.send_req(is_push)
         await self.receive_resp()
         for _ in range(random.randint(0, 5)):
-            await self.dut.astep(1)
+            await self.dut.AStep(1)
 
     async def main(self):
         for _ in range(10):
@@ -150,13 +150,13 @@ async def test_stack(stack):
 
     asyncio.create_task(port0.main())
     asyncio.create_task(port1.main())
-    await asyncio.create_task(dut.runstep(200))
+    await asyncio.create_task(dut.RunStep(200))
 
 if __name__ == "__main__":
     dut = DUTdual_port_stack()
-    dut.init_clock("clk")
+    dut.InitClock("clk")
     asyncio.run(test_stack(dut))
-    dut.finalize()
+    dut.Finish()
 ```
 
 与案例三类似，我们定义了一个 `SinglePortDriver` 类，用于驱动单个端口的逻辑。在 `main` 函数中，我们创建了两个 `SinglePortDriver` 实例，分别用于驱动两个端口。我们将两个端口的驱动过程放在了入口函数 `main` 中，并通过 `asyncio.create_task` 将其加入到事件循环中，在最后我们通过 `dut.runstep(200)` 来创建了后台时钟，以推动测试的进行。

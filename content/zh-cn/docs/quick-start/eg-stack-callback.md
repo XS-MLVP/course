@@ -244,7 +244,6 @@ class SinglePortDriver:
         IDLE = 0
         WAIT_REQ_READY = 1
         WAIT_RESP_VALID = 2
-
     class BusCMD(Enum):
         PUSH = 0
         POP = 1
@@ -335,9 +334,9 @@ def test_stack(stack):
 
 if __name__ == "__main__":
     dut = DUTdual_port_stack()
-    dut.init_clock("clk")
+    dut.InitClock("clk")
     test_stack(dut)
-    dut.finalize()
+    dut.Finish()
 ```
 
 在上述代码中，实现了这样的驱动过程：每个端口独立对DUT进行驱动，并在一个请求完成后添加随机延迟，每个端口分别完成了 10 次 `PUSH` 操作与 10 次 `POP` 操作。
