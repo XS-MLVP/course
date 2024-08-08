@@ -33,22 +33,22 @@ from UT_dual_port_stack import *
 async def my_coro(dut, name):
     for i in range(10):
         print(f"{name}: {i}")
-        await dut.astep(1)
+        await dut.AStep(1)
 
 async def test_dut(dut):
     asyncio.create_task(my_coro(dut, "coroutine 1"))
     asyncio.create_task(my_coro(dut, "coroutine 2"))
-    await asyncio.create_task(dut.runstep(10))
+    await asyncio.create_task(dut.RunStep(10))
 
 dut = DUTdual_port_stack()
-dut.init_clock("clk")
+dut.InitClock("clk")
 asyncio.run(test_dut(dut))
-dut.finalize()
+dut.Finish()
 ```
 
 你可以直接运行上述代码来观察协程的执行过程。在上述代码中我们用 `create_task` 创建了两个协程任务并加入到事件循环中，每个协程任务中，会不断打印一个数字并等待下一个时钟信号到来。
 
-我们使用 `dut.runstep(10)` 来创建一个后台时钟，它会不断产生时钟同步信号，使得其他协程能够在时钟信号到来时继续执行。
+我们使用 `dut.RunStep(10)` 来创建一个后台时钟，它会不断产生时钟同步信号，使得其他协程能够在时钟信号到来时继续执行。
 
 ### 基于协程驱动的双端口栈
 
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     dut.Finish()
 ```
 
-与案例三类似，我们定义了一个 `SinglePortDriver` 类，用于驱动单个端口的逻辑。在 `main` 函数中，我们创建了两个 `SinglePortDriver` 实例，分别用于驱动两个端口。我们将两个端口的驱动过程放在了入口函数 `main` 中，并通过 `asyncio.create_task` 将其加入到事件循环中，在最后我们通过 `dut.runstep(200)` 来创建了后台时钟，以推动测试的进行。
+与案例三类似，我们定义了一个 `SinglePortDriver` 类，用于驱动单个端口的逻辑。在 `main` 函数中，我们创建了两个 `SinglePortDriver` 实例，分别用于驱动两个端口。我们将两个端口的驱动过程放在了入口函数 `main` 中，并通过 `asyncio.create_task` 将其加入到事件循环中，在最后我们通过 `dut.RunStep(200)` 来创建了后台时钟，以推动测试的进行。
 
 该代码实现了与案例三一致的测试逻辑，即在每个端口中对栈进行 10 次 PUSH 和 10 次 POP 操作，并在操作完成后添加随机延迟。但你可以清晰的看到，利用协程进行编写，不需要维护任何的中间状态。
 
