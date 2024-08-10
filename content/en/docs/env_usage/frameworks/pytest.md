@@ -150,7 +150,7 @@ def adder():
     # The code after the yield statement will be executed after the test ends, used to clean up resources
     yield dut
     # Clean up DUT resources and generate test coverage reports and waveforms
-    dut.finalize()
+    dut.Finish()
 
 class TestFullAdder:
     # Define full_adder as a static method, as it does not depend on class instances
