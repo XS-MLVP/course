@@ -4,10 +4,11 @@ description: 利用异步模式简化回调
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 2
+draft: true
 ---
 
 # 异步编程
-### 概述  
+### 概述
 #### 为什么要引入异步编程？
 > 上一节中我们学习了如何使用回调函数，但是在使用回调函数时可能会遇到回调地狱，即如果回调嵌套过多会导致代码会变得非常复杂，并且难以，因此我们可以通过异步(async,await)的方式来避免这种情况，使用异步，可以使代码结构变得清晰，过await关键字，可以使得异步操作按顺序执行，而不需要通过回调函数来管理执行顺序。
 
@@ -142,7 +143,7 @@ FONT_COLOR_RESET = "\033[0m"  # 重置颜色
 class SimpleRisAdder:
     """
     SimpleRisAdder 类是一个作为参考的加法器类，
-    它模拟了我们预期的RisAdder的行为 
+    它模拟了我们预期的RisAdder的行为
     """
     def __init__(self, width) -> None:
         self.WIDTH = width  # 加法器的位宽

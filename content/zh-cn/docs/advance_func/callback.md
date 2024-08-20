@@ -4,6 +4,7 @@ description: 利用回调处理电路事件
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 1
+draft: true
 ---
 ## 回调
 ### 概述
@@ -109,7 +110,7 @@ self.dut.init_clock("clk") # 等价于 self.xclock.Add(self.port["clk"])
 之后再对生成器进行复位，进行初始化赋值：
 
 ```python
-self.dut.reset.value = 1 
+self.dut.reset.value = 1
 self.dut.Step(1)  # 时钟等待一个周期，下个周期dut的输出会置为0
 self.dut.reset.value = 0  # 设置完成后需要记得复位原信号！
 ```
@@ -171,7 +172,7 @@ class TestRandomGenerator:
         self.dut.init_clock("clk")
         self.dut.seed.value = self.SEED
         # 复位操作
-        self.dut.reset.value = 1 
+        self.dut.reset.value = 1
         self.dut.Step(1)  # 时钟等待一个周期，下个周期dut的输出会置为0
         self.dut.reset.value = 0  # 设置完成后需要记得复位原信号！
         # 设置回调函数
@@ -228,7 +229,7 @@ reg [WIDTH-1:0] Sum;
 always @(posedge clk) begin
 	{Cout, Sum} <= a + b + cin;
 end
-  
+
 assign {cout, sum} = {Cout, Sum};
 
 endmodule
@@ -320,7 +321,7 @@ FONT_COLOR_RESET = "\033[0m"
 class SimpleRisAdder:
     """
     SimpleRisAdder 类是一个作为参考的加法器类，
-    它模拟了我们预期的RisAdder的行为 
+    它模拟了我们预期的RisAdder的行为
     """
     def __init__(self, width) -> None:
         self.WIDTH = width  # 加法器的位宽
@@ -341,7 +342,7 @@ class SimpleRisAdder:
 
         self.a = a  # 更新输入a
         self.b = b  # 更新输入b
-        self.cin = cin  # 更新输入cin        
+        self.cin = cin  # 更新输入cin
 
 
 # 测试函数，验证加法器的输出是否正确

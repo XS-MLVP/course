@@ -4,13 +4,14 @@ description: 利用消息对电路和软件激励进行解耦
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 3
+draft: true
 ---
 
 ## 概述
 消息驱动编程是一种编程范式，它依赖于异步消息传递以促进组件间的通信和协作。在这种模式下，系统的各个组件不是通过直接调用对方的函数或方法，而是通过发送和接收消息来交流。例如，在picker环境中，我们可以利用消息驱动的方法将电路的行为和软件的激励相解耦，这样就可以**避免受到硬件电路时序限制的束缚**。
-在硬件电路测试中，硬件时序指的是电路中各个元件操作的顺序和时间间隔，这对于电路的正确运行至关重要。软件激励则是指用软件生成的一系列动作或信号，用以模拟外部事件对电路的影响，以测试电路的反应。将硬件时序与软件激励解耦是必要的，因为这样可以使得测试过程更加灵活和高效。这种解耦还有助于**在不同的环境中重用软件激励**，提高测试资源的利用率。总之，使用消息驱动来解耦硬件时序和软件激励可以**提升测试的质量和可维护性**，同时**降低复杂性**。  
+在硬件电路测试中，硬件时序指的是电路中各个元件操作的顺序和时间间隔，这对于电路的正确运行至关重要。软件激励则是指用软件生成的一系列动作或信号，用以模拟外部事件对电路的影响，以测试电路的反应。将硬件时序与软件激励解耦是必要的，因为这样可以使得测试过程更加灵活和高效。这种解耦还有助于**在不同的环境中重用软件激励**，提高测试资源的利用率。总之，使用消息驱动来解耦硬件时序和软件激励可以**提升测试的质量和可维护性**，同时**降低复杂性**。
 
-![消息驱动](message.svg)  
+![消息驱动](message.svg)
 
 消息驱动编程通常涉及以下几个概念和组件：
 
@@ -23,8 +24,8 @@ weight: 3
 发布/订阅模式是一种在软件架构中常见的消息通信方式。在这个模式中，发布者不直接将消息发送给特定的接收者，而是发布（发送）到一个中间层，即消息代理。订阅者通过订阅感兴趣的消息类型或主题，来表明他们希望接收哪些消息。消息代理的职责是确保所有订阅了特定主题的客户端都能收到相应的消息。
 这种模式的一个关键特点是发布者和订阅者之间的解耦。他们不需要知道对方的存在，也不需要直接通信。这提高了系统的灵活性和可扩展性，因为可以独立地添加或移除发布者和订阅者，而不会影响系统的其他部分。
 
-1. 使用 Python 的内置队列模块实现的基本发布/订阅模型：  
-- 此处 Publisher 类具有消息队列和订阅者列表。使用发布方法发布消息时，会将其添加到队列中，并通过调用其接收方法传递到所有订阅的客户端。Subscriber 类具有一个 receive 方法，该方法仅打印收到的消息。  
+1. 使用 Python 的内置队列模块实现的基本发布/订阅模型：
+- 此处 Publisher 类具有消息队列和订阅者列表。使用发布方法发布消息时，会将其添加到队列中，并通过调用其接收方法传递到所有订阅的客户端。Subscriber 类具有一个 receive 方法，该方法仅打印收到的消息。
     ```python
     import queue
     # 发布者类
@@ -67,9 +68,9 @@ weight: 3
     publisher.subscribe(subscriber_2)
 
     # 发布者发布一条消息
-    publisher.publish("Hello World") 
-    ``` 
-2. 使用 Python 的线程模块实现的发布/订阅模型：  
+    publisher.publish("Hello World")
+    ```
+2. 使用 Python 的线程模块实现的发布/订阅模型：
 - 在此示例中，Publisher 类有一个订阅者字典，其中键是主题，值是订阅者列表。subscribe 方法将订阅服务器添加到指定主题的列表中。publish 方法检查指定主题是否有任何订阅者，如果有，则设置事件并存储每个订阅者的消息。Subscriber 类和 receive 方法与前面的示例相同。
     ```python
     import threading
@@ -129,11 +130,11 @@ weight: 3
 
     # 订阅者1接收并处理消息
     subscriber_1.receive()
-    ``` 
+    ```
 
 ## 使用消息驱动进行验证
 下面我们将以果壳cache的验证过程为例，来介绍消息驱动在验证中的使用。
-[完整代码](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/tree/master)参见。  
+[完整代码](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/tree/master)参见。
 
 
 ```python
@@ -151,9 +152,9 @@ class ReqMsg:
         self.cmd = cmd
         self.mask = mask
         self.data = data
-    
+
     def display(self):
-        print(f"[REQ MSG] user {self.user:x}, size {self.size}, addr 0x{self.addr:x} " 
+        print(f"[REQ MSG] user {self.user:x}, size {self.size}, addr 0x{self.addr:x} "
             f"cmd 0x{self.cmd:x}, mask {self.mask:b}, data {self.data:x}")
 
 # 缓存包装器类，模拟缓存的行为并与外部总线通信
@@ -239,10 +240,10 @@ class CacheWrapper:
         if self.io_bus.IsRespValid():
             res = self.io_bus.get_resp_rdata()
             self.resp_que.put_nowait(res)
-``` 
+```
 
 在上述代码中，进行消息驱动的流程如下：
-1. 封装软件激励：  
+1. 封装软件激励：
 - 软件激励首先被封装进ReqMsg对象中，这个对象包含了所有必要的信息，如地址、命令、数据等。此处以果壳cache的验证为例。
 
 2. 使用消息队列存储请求：

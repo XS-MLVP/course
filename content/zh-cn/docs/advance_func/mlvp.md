@@ -4,6 +4,7 @@ description: MLVP 验证框架。
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 5
+draft: true
 ---
 
 通过 Picker 工具生成的 Python DUT，已经可以使我们在 Python 环境中进行简单的验证，包括对 DUT 的实例化、信号赋值、时钟驱动等操作。但是在实际的验证工作中，我们通常需要更为高级的验证特性，例如协程支持、覆盖率收集与报告生成等功能。为此，我们提供了 **MLVP(Multi-language Verification Platform)** 验证框架，用于提供这些高级验证特性。
