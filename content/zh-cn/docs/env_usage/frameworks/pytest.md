@@ -150,7 +150,7 @@ def adder():
     # yield 语句之后的代码会在测试结束后执行，用于清理资源
     yield dut
     # 清理DUT资源，并生成测试覆盖率报告和波形
-    dut.finalize()
+    dut.Finish()
 
 class TestFullAdder:
     # 将 full_adder 定义为静态方法，因为它不依赖于类实例
