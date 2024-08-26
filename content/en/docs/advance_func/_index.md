@@ -4,6 +4,7 @@ description: Tutorial on the advanced features of the Open Verification Platform
 categories: [Example Projects, Tutorials]
 tags: [examples, docs]
 weight: 3
+draft: true
 ---
 
 Picker now supports simulation using VCS. Relevant documentation is still being improved.
