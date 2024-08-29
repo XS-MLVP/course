@@ -28,8 +28,10 @@ This tool allows users to perform chip unit testing based on existing software t
  
 4. **Utilization of a Rich Software Ecosystem:**  Supports ecosystems such as Python3, Java, Golang, etc.
  
-5. **Automated UVM Transaction Encapsulation:**  Enables communication between UVM and Python through automated UVM transaction encapsulation.
-**RTL Simulators Currently Supported by Picker:** 
+5. **Automated UVM Transaction Encapsulation:**  Enables communication between UVM and Python through automated UVM transaction encapsulation.  
+
+RTL Simulators Currently Supported by Picker:
+
 1. Verilator
 
 2. Synopsys VCS
