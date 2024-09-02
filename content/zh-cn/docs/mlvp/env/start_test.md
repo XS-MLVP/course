@@ -31,6 +31,18 @@ async def my_coro2():
     print(result)
 ```
 
+如果不想等待一个协程函数完成，只想将这一函数加入到事件循环中放入后台运行，可以使用 mlvp 提供的 `create_task` 方法，例如
+
+```python
+import mlvp
+
+async def my_coro():
+    return "my_coro"
+
+async def my_coro2():
+    mlvp.create_task(my_coro())
+```
+
 那么如何启动事件循环，并使事件循环开始运行 `my_coro2` 呢？在 mlvp 中，我们使用 `mlvp.run` 来启动事件循环，并运行异步程序。
 
 ```python
