@@ -414,3 +414,36 @@ for signal in adder_bundle.all_signals():
     print(signal)
 ```
 
+## Bundle 的自动生成脚本
+
+在很多情况下，DUT 的接口可能过于复杂，手动去编写 Bundle 的定义会变得非常繁琐。然而，Bundle 作为中间层，提供一个确切的信号名称定义是必要的。为了解决这个问题，mlvp 提供了一个自动生成 Bundle 的脚本来从 DUT 的接口定义中生成 Bundle 的定义。
+
+可以在 mlvp 仓库目录下的 `scripts` 文件夹中找到 `bundle_code_gen.py` 脚本。该脚本可以通过解析 DUT 实例，以及指定的绑定规则自动生成 Bundle 的定义。
+
+其中提供了三个函数
+
+```python
+def gen_bundle_code_from_dict(bundle_name: str, dut, dict: dict, max_width: int = 120)
+def gen_bundle_code_from_prefix(bundle_name: str, dut, prefix: str = "", max_width: int = 120):
+def gen_bundle_code_from_regex(bundle_name: str, dut, regex: str, max_width: int = 120):
+```
+
+分别用于通过字典、前缀、正则表达式的方式生成 Bundle 的定义。
+
+使用时，指定 Bundle 的名称，DUT 实例，以及对应的生成规则便可生成 Bundle 的定义，还可以通过 `max_width` 参数来指定生成的代码的最大宽度。
+
+```python
+from bundle_code_gen import *
+
+gen_bundle_code_from_dict('AdderBundle', dut, {
+    'a': 'io_a',
+    'b': 'io_b',
+    'sum': 'io_sum',
+    'cin': 'io_cin',
+    'cout': 'io_cout'
+})
+gen_bundle_code_from_prefix('AdderBundle', dut, 'io_')
+gen_bundle_code_from_regex('AdderBundle', dut, r'io_(.*)')
+```
+
+生成好的代码可以直接或经过简单的修改后，复制到代码中使用。也可以作为子 Bundle 的定义，应用到其他 Bundle 中。
