@@ -27,6 +27,8 @@ class AdderRefModel():
 
 在这个参考模型中，不需要任何内部状态，通过一个对外函数接口即可实现参考模型所有功能。
 
+需要注意的是，使用函数调用模式编写的参考模型，只能通过外部主动调用的方式来执行，无法被动输出内部数据。因此，其无法与 Agent 中的监测方法进行匹配。在 Agent 中编写监测方法，在函数调用模式编写参考模型时是没有意义的。
+
 ### 独立执行流模式
 
 **独立执行流模式**即是将参考模型的行为定义为一个独立的执行流，它不再受外部主动调用函数控制，而拥有了主动获取输入数据和主动输出数据的能力。当外部给参考模型发送数据时，参考模型不会立即响应，而是将这一数据保存起来，等待其执行逻辑主动获取该数据。
@@ -60,5 +62,110 @@ class AdderRefModel(Model):
 
 ### 驱动函数匹配
 
+假如 Env 中定义的接口如下：
 
+```
+StackEnv
+  - port_agent
+    - @driver_method push
+    - @driver_method pop
+```
+
+那么如果我们想要编写与之对应的参考模型，自然地，我们需要定义这四个驱动函数被调用时参考模型的行为。也就是说为每一个驱动函数编写一个对应的函数，这些函数将会在驱动函数被调用时被框架自动调用。
+
+如何让参考模型中定义的函数能够与某个驱动函数匹配呢？首先应该使用 `@driver_hook` 装饰器来表示这个函数是一个驱动函数的匹配函数。接着，为了建立对应关系，我们需要在装饰器中指定其对应的 Agent 和驱动函数的名称。最后，只需要保证函数的参数与驱动函数的参数一致，两个函数便能够建立对应关系。
+
+```python
+class StackRefModel(Model):
+    @driver_hook(agent_name="port_agent", driver_name="push")
+    def push(self, data):
+        pass
+
+    @driver_hook(agent_name="port_agent", driver_name="pop")
+    def pop(self):
+        pass
+```
+
+此时，驱动函数与参考模型的对应关系已经建立，当 Env 中的某个驱动函数被调用时，参考模型中对应的函数将会被自动调用，并自动对比两者的返回值是否一致。
+
+mlvp 还提供了以下几种匹配方式，以便更好地匹配驱动函数：
+
+**指定驱动函数路径**
+
+可以通过 "." 来指定驱动函数的路径，例如：
+
+```python
+class StackRefModel(Model):
+    @driver_hook("port_agent.push")
+    def push(self, data):
+        pass
+
+    @driver_hook("port_agent.pop")
+    def pop(self):
+        pass
+```
+
+**使用函数名称匹配驱动函数名称**
+
+如果参考模型中的函数名称与驱动函数名称相同，可以省略 `driver_name` 参数，例如：
+
+```python
+class StackRefModel(Model):
+    @driver_hook(agent_name="port_agent")
+    def push(self, data):
+        pass
+
+    @driver_hook(agent_name="port_agent")
+    def pop(self):
+        pass
+```
+
+**使用函数名称同时匹配 Agent 名称与驱动函数名称**
+
+可以在函数名中通过双下划线 "__" 来同时匹配 Agent 名称与驱动函数名称，例如：
+
+```python
+class StackRefModel(Model):
+    @driver_hook()
+    def port_agent__push(self, data):
+        pass
+
+    @driver_hook()
+    def port_agent__pop(self):
+        pass
+```
+
+### Agent 匹配
+
+除了对 Agent 中每一个驱动函数都编写一个 `driver_hook` 之外，还可以通过 `@agent_hook` 装饰器来一次性匹配 Agent 中的所有驱动函数。
+
+```python
+class StackRefModel(Model):
+    @agent_hook("port_agent")
+    def port_agent(self, driver_name, args):
+        pass
+```
+
+在这个例子中，`port_agent` 函数将会匹配 `port_agent` Agent 中的所有驱动函数，当 Agent 中的任意一个驱动函数被调用时，`port_agent` 函数将会被自动调用。除了 self 之外，`port_agent` 函数还需接受且只接受两个参数，第一个参数为驱动函数的名称，第二个参数为驱动函数的参数。
+
+当某个驱动函数被调用时，driver_name 参数将会传入驱动函数的名称，args 参数将会传入该该驱动函数被调用时的参数，参数将会以字典的形式传入。port_agent 函数可以根据 driver_name 和 args 来决定如何处理这个驱动函数的调用，并将结果返回。此时框架将会使用此函数的返回值与驱动函数的返回值进行对比。
+
+与驱动函数类似，`@agent_hook` 装饰器也支持当函数名与 Agent 名称相同时省略 `agent_name` 参数。
+
+```python
+class StackRefModel(Model):
+    @agent_hook()
+    def port_agent(self, driver_name, args):
+        pass
+```
+
+**agent_hook 与 driver_hook 同时存在**
+
+当 `agent_hook` 被定义后，理论上无需再定义任何 `driver_hook` 与 Agent 中的驱动函数进行匹配。但是，如果需要对某个驱动函数进行特殊处理，可以再定义一个 `driver_hook` 与该驱动函数进行匹配。
+
+当 `agent_hook` 与 `driver_hook` 同时存在时，框架会优先调用 `agent_hook` 函数，再调用 `driver_hook` 函数，并将 `driver_hook` 函数的返回值用于结果的对比。
+
+当 Env 中所有的驱动函数都能找到对应的 `driver_hook` 或 `agent_hook` 时，参考模型便能成功与 Env 建立匹配关系，此时可以直接通过 Env 中的 `attach` 方法将参考模型附加到 Env 上。
+
+## 如何编写独立执行流模式的参考模型
 
