@@ -333,6 +333,48 @@ class MyMessage:
 my_message = MyMessage.from_bundle(adder_bundle)
 ```
 
+### 时序封装
+
+Bundle类除了对DUT的引脚进行封装外，还提供了基于数组的时序封装，可以适用于部分简单时序场景。Bundle类提供了`process_requests(data_list)`函数，他接受一个数组输入，第`i`个时钟周期，会将`data_list[i]`对应的数据赋值给引脚。`data_list`中的数据可以是`dict`类型，或者`callable(cycle, bundle_ins)`类型的可调用对象。对于`dict`类型，特殊`key`有：
+
+```bash
+__funcs__: func(cycle, self)  # 可调用对象，可以为函数数组[f1,f2,..]
+__condition_func__:  func(cycle, slef, cargs) # 条件函数，当改函数返回为true时，进行赋值，否则继续推进时钟
+__condition_args__:  cargs # 条件函数需要的参数
+__return_bundles__:  bundle # 需要本次dict赋值时返回的bundle数据，可以是list[bundle]
+```
+
+如果输入的`dict`中有`__return_bundles__`，则函数会返回该输入对应的bundle值，例如`{"data": x, "cycle": y}`。以Adder为例，期望第三次加后返回结果：
+
+```python
+# Adder虽然为存组合逻辑，但此处当时序逻辑使用
+class AdderBundle(Bundle):
+    a, b, sum, cin, cout = Signals(5)             # 指定引脚
+
+    def __init__(self, dut):
+        super().__init__()
+        # init clock
+        # dut.InitClock("clock")
+        self.bind(dut)                            # 绑定到dut
+
+    def add_list(data_list =[(1,2),(3,4),(5,6),(7,8)]):
+        # make input dit
+        data = []
+        for i, (a, b) in enumerate(data_list):
+            x = {"a":a, "b":b, "*":0}             # 构建budle赋值的dict
+            if i >= 2:
+                x["__return_bundles__"] = self    # 设置需要返回的bundle
+        return self.process_requests(data)        # 推动时钟，赋值，返回结果
+```
+
+当调用`add_list()`后，返回的结果为:
+```pthon
+[
+  {"data": {"a":5, "b":6, "cin": 0, "sum":11, "cout": 0}, "cycle":3},
+  {"data": {"a":7, "b":8, "cin": 0, "sum":15, "cout": 0}, "cycle":4}
+]
+```
+
 ### 异步支持
 
 在 Bundle 中，为了方便的接收时钟信息，提供了 `step` 函数。当 Bundle 连接至 DUT 的任意一个信号时，step 函数会自动同步至 DUT 的时钟信号。
