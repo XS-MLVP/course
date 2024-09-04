@@ -169,3 +169,74 @@ class StackRefModel(Model):
 
 ## 如何编写独立执行流模式的参考模型
 
+独立执行流模式的参考模型是通过 `port` 接口的形式来完成数据的输入输出，他可以主动向 `port` 请求数据，也可以主动向 `port` 输出数据。在 mlvp 中，我们提供了两种接口来实现这一功能，分别是 `DriverPort` 和 `MonitorPort`。
+
+类似地，我们需要定义一系列的 `DriverPort` 使其与 Env 中的驱动函数匹配，同时定义一系列的 `MonitorPort` 使其与 Env 中的监测函数匹配。
+
+当 Env 中的驱动函数被调用时，调用数据将会被发送到 `DriverPort` 中，参考模型将会主动获取这些数据，并进行计算。计算结果将会被输出到 `MonitorPort` 中，当 Env 中的监测函数被调用时，比较器会自动从 `MonitorPort` 中获取数据，并与 Env 中的监测函数的返回值进行比较。
+
+### 驱动方法接口匹配
+
+为了接收到 Env 中所有的驱动函数的调用，参考模型可以选择为每一个驱动函数编写对应的 `DriverPort`。可以通过 `DriverPort` 的参数 `agent_name` 与 `driver_name` 来匹配 Env 中的驱动函数。
+
+```python
+class StackRefModel(Model):
+    def __init__(self):
+        super().__init__()
+
+        self.push_port = DriverPort(agent_name="port_agent", driver_name="push")
+        self.pop_port = DriverPort(agent_name="port_agent", driver_name="pop")
+```
+
+与 `driver_hook` 类似，也可以使用下面的方式来匹配 Env 中的驱动函数：
+
+```python
+# 使用 "." 来指定驱动函数的路径
+self.push_port = DriverPort("port_agent.push")
+
+# 如果参考模型中的变量名称与驱动函数名称相同，可以省略 driver_name 参数
+self.push = DriverPort(agent_name="port_agent")
+
+# 使用变量名称同时匹配 Agent 名称与驱动函数名称，并使用 `__` 分隔
+self.port_agent__push = DriverPort()
+```
+
+### Agent 接口匹配
+
+也可以选择定义 `AgentPort` 同时匹配一个 Agent 中的所有驱动函数。但与 `agent_hook` 不同的是，定义了 `AgentPort` 后，便不能为该 Agent 中的任何驱动函数再定义 `DriverPort`。所有的驱动函数调用将会被发送到 `AgentPort` 中。
+
+```python
+class StackRefModel(Model):
+    def __init__(self):
+        super().__init__()
+
+        self.port_agent = AgentPort(agent_name="port_agent")
+```
+
+类似的，当变量名称与 Agent 名称相同时，可以省略 `agent_name` 参数：
+
+```python
+self.port_agent = AgentPort()
+```
+
+## 监测方法接口匹配
+
+为了与 Env 中的监测函数匹配，参考模型需要为每一个监测函数编写对应的 `MonitorPort`，定义方法与 `DriverPort` 一致。
+
+```python
+self.monitor_port = MonitorPort(agent_name="port_agent", monitor_name="monitor")
+
+# 使用 "." 来指定监测函数的路径
+self.monitor_port = MonitorPort("port_agent.monitor")
+
+# 如果参考模型中的变量名称与监测函数名称相同，可以省略 monitor_name 参数
+self.monitor = MonitorPort(agent_name="port_agent")
+
+# 使用变量名称同时匹配 Agent 名称与监测函数名称，并使用 `__` 分隔
+self.port_agent__monitor = MonitorPort()
+```
+
+MonitorPort 中送入的数据，将会自动与 Env 中的监测函数的返回值进行比较，来完成参考模型的比对工作。
+
+
+当参考模型中定义的 `DriverPort`, `AgentPort` 和 `MonitorPort` 能够与 `Env` 中所有接口匹配时，参考模型便能成功与 `Env` 建立匹配关系，此时可以直接通过 `Env` 中的 `attach` 方法将参考模型附加到 `Env` 上。
