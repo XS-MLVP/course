@@ -71,7 +71,7 @@ async def test_adder(request):
     env = AdderEnv(adder)
     await env.add_agent.exec_add(1, 2, 0)
 
-    adder.dut.Finish()
+    adder.Finish()
     set_func_coverage(request, cov_groups)
     set_line_coverage(request, "adder.dat")
 ```
