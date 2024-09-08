@@ -111,7 +111,7 @@ result = await adder_agent.monitor_sum()
 如果想获取消息队列中的消息数量，可以使用如下方式获取：
 
 ```python
-message_count = adder_agent.monitor_sum.size()
+message_count = adder_agent.monitor_size("monitor_sum")
 ```
 
 通过创建监测方法，你可以方便地添加一个后台监测任务，监测 `Bundle` 中的信号值，并在满足条件时收集消息。将函数标记为监测方法后，框架还会为这一方法提供与参考模型的匹配与自动收集对比，这一部分将在编写参考模型中详细介绍。
