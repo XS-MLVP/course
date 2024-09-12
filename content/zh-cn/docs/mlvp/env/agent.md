@@ -38,7 +38,7 @@ class AdderAgent(Agent):
         super().__init__(bundle.step)
         self.bundle = bundle
 
-    @driver_method
+    @driver_method()
     async def exec_add(self, a, b, cin):
         self.bundle.a.value = a
         self.bundle.b.value = b
