@@ -91,7 +91,7 @@ Options:
 
 #### 参数解释
 
-* `[file]`: 必需。DUT 的 Verilog 或 SystemVerilog 源文件，包含顶层模块
+* `[file]`: 必需。DUT 的 Verilog 或 SystemVerilog 源文件，包含顶层模块。
 * `--filelist, -fs`: 可选。DUT 的 Verilog 或 SystemVerilog 源文件，逗号分隔。也可以使用 `*.txt` 文件，每行指定一个 RTL 文件路径，来指定文件列表。
 * `--sim`: 可选。模拟器类型，可以是 vcs 或 verilator，默认是 verilator。
 * `--language, --lang`: 可选。构建示例项目的语言，可以是 cpp 或 python，默认是 cpp。
