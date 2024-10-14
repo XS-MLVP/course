@@ -8,8 +8,8 @@ weight: 1
 
 ## 验证报告
 
-<https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/blob/master/report/nutshell_cache_report_demo.pdf>
+<https://github.com/XS-MLVP/Example-NutShellCache/blob/master/nutshell_cache_report_demo.pdf>
 
 ## 验证环境&用例代码
 
-<https://github.com/yzcccccccccc/XS-MLVP-NutShellCache>
+<https://github.com/XS-MLVP/Example-NutShellCache>
