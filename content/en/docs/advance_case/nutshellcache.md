@@ -7,9 +7,12 @@ weight: 1
 ---
 
 ## Verification Report
+Chinese version:  
+<https://github.com/XS-MLVP/Example-NutShellCache/blob/master/nutshell_cache_report_demo.pdf>
 
-<https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/blob/master/report/nutshell_cache_report_demo.pdf>
+English verision:  
+TBD
 
 ## Verification Environment & Test Case Code
 
-<https://github.com/yzcccccccccc/XS-MLVP-NutShellCache>
+<https://github.com/XS-MLVP/Example-NutShellCache>
