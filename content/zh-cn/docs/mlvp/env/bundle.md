@@ -190,6 +190,14 @@ def bind(self, dut, unconnected_signal_access=True)
 adder_bundle.set_all(0)
 ```
 
+**随机赋值所有信号**
+
+可以通过 `randomize_all` 方法随机赋值所有信号。"value_range" 参数用于指定随机值的范围，"exclude_signals" 参数用于指定不需要随机赋值的信号，"random_func" 参数用于指定随机函数。
+
+```python
+adder_bundle.randomize_all()
+```
+
 **信号赋值模式更改**
 
 信号赋值模式是 `picker` 中的概念，用于控制信号的赋值方式，请查阅 `picker` 文档以了解更多信息。
