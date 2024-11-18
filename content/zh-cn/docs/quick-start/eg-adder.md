@@ -39,8 +39,10 @@ endmodule
 进入 Adder 文件夹，执行如下命令：
 
 ```bash
-picker export --autobuild=false Adder.v -w Adder.fst --sname Adder --tdir picker_out_adder --lang python -e --sim verilator
+picker export --autobuild=false Adder.v -w Adder.fst --sname Adder --tdir picker_out_adder/ --lang python -e --sim verilator
 ```
+
+*注：--tdir 指定的是目标构建目录，如果该参数值为空或者以“/”结尾，picker则会自动以DUT的目标模块名创建构建目录。例如 `--tdir picker_out_adder`指定了当前目录下的picker_out_adder为构建目录，而参数`--tdir picker_out_adder/`则指定picker在当前目录picker_out_adder中创建Adder目录作为目标构建目录。
 
 该命令的含义是：
 
@@ -54,43 +56,44 @@ picker export --autobuild=false Adder.v -w Adder.fst --sname Adder --tdir picker
 输出的目录结构如下，**请注意这部分均为中间文件**，不能直接使用：
 
 ```bash
-picker_out_adder
-|-- Adder.v # 原始的RTL源码
-|-- Adder_top.sv # 生成的Adder_top顶层封装，使用DPI驱动Adder模块的inputs和outputs
-|-- Adder_top.v # 生成的Adder_top顶层封装，因为Verdi不支持导入SV源码使用，因此需要生成一个Verilog版本
-|-- CMakeLists.txt # 用于调用仿真器编译基本的cpp class并将其打包成有裸DPI函数二进制动态库(libDPIAdder.so)
-|-- Makefile # 生成的Makefile，用于调用CMakeLists.txt，并让用户可以通过make命令编译出libAdder.so，并手动调整Makefile的配置参数。或者编译示例项目
-|-- cmake # 生成的cmake文件夹，用于调用不同仿真器编译RTL代码
-|   |-- vcs.cmake
-|   `-- verilator.cmake
-|-- cpp # CPP example目录，包含示例代码
-|   |-- CMakeLists.txt # 用于将libDPIAdder.so使用基础数据类型封装为一个可直接操作的类（libUTAdder.so），而非裸DPI函数。
-|   |-- Makefile
-|   |-- cmake
-|   |   |-- vcs.cmake
-|   |   `-- verilator.cmake
-|   |-- dut.cpp # 生成的cpp UT封装，包含了对libDPIAdder.so的调用，及UTAdder类的声明及实现
-|   |-- dut.hpp # 头文件
-|   `-- example.cpp # 调用UTAdder类的示例代码
-|-- dut_base.cpp # 用于调用与驱动不同仿真器编译结果的基类，通过继承封装为统一的类，用于隐藏所有仿真器相关的代码细节。
-|-- dut_base.hpp
-|-- filelist.f # 多文件项目使用的其他文件列表，请查看 -f 参数的介绍。本案例中为空
-|-- mk
-|   |-- cpp.mk # 用于控制以cpp为目标语言时的Makefile，包含控制编译示例项目（-e，example）的逻辑
-|   `-- python.mk # 同上，目标语言是python
-`-- python
-    |-- CMakeLists.txt
-    |-- Makefile
-    |-- cmake
+picker_out_adder/
+└── Adder
+    |-- Adder.v # 原始的RTL源码
+    |-- Adder_top.sv # 生成的Adder_top顶层封装，使用DPI驱动Adder模块的inputs和outputs
+    |-- Adder_top.v # 生成的Adder_top顶层封装，因为Verdi不支持导入SV源码使用，因此需要生成一个Verilog版本
+    |-- CMakeLists.txt # 用于调用仿真器编译基本的cpp class并将其打包成有裸DPI函数二进制动态库(libDPIAdder.so)
+    |-- Makefile # 生成的Makefile，用于调用CMakeLists.txt，并让用户可以通过make命令编译出libAdder.so，并手动调整Makefile的配置参数。或者编译示例项目
+    |-- cmake # 生成的cmake文件夹，用于调用不同仿真器编译RTL代码
     |   |-- vcs.cmake
     |   `-- verilator.cmake
-    |-- dut.i # SWIG配置文件，用于将libDPIAdder.so的基类与函数声明，依据规则用swig导出到python，提供python调用的能力
-    `-- dut.py # 生成的python UT封装，包含了对libDPIAdder.so的调用，及UTAdder类的声明及实现，等价于 libUTAdder.so
+    |-- cpp # CPP example目录，包含示例代码
+    |   |-- CMakeLists.txt # 用于将libDPIAdder.so使用基础数据类型封装为一个可直接操作的类（libUTAdder.so），而非裸DPI函数。
+    |   |-- Makefile
+    |   |-- cmake
+    |   |   |-- vcs.cmake
+    |   |   `-- verilator.cmake
+    |   |-- dut.cpp # 生成的cpp UT封装，包含了对libDPIAdder.so的调用，及UTAdder类的声明及实现
+    |   |-- dut.hpp # 头文件
+    |   `-- example.cpp # 调用UTAdder类的示例代码
+    |-- dut_base.cpp # 用于调用与驱动不同仿真器编译结果的基类，通过继承封装为统一的类，用于隐藏所有仿真器相关的代码细节。
+    |-- dut_base.hpp
+    |-- filelist.f # 多文件项目使用的其他文件列表，请查看 -f 参数的介绍。本案例中为空
+    |-- mk
+    |   |-- cpp.mk # 用于控制以cpp为目标语言时的Makefile，包含控制编译示例项目（-e，example）的逻辑
+    |   `-- python.mk # 同上，目标语言是python
+    `-- python
+        |-- CMakeLists.txt
+        |-- Makefile
+        |-- cmake
+        |   |-- vcs.cmake
+        |   `-- verilator.cmake
+        |-- dut.i # SWIG配置文件，用于将libDPIAdder.so的基类与函数声明，依据规则用swig导出到python，提供python调用的能力
+        `-- dut.py # 生成的python UT封装，包含了对libDPIAdder.so的调用，及UTAdder类的声明及实现，等价于 libUTAdder.so
 ```
 
 #### 构建中间文件
 
-进入 `picker_out_adder` 目录并执行 `make` 命令，即可生成最终的文件。
+进入 `picker_out_adder/Adder` 目录并执行 `make` 命令，即可生成最终的文件。
 
 > 由 `Makefile` 定义的自动编译过程流如下：
 >
@@ -102,26 +105,23 @@ picker_out_adder
 最终目录结果为：
 
 ```bash
-.
-|-- Adder.fst # 测试的波形文件
-|-- UT_Adder
-|   |-- Adder.fst.hier
-|   |-- _UT_Adder.so # Swig生成的wrapper动态库
-|   |-- __init__.py # Python Module的初始化文件，也是库的定义文件
-|   |-- libDPIAdder.a # 仿真器生成的库文件
-|   |-- libUTAdder.so # 基于dut_base生成的libDPI动态库封装
-|   `-- libUT_Adder.py # Swig生成的Python Module
-|   `-- xspcomm # xspcomm基础库，固定文件夹，不需要关注
-`-- example.py # 示例代码
+picker_out_adder/
+└── Adder
+    |-- _UT_Adder.so # Swig生成的wrapper动态库
+    |-- __init__.py # Python Module的初始化文件，也是库的定义文件
+    |-- libDPIAdder.a # 仿真器生成的库文件
+    |-- libUTAdder.so # 基于dut_base生成的libDPI动态库封装
+    |-- libUT_Adder.py # Swig生成的Python Module
+    `-- xspcomm # xspcomm基础库，固定文件夹，不需要关注
 ```
 
 ### 配置测试代码
 
-> 通过以下python测试代码替换 `example.py` 中的内容。
+> 在picker_out_adder中添加 `example.py`：
 
 ```python
 
-from UT_Adder import *
+from Adder import *
 import random
 
 # 生成无符号随机数

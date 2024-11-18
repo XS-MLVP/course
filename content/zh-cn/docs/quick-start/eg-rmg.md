@@ -48,7 +48,7 @@ endmodule
 进入 RandomGenerator 文件夹，执行如下命令：
 
 ```bash
-picker export --autobuild=false RandomGenerator.v -w RandomGenerator.fst --sname RandomGenerator --tdir picker_out_rmg --lang python -e --sim verilator
+picker export --autobuild=false RandomGenerator.v -w RandomGenerator.fst --sname RandomGenerator --tdir picker_out_rmg/ --lang python -e --sim verilator
 ```
 
 该命令的含义是：
@@ -71,24 +71,25 @@ picker export --autobuild=false RandomGenerator.v -w RandomGenerator.fst --sname
 
 ```shell
 picker_out_rmg
-|-- RandomGenerator.fst # 测试的波形文件
-|-- UT_RandomGenerator
-|   |-- RandomGenerator.fst.hier
-|   |-- _UT_RandomGenerator.so # Swig生成的wrapper动态库
-|   |-- __init__.py  # Python Module的初始化文件，也是库的定义文件
-|   |-- libDPIRandomGenerator.a # 仿真器生成的库文件
-|   |-- libUTRandomGenerator.so # 基于dut_base生成的libDPI动态库封装
-|   `-- libUT_RandomGenerator.py # Swig生成的Python Module
-|   `-- xspcomm  # xspcomm基础库，固定文件夹，不需要关注
-`-- example.py # 示例代码
+└── RandomGenerator
+    |-- RandomGenerator.fst # 测试的波形文件
+    |-- UT_RandomGenerator
+    |   |-- RandomGenerator.fst.hier
+    |   |-- _UT_RandomGenerator.so # Swig生成的wrapper动态库
+    |   |-- __init__.py  # Python Module的初始化文件，也是库的定义文件
+    |   |-- libDPIRandomGenerator.a # 仿真器生成的库文件
+    |   |-- libUTRandomGenerator.so # 基于dut_base生成的libDPI动态库封装
+    |   `-- libUT_RandomGenerator.py # Swig生成的Python Module
+    |   `-- xspcomm  # xspcomm基础库，固定文件夹，不需要关注
+    `-- example.py # 示例代码
 ```
 
 ### 配置测试代码
 
-> 复制以下代码替换 `example.py` 中的内容。
+> 在picker_out_rmg中创建 `example.py`：
 
 ```python
-from UT_RandomGenerator import *
+from RandomGenerator import *
 import random
 
 # 定义参考模型

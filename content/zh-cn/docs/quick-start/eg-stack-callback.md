@@ -157,31 +157,12 @@ endmodule
 首先，创建名为 `dual_port_stack.v` 的文件，并将上述的 RTL 代码复制到该文件中，接着在相同文件夹下执行以下命令：
 
 ```bash
-picker export --autobuild=true dual_port_stack.v -w dual_port_stack.fst --sname dual_port_stack --tdir picker_out_dual_port_stack --lang python -e --sim verilator
+picker export --autobuild=true dual_port_stack.v -w dual_port_stack.fst --sname dual_port_stack --tdir picker_out_dual_port_stack/ --lang python -e --sim verilator
 ```
 
-生成好的驱动环境位于 `picker_out_dual_port_stack` 文件夹中, 其中 `UT_dual_port_stack` 为生成的 Python Module，`example.py` 为测试脚本。
+生成好的驱动环境位于 `picker_out_dual_port_stack` 文件夹中, 其中 `dual_port_stack` 为生成的 Python Module。
 
-可以通过以下命令运行测试脚本：
-
-```bash
-cd picker_out_dual_port_stack
-python3 example.py
-```
-
-若运行过程中无错误发生，则代表环境被正确构建。
-
-## 利用协程驱动 DUT
-
-
-
-
-
-
-
-
-
-
+若自动编译运行过程中无错误发生，则代表环境被正确构建。
 
 ## 利用回调函数驱动 DUT
 
@@ -196,7 +177,7 @@ python3 example.py
 回调函数是一种常见的编程技术，它允许我们将一个函数传入，并等待某个条件满足后被调用。构建产生的 Python Module 中，我们提供了向内部执行环境注册回调函数的接口 `StepRis`，使用方法如下:
 
 ```python
-from UT_dual_port_stack import DUTdual_port_stack
+from dual_port_stack import DUTdual_port_stack
 
 def callback(cycles):
     print(f"The current clock cycle is {cycles}")
@@ -222,7 +203,7 @@ dut.Step(10)
 
 ```python
 import random
-from UT_dual_port_stack import *
+from dual_port_stack import *
 from enum import Enum
 
 class StackModel:
@@ -362,7 +343,7 @@ if __name__ == "__main__":
 
 ### 运行测试
 
-将上述代码复制到 `example.py` 中，然后执行以下命令：
+在picker_out_dual_port_stack中创建`exmaple.py`文件，将上述代码复制到其中，然后执行以下命令：
 
 ```bash
 cd picker_out_dual_port_stack

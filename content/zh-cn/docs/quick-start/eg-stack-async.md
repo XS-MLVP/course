@@ -28,7 +28,7 @@ weight: 6
 
 ```python
 import asyncio
-from UT_dual_port_stack import *
+from dual_port_stack import *
 
 async def my_coro(dut, name):
     for i in range(10):
@@ -59,7 +59,7 @@ dut.Finish()
 ```python
 import asyncio
 import random
-from UT_dual_port_stack import *
+from dual_port_stack import *
 from enum import Enum
 
 class StackModel:
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
 ### 运行测试
 
-将上述代码复制到 `example.py` 中，然后执行以下命令：
+在picker_out_dual_port_stack文件夹中创建`example.py`将上述代码复制到其中，然后执行以下命令：
 
 ```bash
 cd picker_out_dual_port_stack
