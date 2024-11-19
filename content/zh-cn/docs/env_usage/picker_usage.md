@@ -67,18 +67,17 @@ Picker 导出 Python Module 的方式是基于 C++ 的。
 
 - Picker会自动生成Python的一个基础类，我们称之为DUT类，以前加法器为例，用户需要编写测试用例，即导入上一章节生成的 Python Module，并调用其中的方法，以实现对硬件模块的操作。
 目录结构为：
-```shell
-    picker_out_adder
-    |-- UT_Adder                # Picker 工具生成的项目
-    |   |-- Adder.fst.hier
-    |   |-- _UT_Adder.so
-    |   |-- __init__.py
-    |   |-- libDPIAdder.a
-    |   |-- libUTAdder.so
-    |   `-- libUT_Adder.py
-    `-- example.py              # 用户需要编写的代码
+```bash
+picker_out_adder
+├── Adder                   # Picker 工具生成的项目
+│   ├── _UT_Adder.so
+│   ├── __init__.py
+│   ├── libUTAdder.so
+│   ├── libUT_Adder.py
+│   └── signals.json
+└── example.py              # 用户需要编写的代码
 ```
-- 在DUT对应的DUTAdder类中共有8个方法，具体如下：
+- 在DUT对应的DUTAdder类中共有8个方法(位于Adder/__init__.py文件)，具体如下：
 
 ```python
 class DUTAdder:
@@ -96,7 +95,7 @@ class DUTAdder:
 - DUT对应的引脚，例如reset，clock等在DUTAdder类中以成员变量的形式呈现。如下所示，可以通过value进行引脚的读取和写入。
 
 ```python
-from UT_Adder import * 
+from Adder import *
 dut = DUTAdder()
 dut.a.value = 1  # 通过给引脚的.value属性赋值完成对引脚的赋值
 dut.a[12] = 1    # 对引脚输入a的第12bit进行赋值
@@ -118,7 +117,8 @@ y = dut.a[12]    # 读取引脚a的第12bit的值
 
 ```python
 
-from UT_DUT import *
+# Python DUT 的名字可通过 --tdir 指定
+from DUT import *
 
 # 1 创建
 dut = DUT()

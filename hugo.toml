@@ -65,7 +65,6 @@ title = "开放验证平台学习资源"
 languageName ="English"
 weight = 2
 title = "UnityChip Verification"
-description = "Quickly join the open verification platform trial"
 contentDir = "content/en"
 
 [markup]
