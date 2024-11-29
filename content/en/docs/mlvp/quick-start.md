@@ -4,26 +4,58 @@ weight: 1
 ---
 ## Installation 
 
-mlvp requires the following dependencies:
+### toffee 
+
+[Toffee](https://github.com/XS-MLVP/toffee) is a Python-based hardware verification framework designed to help users build hardware verification environments more conveniently and systematically using Python. It leverages the multi-language conversion tool [picker](https://github.com/XS-MLVP/picker), which converts Verilog code of hardware designs into Python Packages, enabling users to drive and verify hardware designs in Python.
+
+Toffee requires the following dependencies:
 
 - Python 3.6.8+
 
 - Picker 0.9.0+
 
-After installing the dependencies, you can install the latest version of mlvp by running the following command:
-
+Once these dependencies are installed, you can install Toffee via pip:
 
 ```bash
-pip3 install mlvp@git+https://github.com/XS-MLVP/mlvp@master
+pip install pytoffee
 ```
 
-Alternatively, you can install it locally using the following steps:
-
+Or install the latest version of Toffee with the following command:
 
 ```bash
-git clone https://github.com/XS-MLVP/mlvp.git
-cd mlvp
-pip3 install .
+pip install pytoffee@git+https://github.com/XS-MLVP/toffee@master
+```
+
+For a local installation:
+
+```bash
+git clone https://github.com/XS-MLVP/toffee.git
+cd toffee
+pip install .
+```
+
+### toffee-test
+
+[toffee-test](https://github.com/XS-MLVP/toffee-test) is a pytest plugin that provides testing support for the toffee framework. It includes identifying test functions as toffee test case objects, making them recognizable and executable by the toffee framework, offering resource management for test cases and providing test report generationto assist users in writing test cases for toffee
+
+To install toffee-test via pip:
+
+```bash
+pip install toffee-test
+```
+
+Or install the development version:
+
+```bash
+pip install toffee-test@git+https://github.com/XS-MLVP/toffee-test@master
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/XS-MLVP/toffee-test.git
+cd toffee-test
+pip install .
 ```
 
 ## Setting Up a Simple Verification Environment 
@@ -59,11 +91,8 @@ First, we create a driver method for the adder interface using `Bundle` to descr
 class AdderBundle(Bundle):
     a, b, cin, sum, cout = Signals(5)
 
-class AdderAgent(Agent):
-    def __init__(self, bundle):
-        super().__init__(bundle.step)
-        self.bundle = bundle
 
+class AdderAgent(Agent):
     @driver_method()
     async def exec_add(self, a, b, cin):
         self.bundle.a.value = a
@@ -96,9 +125,9 @@ class AdderEnv(Env):
         self.attach(AdderModel())
 ```
 
-At this point, the verification environment is set up. mlvp will automatically drive the reference model, collect results, and compare them with the adder's output.
+At this point, the verification environment is set up. toffee will automatically drive the reference model, collect results, and compare them with the adder's output.
 
-We can now write several test cases to verify the adder's functionality, as shown below:
+After that, we can now write several test cases to verify the adder's functionality by toffee-test, as shown below:
 
 
 ```python
@@ -122,7 +151,6 @@ async def test_boundary(mlvp_request):
                 await env.add_agent.exec_add(a, b, cin)
 ```
 
-mlvp integrates with the pytest framework, allowing you to manage test cases using pytest. mlvp will automatically handle driving the DUT, comparing results with the reference model, and generating a verification report.
 You can run the example in the `example/adder` directory with the following command:
 
 ```bash
