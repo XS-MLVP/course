@@ -35,7 +35,7 @@ pip install .
 ```
 ### toffee-test
 
-[Toffee-test](https://github.com/XS-MLVP/toffee-test/tree/master) 是一个用于为 Toffee 框架提供测试支持的 Pytest 插件，他为 toffee 框架提供了以下测试功能，以便于用户编写测试用例。
+[Toffee-test](https://github.com/XS-MLVP/toffee-test/tree/master) 是一个用于为 Toffee 框架提供测试支持的 Pytest 插件，他为 toffee 框架提供了将测试用例函数标识为 toffee 的测试用例对象，使其可以被 toffee 框架识别并执行;测试用例资源的管理功能;测试报告生成功能，以便于用户编写测试用例。
 
 通过 pip 安装 toffee-test
 
