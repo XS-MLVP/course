@@ -1,28 +1,27 @@
 ---
 title: 多时钟
 description: 多时钟示例
-categories: [示例项目, 教程] 
+categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 5
 draft: true
 ---
 
+部分电路有多个时钟，XClock 类提供了分频功能，可以通过它实现对多时钟电路的驱动。
 
-部分电路有多个时钟，XClock类提供了分频功能，可以通过它实现对多时钟电路的驱动。  
-对XClock的介绍可以参照[工具介绍](https://xs-mlvp.github.io/mlvp/docs/env_usage/picker_usage/#xclock-%E7%B1%BB)。
+## XClock 中的 FreqDivWith 接口
 
-## XClock 中的FreqDivWith接口
+XClock 函数提供如下分频接口
 
-XClock函数提供如下分频接口
 ```c++
 void XClock::FreqDivWith(int div,   // 分频数，，即绑定的XClock的频率为原时钟频率的div分之1
                      XClock &clk,   // 绑定的XClock
                      int shift=0)   // 对波形进行 shift 个半周期的移位
 ```
 
-## XClock的一般驱动流程
+## XClock 的一般驱动流程
 
-1. 创建XClock，绑定DUT的驱动函数
+1. 创建 XClock，绑定 DUT 的驱动函数
 
 ```python
 # 假设已经创建了DUT，并将其命名为dut
@@ -30,78 +29,57 @@ void XClock::FreqDivWith(int div,   // 分频数，，即绑定的XClock的频�
 xclock = XClock(dut.dut.simStep)
 ```
 
-2. 绑定关联clk引脚
+2. 绑定关联 clk 引脚
 
 ```python
 # clk是dut的时钟引脚
 xclock.Add(dut.clk)
+# Add方法具有别名：AddPin
 ```
 
-3. 通过XPort绑定与clk关联的引脚
+3. 通过 XPort 绑定与 clk 关联的引脚
+
+因为在我们的工具中，对与端口的读写是通过 xclock 来驱动的，所以如果不将与 clk 关联的引脚绑定到 XClock 上，那么在驱动时，相关的引脚数值不会发生变化。  
+比如，我们要进行复位操作，那么可以将 reset 绑定到 xclock 上。
 
 方法：
+
 ```python
 class XClock:
     def Add(xport)       #将Clock和XData进行绑定
 ```
-举例：
-```python
-xclock.Add(dut.xport.Add(pin_name, XData))
-```
-
-4. 根据需要设置回调
-回调函数通过上升沿触发和下降沿触发
-
-方法：
-```python
-class XClock:
-    # func为回调函数，args为自定义参数
-    def StepRis(func, args=(), kwargs={}) #设置上升沿回调函数，dut.StepRis = dut.xclock.StepRis
-    def StepFal(func, args=(), kwargs={}) #设置下降沿回调函数，dut.StepFal = dut.xclock.StepFal
-```
 
 举例：
+
 ```python
+# xclock.Add(dut.xport.Add(pin_name, XData))
+xclock.Add(dut.xport.Add("reset", dut.reset))
+```
+
+---
+
+在经过了前面的绑定之后，接下来可以使用了。  
+我们根据需要来设置回调、设置分频。当然，时序电路肯定也要驱动时钟。  
+这些方法都可以参照[工具介绍](https://xs-mlvp.github.io/mlvp/docs/env_usage/picker_usage/#xclock-%E7%B1%BB)。
+
+下面是举例：
+
+```python
+# func为回调函数，args为自定义参数
 #设置上升沿回调函数
 dut.StepRis(func, args=(), kwargs={})
 #设置下降沿回调函数
 dut.StepFal(func, args=(), kwargs={})
-```
-
-5. 根据需要设置分频
-
-分频的方法已经在XClock中实现，方法如下：
-```python
-class XClock:
-    FreqDivWith(int div,       # 分频数，，即绑定的XClock的频率为原时钟频率的div分之1
-                XClock &clk,   # 绑定的XClock
-                int shift=0)   # 对波形进行 shift 个半周期的移位
-```
-
-举例：
-```python
 # 假设xclock是XClock的实例
 xclock.FreqDivWith(2, half_clock)           # 将xclock的频率分频为原来的一半
 xclock.FreqDivWith(1, left_clock， -2)      # 将xclock的频率不变，对波形进行一个周期的左移
-```
-
-6. 驱动时钟
-
-方法：
-```python
-class XClock:
-    def Step(int s = 1)                   #推进电路s个时钟周期
-```
-
-举例：
-```python
 dut.Step(10) #推进10个时钟周期
 ```
 
-
 ## 多时钟案例
 
-例如多时钟电路有6个clock，每个clock都有一个对应的计数器，设计代码如下：
+例如多时钟电路有 6 个 clock，每个 clock 都有一个对应的计数器，设计代码如下：
+
 ```verilog
 module multi_clock (
     input wire clk1,
@@ -146,7 +124,8 @@ module multi_clock (
 endmodule
 ```
 
-可以通过如下Python进行多时钟驱动：
+可以通过如下 Python 进行多时钟驱动：
+
 ```python
 
 from MultiClock import *
@@ -186,9 +165,10 @@ if __name__ == "__main__":
 
 ![multi_clock](multiclock.png)
 
-可以看到：  
-- clk2的周期是clk1的2倍
-- clk3的周期是clk1的3倍，
-- clk4的周期和clk1相同，但是进行了半个周期的右移
-- clk5的周期和clk2相同，但是进行了半个周期的左移
-- clk6的周期和clk3相同，但是进行了一个周期的左移
+可以看到：
+
+- clk2 的周期是 clk1 的 2 倍
+- clk3 的周期是 clk1 的 3 倍，
+- clk4 的周期和 clk1 相同，但是进行了半个周期的右移
+- clk5 的周期和 clk2 相同，但是进行了半个周期的左移
+- clk6 的周期和 clk3 相同，但是进行了一个周期的左移
