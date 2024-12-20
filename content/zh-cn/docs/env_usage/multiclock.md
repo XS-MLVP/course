@@ -8,7 +8,8 @@ draft: true
 ---
 
 
-部分电路有多个时钟，XClock类提供了分频功能，可以通过它实现对多时钟电路的驱动。
+部分电路有多个时钟，XClock类提供了分频功能，可以通过它实现对多时钟电路的驱动。  
+对XClock的介绍可以参照[工具介绍](https://xs-mlvp.github.io/mlvp/docs/env_usage/picker_usage/#xclock-%E7%B1%BB)。
 
 ## XClock 中的FreqDivWith接口
 
@@ -22,10 +23,80 @@ void XClock::FreqDivWith(int div,   // 分频数，，即绑定的XClock的频�
 ## XClock的一般驱动流程
 
 1. 创建XClock，绑定DUT的驱动函数
-1. 绑定关联clk引脚
-1. 通过XPort绑定与clk关联的引脚
-1. 根据需要设置回调
-1. 根据需要设置分频
+
+```python
+# 假设已经创建了DUT，并将其命名为dut
+# 创建XClock
+xclock = XClock(dut.dut.simStep)
+```
+
+2. 绑定关联clk引脚
+
+```python
+# clk是dut的时钟引脚
+xclock.Add(dut.clk)
+```
+
+3. 通过XPort绑定与clk关联的引脚
+
+方法：
+```python
+class XClock:
+    def Add(xport)       #将Clock和XData进行绑定
+```
+举例：
+```python
+xclock.Add(dut.xport.Add(pin_name, XData))
+```
+
+4. 根据需要设置回调
+回调函数通过上升沿触发和下降沿触发
+
+方法：
+```python
+class XClock:
+    # func为回调函数，args为自定义参数
+    def StepRis(func, args=(), kwargs={}) #设置上升沿回调函数，dut.StepRis = dut.xclock.StepRis
+    def StepFal(func, args=(), kwargs={}) #设置下降沿回调函数，dut.StepFal = dut.xclock.StepFal
+```
+
+举例：
+```python
+#设置上升沿回调函数
+dut.StepRis(func, args=(), kwargs={})
+#设置下降沿回调函数
+dut.StepFal(func, args=(), kwargs={})
+```
+
+5. 根据需要设置分频
+
+分频的方法已经在XClock中实现，方法如下：
+```python
+class XClock:
+    FreqDivWith(int div,       # 分频数，，即绑定的XClock的频率为原时钟频率的div分之1
+                XClock &clk,   # 绑定的XClock
+                int shift=0)   # 对波形进行 shift 个半周期的移位
+```
+
+举例：
+```python
+# 假设xclock是XClock的实例
+xclock.FreqDivWith(2, half_clock)           # 将xclock的频率分频为原来的一半
+xclock.FreqDivWith(1, left_clock， -2)      # 将xclock的频率不变，对波形进行一个周期的左移
+```
+
+6. 驱动时钟
+
+方法：
+```python
+class XClock:
+    def Step(int s = 1)                   #推进电路s个时钟周期
+```
+
+举例：
+```python
+dut.Step(10) #推进10个时钟周期
+```
 
 
 ## 多时钟案例
@@ -111,4 +182,13 @@ if __name__ == "__main__":
     test_multi_clock()
 ```
 
-上述代码输出的波形如下：TBD
+上述代码输出的波形如下：
+
+![multi_clock](multiclock.png)
+
+可以看到：  
+- clk2的周期是clk1的2倍
+- clk3的周期是clk1的3倍，
+- clk4的周期和clk1相同，但是进行了半个周期的右移
+- clk5的周期和clk2相同，但是进行了半个周期的左移
+- clk6的周期和clk3相同，但是进行了一个周期的左移
