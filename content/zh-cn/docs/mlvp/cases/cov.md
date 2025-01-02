@@ -5,7 +5,7 @@ weight: 3
 
 ## 什么是功能检查点
 
-在 mlvp 中，**功能检查点(Cover Point)** 是指对设计的某个功能进行验证的最小单元，判断该功能是否满足设计目标。**测试组(Cover Croup)** 是一类检查点的集合。
+在 toffee 中，**功能检查点(Cover Point)** 是指对设计的某个功能进行验证的最小单元，判断该功能是否满足设计目标。**测试组(Cover Croup)** 是一类检查点的集合。
 
 定义一个检查点，需要指定检查点的名称及检查点的触发条件（触发条件可以有多个，最终的检查结果为所有条件取“逻辑与”，触发条件称为`Cover Bin`）。例如，可以定义了一个检查点，“当加法器运算结果不为 0 时，结果运算正确”，此时，检查点的触发条件可以为 “加法器的 sum 信号不为零”。
 
@@ -15,9 +15,8 @@ weight: 3
 
 编写检查点前，首先需要创建一个测试组，并指定测试组的名称
 
-
 ```python
-import mlvp.funcov as fc
+import toffee.funcov as fc
 
 g = fc.CovGroup("Group-A")
 ```
@@ -35,12 +34,10 @@ g.add_watch_point(adder.io_cout,
 ```python
 def add_watch_point(target,
                     bins: dict,
-                    check_func: dict = {},
                     name: str = "", once=None):
         """
         @param target: 检查目标，可以是一个引脚，也可以是一个DUT对象
         @param bins: 检查条件，dict格式，key为条件名称，value为具体检查方法或者检查方法的数组。
-        @param check_func: 用于覆盖bins中的检查函数（不建议使用，后续版本会删除该参数）
         @param name: 检查点名称
         @param once，如果once=True，表明只检查一次，一旦该检查点满足要求后就不再进行重复条件判断。
 ```
@@ -73,8 +70,8 @@ print(g.as_dict())
 
 ```python
 import pytest
-import mlvp.funcov as fc
-from mlvp.reporter import set_func_coverage
+import toffee.funcov as fc
+from toffee_test.reporter import set_func_coverage
 
 g = fc.CovGroup("Group X")
 
