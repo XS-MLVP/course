@@ -3,16 +3,16 @@ title: 如何编写 Agent
 weight: 3
 ---
 
-`Agent` 在 mlvp 验证环境中实现了对一类 `Bundle` 中信号的高层封装，使得上层驱动代码可以在不关心具体信号赋值的情况下，完成对 Bundle 中信号的驱动及监测。
+`Agent` 在 toffee 验证环境中实现了对一类 `Bundle` 中信号的高层封装，使得上层驱动代码可以在不关心具体信号赋值的情况下，完成对 Bundle 中信号的驱动及监测。
 
 一个 `Agent` 由 **驱动方法(driver_method)** 和 **监测方法(monitor_method)** 组成，其中驱动方法用于主动驱动 `Bundle` 中的信号，而监测方法用于被动监测 `Bundle` 中的信号。
 
 ## 初始化 Agent
 
-为了定义一个 `Agent`，需要自定义一个新类，并继承 mlvp 中的 `Agent` 类。下面是一个简单的 `Agent` 的定义示例：
+为了定义一个 `Agent`，需要自定义一个新类，并继承 toffee 中的 `Agent` 类。下面是一个简单的 `Agent` 的定义示例：
 
 ```python
-from mlvp.agent import *
+from toffee.agent import *
 
 class AdderAgent(Agent):
     def __init__(self, bundle):
@@ -31,7 +31,7 @@ class AdderAgent(Agent):
 下面是一个简单的驱动方法的定义示例：
 
 ```python
-from mlvp.agent import *
+from toffee.agent import *
 
 class AdderAgent(Agent):
     def __init__(self, bundle):
@@ -69,7 +69,7 @@ print(sum, cout)
 一个简单的监测方法的定义示例如下：
 
 ```python
-from mlvp.agent import *
+from toffee.agent import *
 
 class AdderAgent(Agent):
     def __init__(self, bundle):
