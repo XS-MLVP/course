@@ -8,7 +8,8 @@ draft: true
 ---
 
 ## 概述
-消息驱动编程是一种编程范式，它依赖于异步消息传递以促进组件间的通信和协作。在这种模式下，系统的各个组件不是通过直接调用对方的函数或方法，而是通过发送和接收消息来交流。例如，在picker环境中，我们可以利用消息驱动的方法将电路的行为和软件的激励相解耦，这样就可以**避免受到硬件电路时序限制的束缚**。
+
+消息驱动编程是一种编程范式，它依赖于异步消息传递以促进组件间的通信和协作。在这种模式下，系统的各个组件不是通过直接调用对方的函数或方法，而是通过发送和接收消息来交流。例如，在 picker 环境中，我们可以利用消息驱动的方法将电路的行为和软件的激励相解耦，这样就可以**避免受到硬件电路时序限制的束缚**。
 在硬件电路测试中，硬件时序指的是电路中各个元件操作的顺序和时间间隔，这对于电路的正确运行至关重要。软件激励则是指用软件生成的一系列动作或信号，用以模拟外部事件对电路的影响，以测试电路的反应。将硬件时序与软件激励解耦是必要的，因为这样可以使得测试过程更加灵活和高效。这种解耦还有助于**在不同的环境中重用软件激励**，提高测试资源的利用率。总之，使用消息驱动来解耦硬件时序和软件激励可以**提升测试的质量和可维护性**，同时**降低复杂性**。
 
 ![消息驱动](message.svg)
@@ -20,122 +21,128 @@ draft: true
 - **发布-订阅模式**： 发布-订阅模式是消息驱动编程的一种常见实现方式。在这种模式中，发布者发布消息到一个或多个主题（topic），订阅者订阅感兴趣的主题，并接收相应的消息。
 - **消息代理**： 消息代理是处理消息传递的中间件组件。它负责接收和分发消息，管理消息队列，确保消息的可靠传递，以及提供其他消息相关的功能，如消息路由、消息过滤、消息持久化等
 
-## 使用Pub/Sub模式来实现消息驱动
+## 使用 Pub/Sub 模式来实现消息驱动
+
 发布/订阅模式是一种在软件架构中常见的消息通信方式。在这个模式中，发布者不直接将消息发送给特定的接收者，而是发布（发送）到一个中间层，即消息代理。订阅者通过订阅感兴趣的消息类型或主题，来表明他们希望接收哪些消息。消息代理的职责是确保所有订阅了特定主题的客户端都能收到相应的消息。
 这种模式的一个关键特点是发布者和订阅者之间的解耦。他们不需要知道对方的存在，也不需要直接通信。这提高了系统的灵活性和可扩展性，因为可以独立地添加或移除发布者和订阅者，而不会影响系统的其他部分。
 
 1. 使用 Python 的内置队列模块实现的基本发布/订阅模型：
+
 - 此处 Publisher 类具有消息队列和订阅者列表。使用发布方法发布消息时，会将其添加到队列中，并通过调用其接收方法传递到所有订阅的客户端。Subscriber 类具有一个 receive 方法，该方法仅打印收到的消息。
-    ```python
-    import queue
-    # 发布者类
-    class Publisher:
-        def __init__(self):
-            # 初始化消息队列和订阅者列表
-            self.message_queue = queue.Queue()
-            self.subscribers = []
 
-        def subscribe(self, subscriber):
-            # 添加一个新的订阅者到订阅者列表
-            self.subscribers.append(subscriber)
+  ```python
+  import queue
+  # 发布者类
+  class Publisher:
+      def __init__(self):
+          # 初始化消息队列和订阅者列表
+          self.message_queue = queue.Queue()
+          self.subscribers = []
 
-        def publish(self, message):
-            # 将消息放入队列并通知所有订阅者
-            self.message_queue.put(message)
-            for subscriber in self.subscribers:
-                # 调用订阅者的接收方法
-                subscriber.receive(message)
+      def subscribe(self, subscriber):
+          # 添加一个新的订阅者到订阅者列表
+          self.subscribers.append(subscriber)
 
-    # 订阅者类
-    class Subscriber:
-        def __init__(self, name):
-            # 初始化订阅者的名称
-            self.name = name
+      def publish(self, message):
+          # 将消息放入队列并通知所有订阅者
+          self.message_queue.put(message)
+          for subscriber in self.subscribers:
+              # 调用订阅者的接收方法
+              subscriber.receive(message)
 
-        def receive(self, message):
-            # 打印接收到的消息
-            print(f"{self.name} received message: {message}")
+  # 订阅者类
+  class Subscriber:
+      def __init__(self, name):
+          # 初始化订阅者的名称
+          self.name = name
 
-    # 创建一个发布者实例
-    publisher = Publisher()
+      def receive(self, message):
+          # 打印接收到的消息
+          print(f"{self.name} received message: {message}")
 
-    # 创建两个订阅者实例
-    subscriber_1 = Subscriber("Subscriber 1")
-    subscriber_2 = Subscriber("Subscriber 2")
+  # 创建一个发布者实例
+  publisher = Publisher()
 
-    # 将订阅者添加到发布者的订阅者列表中
-    publisher.subscribe(subscriber_1)
-    publisher.subscribe(subscriber_2)
+  # 创建两个订阅者实例
+  subscriber_1 = Subscriber("Subscriber 1")
+  subscriber_2 = Subscriber("Subscriber 2")
 
-    # 发布者发布一条消息
-    publisher.publish("Hello World")
-    ```
+  # 将订阅者添加到发布者的订阅者列表中
+  publisher.subscribe(subscriber_1)
+  publisher.subscribe(subscriber_2)
+
+  # 发布者发布一条消息
+  publisher.publish("Hello World")
+  ```
+
 2. 使用 Python 的线程模块实现的发布/订阅模型：
+
 - 在此示例中，Publisher 类有一个订阅者字典，其中键是主题，值是订阅者列表。subscribe 方法将订阅服务器添加到指定主题的列表中。publish 方法检查指定主题是否有任何订阅者，如果有，则设置事件并存储每个订阅者的消息。Subscriber 类和 receive 方法与前面的示例相同。
-    ```python
-    import threading
 
-    # 发布者类
-    class Publisher:
-        def __init__(self):
-            # 初始化订阅者字典，按主题组织
-            self.subscribers = {}
+  ```python
+  import threading
 
-        def subscribe(self, subscriber, topic):
-            # 订阅方法，将订阅者添加到特定主题
-            if topic not in self.subscribers:
-                self.subscribers[topic] = []
-            self.subscribers[topic].append(subscriber)
+  # 发布者类
+  class Publisher:
+      def __init__(self):
+          # 初始化订阅者字典，按主题组织
+          self.subscribers = {}
 
-        def publish(self, message, topic):
-            # 发布方法，向特定主题的所有订阅者发送消息
-            if topic in self.subscribers:
-                for subscriber in self.subscribers[topic]:
-                    # 设置事件标志，通知订阅者有新消息
-                    subscriber.event.set()
-                    # 将消息传递给订阅者
-                    subscriber.message = message
+      def subscribe(self, subscriber, topic):
+          # 订阅方法，将订阅者添加到特定主题
+          if topic not in self.subscribers:
+              self.subscribers[topic] = []
+          self.subscribers[topic].append(subscriber)
 
-    # 订阅者类
-    class Subscriber:
-        def __init__(self, name):
-            # 初始化订阅者名称和事件标志
-            self.name = name
-            self.event = threading.Event()
-            self.message = None
+      def publish(self, message, topic):
+          # 发布方法，向特定主题的所有订阅者发送消息
+          if topic in self.subscribers:
+              for subscriber in self.subscribers[topic]:
+                  # 设置事件标志，通知订阅者有新消息
+                  subscriber.event.set()
+                  # 将消息传递给订阅者
+                  subscriber.message = message
 
-        def receive(self):
-            # 接收方法，等待事件标志被设置
-            self.event.wait()
-            # 打印接收到的消息
-            print(f"{self.name} received message: {self.message}")
-            # 清除事件标志，准备接收下一个消息
-            self.event.clear()
+  # 订阅者类
+  class Subscriber:
+      def __init__(self, name):
+          # 初始化订阅者名称和事件标志
+          self.name = name
+          self.event = threading.Event()
+          self.message = None
 
-    # 创建发布者实例
-    publisher = Publisher()
+      def receive(self):
+          # 接收方法，等待事件标志被设置
+          self.event.wait()
+          # 打印接收到的消息
+          print(f"{self.name} received message: {self.message}")
+          # 清除事件标志，准备接收下一个消息
+          self.event.clear()
 
-    # 创建三个订阅者实例
-    subscriber_1 = Subscriber("Subscriber 1")
-    subscriber_2 = Subscriber("Subscriber 2")
-    subscriber_3 = Subscriber("Subscriber 3")
+  # 创建发布者实例
+  publisher = Publisher()
 
-    # 将订阅者根据主题订阅到发布者
-    publisher.subscribe(subscriber_1, "sports")
-    publisher.subscribe(subscriber_2, "entertainment")
-    publisher.subscribe(subscriber_3, "sports")
+  # 创建三个订阅者实例
+  subscriber_1 = Subscriber("Subscriber 1")
+  subscriber_2 = Subscriber("Subscriber 2")
+  subscriber_3 = Subscriber("Subscriber 3")
 
-    # 发布者发布一条属于'sports'主题的消息
-    publisher.publish("Soccer match result", "sports")
+  # 将订阅者根据主题订阅到发布者
+  publisher.subscribe(subscriber_1, "sports")
+  publisher.subscribe(subscriber_2, "entertainment")
+  publisher.subscribe(subscriber_3, "sports")
 
-    # 订阅者1接收并处理消息
-    subscriber_1.receive()
-    ```
+  # 发布者发布一条属于'sports'主题的消息
+  publisher.publish("Soccer match result", "sports")
+
+  # 订阅者1接收并处理消息
+  subscriber_1.receive()
+  ```
 
 ## 使用消息驱动进行验证
-下面我们将以果壳cache的验证过程为例，来介绍消息驱动在验证中的使用。
-[完整代码](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/tree/master)参见。
 
+下面我们将以果壳 cache 的验证过程为例，来介绍消息驱动在验证中的使用。
+[完整代码](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/tree/master)参见。
 
 ```python
 from util.simplebus import SimpleBusWrapper
@@ -243,19 +250,25 @@ class CacheWrapper:
 ```
 
 在上述代码中，进行消息驱动的流程如下：
+
 1. 封装软件激励：
-- 软件激励首先被封装进ReqMsg对象中，这个对象包含了所有必要的信息，如地址、命令、数据等。此处以果壳cache的验证为例。
+
+- 软件激励首先被封装进 ReqMsg 对象中，这个对象包含了所有必要的信息，如地址、命令、数据等。此处以果壳 cache 的验证为例。
 
 2. 使用消息队列存储请求：
-- 封装后的请求被放入CacheWrapper类的请求队列req_que中。这个队列作为软件激励的缓冲区，允许软件在任何时刻发送请求，而不必等待硬件的即时响应。
+
+- 封装后的请求被放入 CacheWrapper 类的请求队列 req_que 中。这个队列作为软件激励的缓冲区，允许软件在任何时刻发送请求，而不必等待硬件的即时响应。
 
 3. 解耦的回调机制：
-- 在硬件时钟上升沿，CacheWrapper类的__callback方法被触发。这个方法检查请求队列中是否有待处理的请求，并根据当前的硬件状态决定是否处理这些请求。这是解耦过程中的关键步骤，因为它将软件激励的发送与硬件时序的处理分离开来。
+
+- 在硬件时钟上升沿，CacheWrapper 类的\_\_callback 方法被触发。这个方法检查请求队列中是否有待处理的请求，并根据当前的硬件状态决定是否处理这些请求。这是解耦过程中的关键步骤，因为它将软件激励的发送与硬件时序的处理分离开来。
 
 4. 模拟硬件响应：
-- 封装后的请求被放入CacheWrapper类的请求队列req_que中。这个队列作为软件激励的缓冲区，允许软件在任何时刻发送请求，而不必等待硬件的即时响应。
+
+- 封装后的请求被放入 CacheWrapper 类的请求队列 req_que 中。这个队列作为软件激励的缓冲区，允许软件在任何时刻发送请求，而不必等待硬件的即时响应。
 
 5. 软件接收响应：
-- 软件可以通过CacheWrapper类的recv方法从响应队列中取出响应。这个过程是同步的，但它允许软件在任何时刻检查响应队列，而不是必须在特定的硬件时序点上。
 
-通过上述过程，软件的请求（激励）和硬件的响应（时序）被有效地解耦。软件可以自由地发送请求，而硬件则在适当的时序下处理这些请求，生成响应。这样的分离确保了软件的开发和测试可以与硬件的具体行为相独立，极大提升了开发效率和系统的可扩展性。为了避免每次都手动编写代码，我们提供了一个名为[MLVP](https://github.com/XS-MLVP/mlvp)的框架，它包含了一系列现成的消息驱动方法。
+- 软件可以通过 CacheWrapper 类的 recv 方法从响应队列中取出响应。这个过程是同步的，但它允许软件在任何时刻检查响应队列，而不是必须在特定的硬件时序点上。
+
+通过上述过程，软件的请求（激励）和硬件的响应（时序）被有效地解耦。软件可以自由地发送请求，而硬件则在适当的时序下处理这些请求，生成响应。这样的分离确保了软件的开发和测试可以与硬件的具体行为相独立，极大提升了开发效率和系统的可扩展性。为了避免每次都手动编写代码，我们提供了一个名为[toffee-test](https://github.com/XS-MLVP/toffee-test)的框架，它包含了一系列现成的消息驱动方法。
