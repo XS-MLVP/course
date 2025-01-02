@@ -3,14 +3,14 @@ title: 如何使用 Bundle
 weight: 2
 ---
 
-`Bundle` 在 mlvp 验证环境中，用于构建 `Agent` 与 DUT 之间交互的中间层，以保证 `Agent` 与 DUT 之间的解耦。同时 `Bundle` 也起到了对 DUT 接口层次结构划分的作用，使得对 DUT 接口的访问变得更加清晰、方便。
+`Bundle` 在 toffee 验证环境中，用于构建 `Agent` 与 DUT 之间交互的中间层，以保证 `Agent` 与 DUT 之间的解耦。同时 `Bundle` 也起到了对 DUT 接口层次结构划分的作用，使得对 DUT 接口的访问变得更加清晰、方便。
 
 ## 一个简单的 Bundle 的定义
 
-为了定义一个 `Bundle`，需要自定义一个新类，并继承 mlvp 中的 `Bundle` 类。下面是一个简单的 `Bundle` 的定义示例：
+为了定义一个 `Bundle`，需要自定义一个新类，并继承 toffee 中的 `Bundle` 类。下面是一个简单的 `Bundle` 的定义示例：
 
 ```python
-from mlvp import Bundle, Signals
+from toffee import Bundle, Signals
 
 class AdderBundle(Bundle):
     a, b, sum, cin, cout = Signals(5)
@@ -121,12 +121,12 @@ adder_bundle.bind(adder)
 
 例如对于上面代码中的正则表达式，`io_a_in` 会与正则表达式成功匹配，唯一的捕获组捕获到的内容为 `a`。`a` 这个名称与 Bundle 中的接口名称 `a` 匹配，因此 `io_a_in` 会被正确绑定至 `a`。
 
-## 创建子Bundle
+## 创建子 Bundle
 
 很多时候，我们会需要一个 Bundle 包含一个或多个其他 Bundle 的情况，这时我们可以将其他已经定义好的 Bundle 作为当前 Bundle 的子 Bundle。
 
 ```python
-from mlvp import Bundle, Signal, Signals
+from toffee import Bundle, Signal, Signals
 
 class AdderBundle(Bundle):
     a, b, sum, cin, cout = Signals(5)
@@ -210,7 +210,7 @@ Bundle 中支持通过 `set_write_mode` 来改变整个 Bundle 的赋值模式�
 
 **默认消息类型赋值**
 
-mlvp 支持一个默认的消息类型，可以通过 `assign` 方法将一个字典赋值给 Bundle 中的信号。
+toffee 支持一个默认的消息类型，可以通过 `assign` 方法将一个字典赋值给 Bundle 中的信号。
 
 ```python
 adder_bundle.assign({
@@ -229,7 +229,7 @@ adder_bundle.assign({
 })
 ```
 
-**子Bundle的默认消息赋值支持**
+**子 Bundle 的默认消息赋值支持**
 
 如果希望通过默认消息类型同时赋值子 Bundle 中的信号，可以通过两种方式实现。当 `assign` 中的 `multilevel` 参数为 `True` 时，Bundle 支持多级字典赋值。
 
@@ -343,7 +343,7 @@ my_message = MyMessage.from_bundle(adder_bundle)
 
 ### 时序封装
 
-Bundle类除了对DUT的引脚进行封装外，还提供了基于数组的时序封装，可以适用于部分简单时序场景。Bundle类提供了`process_requests(data_list)`函数，他接受一个数组输入，第`i`个时钟周期，会将`data_list[i]`对应的数据赋值给引脚。`data_list`中的数据可以是`dict`类型，或者`callable(cycle, bundle_ins)`类型的可调用对象。对于`dict`类型，特殊`key`有：
+Bundle 类除了对 DUT 的引脚进行封装外，还提供了基于数组的时序封装，可以适用于部分简单时序场景。Bundle 类提供了`process_requests(data_list)`函数，他接受一个数组输入，第`i`个时钟周期，会将`data_list[i]`对应的数据赋值给引脚。`data_list`中的数据可以是`dict`类型，或者`callable(cycle, bundle_ins)`类型的可调用对象。对于`dict`类型，特殊`key`有：
 
 ```bash
 __funcs__: func(cycle, self)  # 可调用对象，可以为函数数组[f1,f2,..]
@@ -352,7 +352,7 @@ __condition_args__:  cargs # 条件函数需要的参数
 __return_bundles__:  bundle # 需要本次dict赋值时返回的bundle数据，可以是list[bundle]
 ```
 
-如果输入的`dict`中有`__return_bundles__`，则函数会返回该输入对应的bundle值，例如`{"data": x, "cycle": y}`。以Adder为例，期望第三次加后返回结果：
+如果输入的`dict`中有`__return_bundles__`，则函数会返回该输入对应的 bundle 值，例如`{"data": x, "cycle": y}`。以 Adder 为例，期望第三次加后返回结果：
 
 ```python
 # Adder虽然为存组合逻辑，但此处当时序逻辑使用
@@ -376,6 +376,7 @@ class AdderBundle(Bundle):
 ```
 
 当调用`add_list()`后，返回的结果为:
+
 ```pthon
 [
   {"data": {"a":5, "b":6, "cin": 0, "sum":11, "cout": 0}, "cycle":3},
@@ -466,9 +467,9 @@ for signal in adder_bundle.all_signals():
 
 ## Bundle 的自动生成脚本
 
-在很多情况下，DUT 的接口可能过于复杂，手动去编写 Bundle 的定义会变得非常繁琐。然而，Bundle 作为中间层，提供一个确切的信号名称定义是必要的。为了解决这个问题，mlvp 提供了一个自动生成 Bundle 的脚本来从 DUT 的接口定义中生成 Bundle 的定义。
+在很多情况下，DUT 的接口可能过于复杂，手动去编写 Bundle 的定义会变得非常繁琐。然而，Bundle 作为中间层，提供一个确切的信号名称定义是必要的。为了解决这个问题，toffee 提供了一个自动生成 Bundle 的脚本来从 DUT 的接口定义中生成 Bundle 的定义。
 
-可以在 mlvp 仓库目录下的 `scripts` 文件夹中找到 `bundle_code_gen.py` 脚本。该脚本可以通过解析 DUT 实例，以及指定的绑定规则自动生成 Bundle 的定义。
+可以在 toffee 仓库目录下的 `scripts` 文件夹中找到 `bundle_code_gen.py` 脚本。该脚本可以通过解析 DUT 实例，以及指定的绑定规则自动生成 Bundle 的定义。
 
 其中提供了三个函数
 
