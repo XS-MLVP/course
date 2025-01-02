@@ -3,16 +3,16 @@ title: 如何搭建 Env
 weight: 4
 ---
 
-`Env` 在 mlvp 验证环境中用于打包整个验证环境，Env 中直接实例化了验证环境中需要用的所有 agent，并负责将这些 Agent 需要的 bundle 传递给它们。
+`Env` 在 toffee 验证环境中用于打包整个验证环境，Env 中直接实例化了验证环境中需要用的所有 agent，并负责将这些 Agent 需要的 bundle 传递给它们。
 
 创建好 Env 后，参考模型的编写规范也随之确定，按照此规范编写的参考模型可直接附加到 Env 上，由 Env 来完成参考模型的自动同步。
 
 ## 创建 Env
 
-为了定义一个 `Env`，需要自定义一个新类，并继承 mlvp 中的 `Env` 类。下面是一个简单的 `Env` 的定义示例：
+为了定义一个 `Env`，需要自定义一个新类，并继承 toffee 中的 `Env` 类。下面是一个简单的 `Env` 的定义示例：
 
 ```python
-from mlvp.env import *
+from toffee.env import *
 
 class DualPortStackEnv(Env):
     def __init__(self, port1_bundle, port2_bundle):
