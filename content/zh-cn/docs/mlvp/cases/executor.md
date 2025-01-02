@@ -5,7 +5,7 @@ weight: 1
 
 ## 如何同时调用多个驱动函数
 
-当验证环境搭建完成后，可以通过验证环境提供的接口来编写测试用例。然而，通过普通的串行代码，往往无法完成两个驱动函数的同时调用。在多个接口需要同时驱动的情况下，这种情况变得尤为重要，mlvp 为这种场景提供了简便的调用方式。
+当验证环境搭建完成后，可以通过验证环境提供的接口来编写测试用例。然而，通过普通的串行代码，往往无法完成两个驱动函数的同时调用。在多个接口需要同时驱动的情况下，这种情况变得尤为重要，toffee 为这种场景提供了简便的调用方式。
 
 ### 同时调用多个不同类别的驱动函数
 
@@ -23,10 +23,10 @@ DualPortStackEnv
 
 我们期望在测试用例中同时调用 `port1_agent` 和 `port2_agent` 的 `push` 函数，以便同时驱动两个接口。
 
-在 mlvp 中，可以通过 `Executor` 来完成。
+在 toffee 中，可以通过 `Executor` 来完成。
 
 ```python
-from mlvp import Executor
+from toffee import Executor
 
 def test_push(env):
     async with Executor() as exec:
@@ -45,7 +45,7 @@ def test_push(env):
 如果在在执行块中多次调用同一驱动函数，`Executor` 会自动将这些调用串行执行。
 
 ```python
-from mlvp import Executor
+from toffee import Executor
 
 def test_push(env):
     async with Executor() as exec:
@@ -90,7 +90,7 @@ Executor 根据两个驱动函数的函数名自动创建了两个调度组，�
 通过 `sche_group` 参数，你可以在执行函数时手动指定驱动函数调用时所属的调度组，例如
 
 ```python
-from mlvp import Executor
+from toffee import Executor
 
 def test_push(env):
     async with Executor() as exec:
@@ -108,7 +108,7 @@ def test_push(env):
 如果我们在一个自定义函数中调用了驱动函数或其他驱动函数，并希望自定义函数也可以通过 `Executor` 来调度，可以通过与添加驱动函数相同的方式来添加自定义函数。
 
 ```python
-from mlvp import Executor
+from toffee import Executor
 
 async def multi_push_port1(env, times):
     for i in range(times):
@@ -142,7 +142,7 @@ Env
 两个 Agent 中的 `send` 函数各需要被并行调用 5 次，并且调用时需要发送上一次的返回结果，第一次发送时发送 0，两个函数调用相互独立。
 
 ```python
-from mlvp import Executor
+from toffee import Executor
 
 async def send(agent):
     result = 0
@@ -173,7 +173,7 @@ env
 task1 和 task2 需要并行执行，并且一次调用结束后需要同步，task1 和 task2 都需要调用 5 次，long_task 需要与 task1 和 task2 并行执行。
 
 ```python
-from mlvp import Executor
+from toffee import Executor
 
 async def exec_once(env):
     async with Executor() as exec:
@@ -196,7 +196,7 @@ Executor 会等待所有添加的驱动函数执行完毕后退出，但有时�
 `exit` 参数可以被设置为 `all`, `any` 或 `none` 三种值，分别表示所有调度组执行完毕后退出、任意一个调度组执行完毕后退出、不等待直接退出。
 
 ```python
-from mlvp import Executor
+from toffee import Executor
 
 async def send_forever(agent):
     result = 0
@@ -217,7 +217,7 @@ async def test_send(env):
 
 ## 如何控制参考模型调度
 
-在 mlvp 中，参考模型的调度是由 mlvp 自动完成的，但在某些情况下需要手动控制参考模型的调度顺序，例如在参考模型中需要调用多个函数，且这些函数之间存在调用顺序的情况。或者是控制参考模型与驱动函数之间的调用顺序。
+在 toffee 中，参考模型的调度是由 toffee 自动完成的，但在某些情况下需要手动控制参考模型的调度顺序，例如在参考模型中需要调用多个函数，且这些函数之间存在调用顺序的情况。或者是控制参考模型与驱动函数之间的调用顺序。
 
 ### 参考模型的调度顺序
 
@@ -240,10 +240,10 @@ def test_push(env):
 
 这一过程若不使用 Executor 使函数并行执行，很容易得到控制，串行执行的代码中函数的调用顺序即为其执行顺序。
 
-但如果使用 Executor 并行执行函数，两个参考模型之间的调用顺序就无法保证。mlvp 为此场景提供了 `priority` 参数，用于指定参考模型函数的调用顺序，数值越小其优先级较高。
+但如果使用 Executor 并行执行函数，两个参考模型之间的调用顺序就无法保证。toffee 为此场景提供了 `priority` 参数，用于指定参考模型函数的调用顺序，数值越小其优先级较高。
 
 ```python
-from mlvp import Executor
+from toffee import Executor
 
 def test_push(env):
     async with Executor() as exec:
