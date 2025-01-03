@@ -13,7 +13,7 @@ weight: 1
 1.  [cmake](https://cmake.org/download/) ( >=3.11 )
 2.  [gcc](https://gcc.gnu.org/) ( 支持c++20,至少为gcc版本10, **建议11及以上** )
 3.  [python3](https://www.python.org/downloads/) ( >=3.8 )
-4.  [verilator](https://verilator.org/guide/latest/install.html#git-quick-install) ( **==4.218** )
+4.  [verilator](https://verilator.org/guide/latest/install.html#git-quick-install) ( **>=4.218** )
 5.  [verible-verilog-format](https://github.com/chipsalliance/verible) ( >=0.0-3428-gcfcbb82b )
 6.  [swig](http://www.swig.org/) ( >=**4.2.0**, 用于多语言支持 )
 
