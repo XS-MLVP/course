@@ -83,12 +83,6 @@ def test_reverse_string(s):
 - 在上一节的代码基础上，我们进行一些修改，将生成测试用例的方法从随机数修改为integers ()方法，修改后的代码如下：
 
 ```python
-from UT_Adder import *
-import pytest
-import ctypes
-import random
-from hypothesis import given, strategies as st
-
 # 使用 pytest fixture 来初始化和清理资源
 from UT_Adder import *
 import pytest
