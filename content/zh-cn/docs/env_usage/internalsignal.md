@@ -4,7 +4,7 @@ description: 内部信号示例
 categories: [示例项目, 教程] 
 tags: [examples, docs]
 weight: 7
-draft: true
+draft: false
 ---
 
 内部信号指的是不在模块的IO端口中暴露，但会在模块内部发挥控制、数据传输、状态跟踪功能的信号。一般来说，在picker将rtl转换成dut的过程中，只有IO端口才会被暴露，这些信号不会被主动暴露。

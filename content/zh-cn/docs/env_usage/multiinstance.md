@@ -4,7 +4,7 @@ description: 多实例示例
 categories: [示例项目, 教程] 
 tags: [examples, docs]
 weight: 6
-draft: true
+draft: false
 ---
 
 在Verilog中，一个module只有一个实例，但很多测试场景下需要实现多个module，为此picker提供了动态多实例和静态多实例的支持。

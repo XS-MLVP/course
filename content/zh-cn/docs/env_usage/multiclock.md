@@ -4,7 +4,7 @@ description: 多时钟示例
 categories: [示例项目, 教程]
 tags: [examples, docs]
 weight: 5
-draft: true
+draft: false
 ---
 
 部分电路有多个时钟，XClock 类提供了分频功能，可以通过它实现对多时钟电路的驱动。
