@@ -372,6 +372,7 @@ class AdderBundle(Bundle):
             x = {"a":a, "b":b, "*":0}             # 构建budle赋值的dict
             if i >= 2:
                 x["__return_bundles__"] = self    # 设置需要返回的bundle
+                data.append(X)
         return self.process_requests(data)        # 推动时钟，赋值，返回结果
 ```
 
