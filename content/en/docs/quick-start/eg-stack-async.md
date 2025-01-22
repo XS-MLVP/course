@@ -8,15 +8,15 @@ Weight:  6
 ---
 
 
-## Introduction to the Dual-Port Stack and Environment Setup 
+## Introduction to the Dual-Port Stack and Environment Setup
 The dual-port stack used in this case is identical to the one implemented in Case 3. Please refer to the [Introduction to the Dual-Port Stack](https://chatgpt.com/eg-stack-callback#%E5%8F%8C%E7%AB%AF%E5%8F%A3%E6%A0%88%E7%AE%80%E4%BB%8B)  and [Driver Environment Setup](https://chatgpt.com/eg-stack-callback#%E6%9E%84%E5%BB%BA%E9%A9%B1%E5%8A%A8%E7%8E%AF%E5%A2%83)  in Case 3 for more details.
-## Driving the DUT Using Coroutines 
+## Driving the DUT Using Coroutines
 
 In Case 3, we used callbacks to drive the DUT. While callbacks offer a way to perform parallel operations, they break the execution flow into multiple function calls and require maintaining a large amount of intermediate state, making the code more complex to write and debug.
 
 In this case, we will introduce a method of driving the DUT using coroutines. This method not only allows for parallel operations but also avoids the issues associated with callbacks.
 
-### Introduction to Coroutines 
+### Introduction to Coroutines
 
 Coroutines are a form of "lightweight" threading that enables behavior similar to concurrent execution without the overhead of traditional threads. Coroutines operate on a single-threaded event loop, where multiple coroutines can be defined and added to the event loop, with the event loop managing their scheduling.
 
@@ -45,7 +45,7 @@ asyncio.run(test_dut(dut))
 dut.Finish()
 ```
 You can run the above code directly to observe the execution of coroutines. In the code, we use `create_task` to create two coroutine tasks and add them to the event loop. Each coroutine task continuously prints a number and waits for the next clock signal.We use `dut.RunStep(10)` to create a background clock, which continuously generates clock synchronization signals, allowing other coroutines to continue execution when the clock signal arrives.
-### Driving the Dual-Port Stack with Coroutines 
+### Driving the Dual-Port Stack with Coroutines
 
 Using coroutines, we can write the logic for driving each port of the dual-port stack as an independent execution flow without needing to maintain a large amount of intermediate state.
 
@@ -90,7 +90,7 @@ class SinglePortDriver:
         self.port_dict["in_data"].value = random.randint(0, 2**8-1)
         await self.dut.AStep(1)
 
-        await self.dut.Acondition(lambda: self.port_dict["in_ready"].value != 1)
+        await self.dut.Acondition(lambda: self.port_dict["in_ready"].value == 1)
         self.port_dict["in_valid"].value = 0
 
         if is_push:
@@ -100,7 +100,7 @@ class SinglePortDriver:
         self.port_dict["out_ready"].value = 1
         await self.dut.AStep(1)
 
-        await self.dut.Acondition(lambda: self.port_dict["out_valid"].value != 1)
+        await self.dut.Acondition(lambda: self.port_dict["out_valid"].value == 1)
         self.port_dict["out_ready"].value = 0
 
         if self.port_dict["out_cmd"].value == self.BusCMD.POP_OKAY.value:
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 Similar to Case 3, we define a `SinglePortDriver` class to handle the logic for driving a single port. In the `main` function, we create two instances of `SinglePortDriver`, each responsible for driving one of the two ports. We place the driving processes for both ports in the main function and add them to the event loop using `asyncio.create_task`. Finally, we use `dut.RunStep(200)` to create a background clock to drive the test.
 This code implements the same test logic as in Case 3, where each port performs 10 PUSH and 10 POP operations, followed by a random delay after each operation. As you can see, using coroutines eliminates the need to maintain any intermediate state.
 **SinglePortDriver Logic** In the `SinglePortDriver` class, we encapsulate a single operation into the `exec_once` function. In the `main` function, we first call `exec_once(is_push=True)` 10 times to complete the PUSH operations, and then call `exec_once(is_push=False)` 10 times to complete the POP operations.In the `exec_once` function, we first call `send_req` to send a request, then call `receive_resp` to receive the response, and finally wait for a random number of clock signals to simulate a delay.The `send_req` and `receive_resp` functions have similar logic; they set the corresponding input/output signals to the appropriate values and wait for the corresponding signals to become valid. The implementation can be written according to the execution sequence of the ports.Similarly, we use the `StackModel` class to simulate stack behavior. The `commit_push` and `commit_pop` functions simulate the PUSH and POP operations, respectively, with the POP operation comparing the data.
-### Running the Test 
+### Running the Test
 Copy the above code into `example.py` and then execute the following commands:
 
 ```bash
@@ -194,7 +194,7 @@ Pop 151
 ...
 ```
 In the output, you can see the data for each `PUSH` and `POP` operation, as well as the result of each `POP` operation. If there are no error messages in the output, it indicates that the test passed.
-## Pros and Cons of Coroutine-Driven Design 
+## Pros and Cons of Coroutine-Driven Design
 
 Using coroutine functions, we can effectively achieve parallel operations while avoiding the issues that come with callback functions. Each independent execution flow can be fully retained as a coroutine, which greatly simplifies code writing.
 
