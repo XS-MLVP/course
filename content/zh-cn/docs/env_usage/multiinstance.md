@@ -18,7 +18,7 @@ draft: false
 以Adder为例，我们可以在测试时根据需要在合适的位置创建多个dut，来动态创建多个Adder实例。
 当需要销毁一个dut时，也不会影响后续创建新的dut。
 
-创建一个名为 picker_out_adder 的文件夹，其中包含一个 Adder.v 文件。该文件的源码参考[案例一：简单加法器](https://xs-mlvp.github.io/mlvp/docs/quick-start/eg-adder/)。
+创建一个名为 picker_out_adder 的文件夹，其中包含一个 Adder.v 文件。该文件的源码参考[案例一：简单加法器](https://open-verify.cc/mlvp/docs/quick-start/eg-adder/)。
 
 运行下述命令将RTL导出为 Python Module：
 

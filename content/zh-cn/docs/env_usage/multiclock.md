@@ -60,7 +60,7 @@ xclock.Add(dut.xport.Add("reset", dut.reset))
 
 在经过了前面的绑定之后，接下来可以使用了。  
 我们根据需要来设置回调、设置分频。当然，时序电路肯定也要驱动时钟。  
-这些方法都可以参照[工具介绍](https://xs-mlvp.github.io/mlvp/docs/env_usage/picker_usage/#xclock-%E7%B1%BB)。
+这些方法都可以参照[工具介绍](https://open-verify.cc/mlvp/docs/env_usage/picker_usage/#xclock-%E7%B1%BB)。
 
 下面是举例：
 
