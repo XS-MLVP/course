@@ -83,10 +83,8 @@ def test_reverse_string(s):
 - 在上一节的代码基础上，我们进行一些修改，将生成测试用例的方法从随机数修改为integers ()方法，修改后的代码如下：
 
 ```python
-# 使用 pytest fixture 来初始化和清理资源
-from UT_Adder import *
+from Adder import *
 import pytest
-import ctypes
 from hypothesis import given, strategies as st
 
 # 使用 pytest fixture 来初始化和清理资源
@@ -94,24 +92,21 @@ from hypothesis import given, strategies as st
 def adder():
     # 创建 DUTAdder 实例，加载动态链接库
     dut = DUTAdder()
-    # 执行一次时钟步进，准备 DUT
-    dut.Step(1)
     # yield 语句之后的代码会在测试结束后执行，用于清理资源
     yield dut
     # 清理DUT资源，并生成测试覆盖率报告和波形
-    dut.finalize()
+    dut.Finish()
 
 class TestFullAdder:
     # 将 full_adder 定义为静态方法，因为它不依赖于类实例
     @staticmethod
     def full_adder(a, b, cin):
         cin = cin & 0b1
-        Sum = ctypes.c_uint64(a).value
-        Sum += ctypes.c_uint64(b).value + cin
-        Cout = (Sum >> 64) & 0b1
-        Sum &= 0xffffffffffffffff
+        Sum = a
+        Sum += b + cin
+        Cout = (Sum >> 128) & 0b1
+        Sum &= 0xffffffffffffffffffffffffffffffff
         return Sum, Cout
-
     # 使用 hypothesis 自动生成测试用例
     @given(
         a=st.integers(min_value=0, max_value=0xffffffffffffffff),
