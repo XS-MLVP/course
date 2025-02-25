@@ -93,7 +93,7 @@ Subcommands:
 
 export 子命令用于将RTL设计转换成其他高级编程语言对应的“库”，可以通过软件的方式进行驱动。
 
-> $picker export --help
+> picker export --help
 
 ```bash
 Export RTL Projects Sources as Software libraries such as C++/Python
@@ -134,7 +134,7 @@ Options:
 
 pack子命令用于将UVM中的 sequence_item 转换为其他语言，然后通过TLM进行通信（目前支持Python，其他语言在开发中）
 
-> $picker pack --help
+> picker pack --help
 
 ```bash
 Pack uvm transaction as a uvm agent and python class
