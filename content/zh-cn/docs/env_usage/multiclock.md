@@ -124,6 +124,11 @@ module multi_clock (
 endmodule
 ```
 
+通过picker导出：
+```bash
+picker export multi_clock.v -w mc.fst --tdir picker_out/MultiClock --lang python
+```
+
 可以通过如下 Python 进行多时钟驱动：
 
 ```python
