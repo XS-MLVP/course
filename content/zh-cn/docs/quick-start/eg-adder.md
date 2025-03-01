@@ -129,7 +129,7 @@ def random_int():
     return random.randint(-(2**63), 2**63 - 1) & ((1 << 63) - 1)
 
 # 通过python实现的加法器参考模型
-def referce_adder(a, b, cin):
+def reference_adder(a, b, cin):
     sum = (a + b) & ((1 << 64) - 1)
     carry = sum < a
     sum += cin
@@ -151,7 +151,7 @@ def random_test():
         dut.a.value, dut.b.value, dut.cin.value = a, b, cin
         dut.RefreshComb()
         # 参考模型：计算结果
-        ref_sum, ref_cout = referce_adder(a, b, cin)
+        ref_sum, ref_cout = reference_adder(a, b, cin)
         # 检查结果
         assert dut.sum.value == ref_sum, "sum mismatch: 0x{dut.sum.value:x} != 0x{ref_sum:x}"
         assert dut.cout.value == ref_cout, "cout mismatch: 0x{dut.cout.value:x} != 0x{ref_cout:x}"
