@@ -39,8 +39,8 @@ sudo -E make install
 
 > 默认的安装的目标路径是 `/usr/local`， 二进制文件被置于 `/usr/local/bin`，模板文件被置于 `/usr/local/share/picker`。
 > 如果需要修改安装目录，可以通过指定ARGS给cmake传递参数，例如`make ARGS="-DCMAKE_INSTALL_PREFIX=your_instal_dir"`
-> 安装时会自动安装 `xspcomm`基础库（[https://github.com/XS-MLVP/xcomm](https://github.com/XS-MLVP/xcomm)），该基础库是用于封装 `RTL` 模块的基础类型，位于 `/usr/local/lib/libxspcomm.so`。 **可能需要手动设置编译时的链接目录参数(-L)**  
-> 如果开启了Java等语言支持，还会安装 `xspcomm` 对应的多语言软件包。 
+> 安装时会自动安装 `xspcomm`基础库（[https://github.com/XS-MLVP/xcomm](https://github.com/XS-MLVP/xcomm)），该基础库是用于封装 `RTL` 模块的基础类型，位于 `/usr/local/lib/libxspcomm.so`。 **可能需要手动设置编译时的链接目录参数(-L)**
+> 如果开启了Java等语言支持，还会安装 `xspcomm` 对应的多语言软件包。
 
 **picker也可以编译为wheel文件，通过pip安装**
 
@@ -60,7 +60,7 @@ pip install dist/picker-0.0.1-cp311-cp311-linux_x86_64.whl
 安装完成后，执行`picker`命令可以得到以下输出:
 
 ```
-XDut Generate. 
+XDut Generate.
 Convert DUT(*.v/*.sv) to C++ DUT libs.
 
 Usage: ./build/bin/picker [OPTIONS] [SUBCOMMAND]
@@ -93,9 +93,11 @@ Subcommands:
 
 export 子命令用于将RTL设计转换成其他高级编程语言对应的“库”，可以通过软件的方式进行驱动。
 
-> picker export --help
-
 ```bash
+picker export --help
+```
+
+```plaintext
 Export RTL Projects Sources as Software libraries such as C++/Python
 Usage: picker export [OPTIONS] file...
 
@@ -134,9 +136,11 @@ Options:
 
 pack子命令用于将UVM中的 sequence_item 转换为其他语言，然后通过TLM进行通信（目前支持Python，其他语言在开发中）
 
-> picker pack --help
-
 ```bash
+picker pack --help
+```
+
+```plaintext
 Pack uvm transaction as a uvm agent and python class
 Usage: picker pack [OPTIONS] file...
 
