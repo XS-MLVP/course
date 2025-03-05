@@ -131,7 +131,7 @@ self.dut.Step(114514)
 最后进行收尾工作，以回调函数的形式调用`median_distribution_stats`输出随机数的分布情况：
 
 ```python
-self.dut.finalize()
+self.dut.Finish()
 callback3(self.greater, self.less_equal, self.MEDIAN)
 ```
 
@@ -140,7 +140,7 @@ callback3(self.greater, self.less_equal, self.MEDIAN)
 #### 随机数生成器测试代码{#test_random_generator_with_callback}
 
 ```python
-from UT_RandomGenerator import *
+from RandomGenerator import *
 import random
 
 
@@ -181,7 +181,7 @@ class TestRandomGenerator:
         # 测试，启动！
         self.dut.Step(114514) # 等待时钟经过114514个周期
         # 结束
-        self.dut.finalize()
+        self.dut.Finish()
         callback3(self.greater, self.less_equal, self.MEDIAN)
         pass
 
@@ -304,13 +304,13 @@ for _ in range(114514):
 	ref.step(a, b, cin) # 更新参考加法器的状态
 	dut.Step(1) # 等待时钟进入下个周期
 
-dut.finalize()
+dut.Finish()
 ```
 
 #### 上升沿更新的加法器的代码{#test_ris_adder_with_callback}
 
 ```python
-from UT_RisAdder import *
+from RisAdder import *
 import random
 
 # 控制字体颜色
@@ -392,7 +392,7 @@ if __name__ == "__main__":
         dut.cin.value = cin  # 设置被测试加法器的输入cin
         dut.Step(1) # 等待时钟进入下个周期
 
-    dut.finalize()
+    dut.Finish()
     pass
 ```
 

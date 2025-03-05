@@ -22,13 +22,13 @@ weight: 2
 ### Python 示例
 
 正常情况下，dut需要被**显式地声明完成任务**，以通知进行模拟器的后处理工作（写入波形、覆盖率等文件）。
-在Python中，需要在完成所有测试后，**调用dut的`.finalize()`方法**以通知模拟器任务已完成，进而将文件flush到磁盘。
+在Python中，需要在完成所有测试后，**调用dut的`.Finish()`方法**以通知模拟器任务已完成，进而将文件flush到磁盘。
 
 
 以[加法器](/docs/quick-start/eg-adder/)为例，以下为测试程序：
 
 ```python
-from UT_Adder import *
+from Adder import *
 
 if __name__ == "__main__":
     dut = DUTAdder()
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         dut.Step(1)
         print(dut.sum.value, dut.cout.value)
 
-    dut.finalize() # flush the wave file to disk
+    dut.Finish() # flush the wave file to disk
 ```
 运行结束后即可生成指定文件名的波形文件。
 

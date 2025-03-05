@@ -1,7 +1,7 @@
 ---
 title: Coverage Statistics
 description: Coverage tools
-categories: [Sample Projects, Tutorials] 
+categories: [Sample Projects, Tutorials]
 tags: [examples, docs]
 weight: 4
 ---
@@ -14,7 +14,7 @@ Currently, the Picker tool supports generating code line coverage reports based 
 
 ### Verilator
 
-The Verilator simulator provides [coverage support](https://verilator.org/guide/latest/exe_verilator_coverage.html).  
+The Verilator simulator provides [coverage support](https://verilator.org/guide/latest/exe_verilator_coverage.html).
 The implementation is as follows:
 1. Use the `verilator_coverage` tool to process or merge coverage databases, ultimately generating a `coverage.info` file for multiple DUTs.
 2. Use the `genhtml` command of the lcov tool based on `coverage.info` and RTL code source files to generate a complete code coverage report.
@@ -22,7 +22,7 @@ The implementation is as follows:
 The process is as follows:
 
 1. Enable the COVERAGE feature when generating the DUT with Picker (add the `-c` option).
-2. After the simulator runs, a coverage database file `V{DUT_NAME}.dat` will be generated after `dut.finalize()` is called.
+2. After the simulator runs, a coverage database file `V{DUT_NAME}.dat` will be generated after `dut.Finish()` is called.
 3. Use the write-info function of `verilator_coverage` to convert it to a `.info` file.
 4. Use the `genhtml` function of `lcov` to generate an HTML report using the `.info` file and the **RTL source files** specified in the file.
 

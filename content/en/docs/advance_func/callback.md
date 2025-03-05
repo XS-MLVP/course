@@ -109,7 +109,7 @@ self.dut.init_clock("clk") # Equivalent to self.xclock.Add(self.port["clk"])
 Then reset the generator and initialize the values:
 
 ```python
-self.dut.reset.value = 1 
+self.dut.reset.value = 1
 self.dut.Step(1)  # Wait one clock cycle, the next cycle will set dut's output to 0
 self.dut.reset.value = 0  # Remember to reset the original signal after setting!
 ```
@@ -130,7 +130,7 @@ self.dut.Step(114514)
 Finally, complete the process and call `median_distribution_stats` to output the random number distribution:
 
 ```python
-self.dut.finalize()
+self.dut.Finish()
 callback3(self.greater, self.less_equal, self.MEDIAN)
 ```
 
@@ -139,7 +139,7 @@ The test is now complete.
 #### Random Number Generator Test Code {#test_random_generator_with_callback}
 
 ```python
-from UT_RandomGenerator import *
+from RandomGenerator import *
 import random
 
 
@@ -171,7 +171,7 @@ class TestRandomGenerator:
         self.dut.init_clock("clk")
         self.dut.seed.value = self.SEED
         # Reset operation
-        self.dut.reset.value = 1 
+        self.dut.reset.value = 1
         self.dut.Step(1)  # Wait one clock cycle, the next cycle will set dut's output to 0
         self.dut.reset.value = 0  # Remember to reset the original signal after setting!
         # Set the callback functions
@@ -180,7 +180,7 @@ class TestRandomGenerator:
         # Test, start!
         self.dut.Step(114514) # Wait for 114514 clock cycles
         # End
-        self.dut.finalize()
+        self.dut.Finish()
         callback3(self.greater, self.less_equal, self.MEDIAN)
         pass
 
@@ -228,7 +228,7 @@ reg [WIDTH-1:0] Sum;
 always @(posedge clk) begin
 	{Cout, Sum} <= a + b + cin;
 end
-  
+
 assign {cout, sum} = {Cout, Sum};
 
 endmodule
@@ -302,13 +302,13 @@ for _ in range(114514):
 	ref.step(a, b, cin) # Update the reference adder's state
 	dut.Step(1) # Wait for the clock to enter the next cycle
 
-dut.finalize()
+dut.Finish()
 ```
 
 #### Code for Adder Updated on Rising Edge {#test_ris_adder_with_callback}
 
 ```python
-from UT_RisAdder import *
+from RisAdder import *
 import random
 
 # Font color control
@@ -319,7 +319,7 @@ FONT_COLOR_RESET = "\033[0m"
 class SimpleRisAdder:
     """
     SimpleRisAdder class acts as a reference adder,
-    simulating the expected behavior of our RisAdder 
+    simulating the expected behavior of our RisAdder
     """
     def __init__(self, width) -> None:
         self.WIDTH = width  # Adder width
@@ -340,7 +340,7 @@ class SimpleRisAdder:
 
         self.a = a  # Update input a
         self.b = b  # Update input b
-        self.cin = cin  # Update input cin        
+        self.cin = cin  # Update input cin
 
 
 # Test function to verify if the adder's output is correct
@@ -390,7 +390,7 @@ if __name__ == "__main__":
         dut.cin.value = cin  # Set input cin of the adder under test
         dut.Step(1) # Wait for the clock to enter the next cycle
 
-    dut.finalize()
+    dut.Finish()
     pass
 ```
 

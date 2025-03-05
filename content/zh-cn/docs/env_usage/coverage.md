@@ -14,7 +14,7 @@ weight: 4
 
 ### Verilator
 
-Verilator 仿真器提供了[覆盖率支持](https://verilator.org/guide/latest/exe_verilator_coverage.html)功能。  
+Verilator 仿真器提供了[覆盖率支持](https://verilator.org/guide/latest/exe_verilator_coverage.html)功能。
 该功能的实现方式是：
 
 1. 利用 `verilator_coverage` 工具处理或合并覆盖率数据库，最终针对多个 DUT 生成一个 `coverage.info` 文件。
@@ -23,7 +23,7 @@ Verilator 仿真器提供了[覆盖率支持](https://verilator.org/guide/latest
 使用时的流程如下：
 
 1. 使用 Picker 生成 dut 时，使能 COVERAGE 功能 （添加`-c`选项）。
-2. 仿真器运行完成后，`dut.finalize()` 之后会生成覆盖率数据库文件 `V{DUT_NAME}.dat`。
+2. 仿真器运行完成后，`dut.Finish()` 之后会生成覆盖率数据库文件 `V{DUT_NAME}.dat`。
 3. 基于 `verilator_coverage` 的 write-info 功能将其转换成 `.info`文件。
 4. 基于 `lcov` 的 `genhtml` 功能，使用`.info`文件和文件中指定的**rtl 源文件**，生成 html 报告。
 

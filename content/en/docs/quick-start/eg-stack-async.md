@@ -27,7 +27,7 @@ We use Python's `asyncio` to implement coroutine support:
 
 ```python
 import asyncio
-from UT_dual_port_stack import *
+from dual_port_stack import *
 
 async def my_coro(dut, name):
     for i in range(10):
@@ -55,7 +55,7 @@ Below is a simple verification code using coroutines:
 ```python
 import asyncio
 import random
-from UT_dual_port_stack import *
+from dual_port_stack import *
 from enum import Enum
 
 class StackModel:

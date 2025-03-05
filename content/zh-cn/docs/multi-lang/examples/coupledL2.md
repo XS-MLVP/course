@@ -219,67 +219,67 @@ class Opcode {
         AcquirePerm(0x7);
 
         private final int value;
-    
+
         A(int value) {
             this.value = value;
         }
-    
+
         public int getValue() {
             return value;
         }
     }
-    
+
     public enum B {
         ProbeBlock(0x6), ProbePerm(0x7);
-    
+
         private final int value;
-    
+
         B(int value) {
             this.value = value;
         }
-    
+
         public int getValue() {
             return value;
         }
     }
-    
+
     public enum C {
         ProbeAck(0x4), ProbeAckData(0x5), Release(0x6), ReleaseData(0x7);
-    
+
         private final int value;
-    
+
         C(int value) {
             this.value = value;
         }
-    
+
         public int getValue() {
             return value;
         }
     }
-    
+
     public enum D {
         AccessAck(0x0), AccessAckData(0x1), HintAck(0x2), Grant(0x4), GrantData(0x5), ReleaseAck(0x6);
-    
+
         private final int value;
-    
+
         D(int value) {
             this.value = value;
         }
-    
+
         public int getValue() {
             return value;
         }
     }
-    
+
     public enum E {
         GrantAck(0x4);
-    
+
         private final int value;
-    
+
         E(int value) {
             this.value = value;
         }
-    
+
         public int getValue() {
             return value;
         }
@@ -301,7 +301,7 @@ public class TestCoupledL2 {
         dut.xclock.Step();
         valid.Set(0);
     }
-    
+
     static void getB() {
         var valid = dut.master_port_0_0_b_valid;
         var ready = dut.master_port_0_0_b_ready;
@@ -309,11 +309,11 @@ public class TestCoupledL2 {
         while (!valid.B()) dut.xclock.Step();
         ready.Set(0);
     }
-    
+
     static void sendC(int opcode, int size, int address, long data) {
         var valid = dut.master_port_0_0_c_valid;
         var ready = dut.master_port_0_0_c_ready;
-    
+
         while (!ready.B()) dut.xclock.Step();
         valid.Set(1);
         dut.master_port_0_0_c_bits_opcode.Set(opcode);
@@ -323,7 +323,7 @@ public class TestCoupledL2 {
         dut.xclock.Step();
         valid.Set(0);
     }
-    
+
     static void getD() {
         var valid = dut.master_port_0_0_d_valid;
         var ready = dut.master_port_0_0_d_ready;
@@ -332,7 +332,7 @@ public class TestCoupledL2 {
         while (!valid.B()) dut.xclock.Step();
         ready.Set(0);
     }
-    
+
     static void sendE(int sink) {
         var valid = dut.master_port_0_0_e_valid;
         var ready = dut.master_port_0_0_e_ready;
@@ -342,15 +342,15 @@ public class TestCoupledL2 {
         dut.xclock.Step();
         valid.Set(0);
     }
-    
+
     static void AcquireBlock(int address) {
         sendA(Opcode.A.AcquireBlock.getValue(), 0x6, address);
     }
-    
+
     static BigInteger GrantData() {
         var opcode = dut.master_port_0_0_d_bits_opcode;
         var data = dut.master_port_0_0_d_bits_data;
-    
+
         do {
             getD();
         } while (opcode.Get().intValue() != Opcode.D.GrantData.getValue());
@@ -360,23 +360,23 @@ public class TestCoupledL2 {
         } while (opcode.Get().intValue() != Opcode.D.GrantData.getValue());
         return r_data.or(data.U64());
     }
-    
+
     static void GrantAck(int sink) {
         sendE(sink);
     }
-    
+
     static void ReleaseData(int address, BigInteger data) {
         sendC(Opcode.C.ReleaseData.getValue(), 0x6, address, data.longValue());
         sendC(Opcode.C.ReleaseData.getValue(), 0x6, address, data.shiftRight(64).longValue());
     }
-    
+
     static void ReleaseAck() {
         var opcode = dut.master_port_0_0_d_bits_opcode;
         do {
             getD();
         } while (opcode.Get().intValue() != Opcode.D.ReleaseAck.getValue());
     }
-    
+
     public static void main(String[] args) throws IOException {
         /* Random Generator */
         var gen_rand = RandomGenerator.getDefault();
@@ -390,22 +390,22 @@ public class TestCoupledL2 {
         dut.reset.Set(0);
         for (int i = 0; i < 100; i++) dut.xclock.Step();
         dut.xclock.Step();
-    
+
         /* Ref */
         BigInteger[] ref_data = new BigInteger[16];
         Arrays.fill(ref_data, BigInteger.ZERO);
-    
+
         /* Test loop */
         for (int test_loop = 0; test_loop < 4000; test_loop++) {
             var address = gen_rand.nextInt(0xf) << 6;
             var data = new BigInteger(128, Random.from(gen_rand));
-    
+
             pwOut.print("[CoupledL2 Test%d]: At address(%#03x), ".formatted(test_loop + 1, address));
             /* Read */
             AcquireBlock(address);
             var r_data = GrantData();
             assert (r_data.equals(ref_data[address >> 6]));
-    
+
             var sink = dut.master_port_0_0_d_bits_sink.Get().intValue();
             GrantAck(sink);
 
@@ -414,7 +414,7 @@ public class TestCoupledL2 {
             ReleaseData(address, data);
             ref_data[address >> 6] = data;
             ReleaseAck();
-    
+
             pwOut.println("Read: %s, Write: %s".formatted(r_data.toString(), data.toString()));
             pwOut.flush();
         }
@@ -582,7 +582,7 @@ class TileLinkAgent(Agent):
 import toffee
 import random
 from toffee.triggers import ClockCycles
-from UT_CoupledL2 import DUTCoupledL2
+from CoupledL2 import DUTCoupledL2
 from bundle import TileLinkBundle
 from agent import TileLinkAgent
 

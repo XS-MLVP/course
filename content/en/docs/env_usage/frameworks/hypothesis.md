@@ -31,7 +31,7 @@ import hypothesis
 
 ## Basic Usage
 
-### Properties and Strategies  
+### Properties and Strategies
 Hypothesis uses property decorators to define the properties of test functions. The most common decorator is @given, which specifies the properties the test function should satisfy.
 We can define a test function test_addition using the @given decorator and add properties to x. The test generator will automatically generate test data for the function and pass it as parameters, for example:
 ```python
@@ -39,15 +39,15 @@ def addition(number: int) -> int:
     return number + 1
 
 @given(x=integers(), y=integers())　　
-def test_addition(x, y):　　   
+def test_addition(x, y):　　
 	assert x + 1 == addition（1）
 ```
 In this example, integers() is a built-in strategy for generating integer test data. Hypothesis offers a variety of built-in strategies for generating different types of test data. Besides integers(), there are strategies for strings, booleans, lists, dictionaries, etc. For instance, using the text() strategy to generate string test data and using lists(text()) to generate lists of strings:
 
 ```python
 @given(s=text(), l=lists(text()))
-def test_string_concatenation(s, l):　　   
-	result = s + "".join(l)　　   
+def test_string_concatenation(s, l):　　
+	result = s + "".join(l)　　
 	assert len(result) == len(s) + sum(len(x) for x in l)
 ```
 
@@ -87,14 +87,14 @@ def test_reverse_string(s):
 - Based on the previous section's code, we modify the method of generating test cases from random numbers to the integers() method. The modified code is as follows:
 
 ```python
-from UT_Adder import *
+from Adder import *
 import pytest
 import ctypes
 import random
 from hypothesis import given, strategies as st
 
 # Initializing and Cleaning Up Resources Using pytest Fixture
-from UT_Adder import *
+from Adder import *
 import pytest
 import ctypes
 from hypothesis import given, strategies as st
@@ -109,7 +109,7 @@ def adder():
     # Code after yield executes after tests finish, for cleanup
     yield dut
     # Clean up DUT resources and generate coverage report and waveform
-    dut.finalize()
+    dut.Finish()
 
 class TestFullAdder:
     # Define full_adder as a static method, as it doesn't depend on class instance
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 > In this example, the @given decorator and strategies are used to generate random data that meets specified conditions. st.integers() is a strategy for generating integers within a specified range, used to generate numbers between 0 and 0xffffffffffffffff for a and b, and between 0 and 1 for cin. Hypothesis will automatically rerun this test multiple times, each time using different random inputs, helping reveal potential boundary conditions or edge cases.
 - Run the tests, and the output will be as follows:
 ```shell
-collected 1 item                                                               
+collected 1 item
 
  test_adder.py ✓                                                 100% ██████████
 

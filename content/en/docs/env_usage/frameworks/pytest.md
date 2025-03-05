@@ -121,7 +121,7 @@ pytest test_se.py::TestSE
 
 # Execute by test method, must be in the following format:
 pytest file_name.py::TestClass::TestMethod, where "::" is the separator used to separate the test module, test class, and test method.
-# Run the test case named test_get_new_message under the class named TestSE in the test_se.py file 
+# Run the test case named test_get_new_message under the class named TestSE in the test_se.py file
 pytest test_se.py::TestSE::test_get_new_message
 
 # The above methods of selecting test cases are all on the **command line**. If you want to execute directly in the test program, you can directly call pytest.main(), the format is:
@@ -133,9 +133,9 @@ pytest.main([module.py::class::method])
 
 ## Writing Validation with Pytest
 - During testing, we use the previously validated adder. Go to the Adder folder, create a new test_adder.py file in the picker_out_adder directory, with the following content:
-```python 
+```python
 # Import test modules and required libraries
-from UT_Adder import *
+from Adder import *
 import pytest
 import ctypes
 import random
@@ -191,7 +191,7 @@ if __name__ == "__main__":
 
 - After running the test, the output is as follows:
 ```shell
-collected 1 item                                                               
+collected 1 item
 
  test_adder.py ✓                                                 100% ██████████
 

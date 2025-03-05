@@ -128,7 +128,7 @@ int main()
 
 ### Generating Waveforms
 
-In C++, the destructor of the DUT automatically calls `dut.finalize()`, so you only need to `delete dut` after the test ends to perform post-processing (write waveform, coverage files, etc.).
+In C++, the destructor of the DUT automatically calls `dut.Finish()`, so you only need to `delete dut` after the test ends to perform post-processing (write waveform, coverage files, etc.).
 
 ```cpp
 #include "UT_Adder.hpp"
@@ -139,7 +139,7 @@ int main()
     printf("Initialized UTAdder\n");
 
     for (int c = 0; c < 114514; c++) {
-    
+
         auto dut_cal = [&]() {
             dut->a   = c * 2;
             dut->b   = c / 2;
@@ -155,7 +155,7 @@ int main()
         printf("DUT: sum=0x%lx, cout=0x%lx\n", o_dut.sum, o_dut.cout);
     }
 
-    delete dut; // automatically call dut.finalize() in ~UTAdder()
+    delete dut; // automatically call dut.Finish() in ~UTAdder()
     printf("Simulation finished\n");
     return 0;
 }

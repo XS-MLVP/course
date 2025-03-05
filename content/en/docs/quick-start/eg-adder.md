@@ -7,7 +7,7 @@ tags: [examples, docs]
 weight: 3
 ---
 
-## RTL Source Code 
+## RTL Source Code
 
 In this case, we drive a 64-bit adder (combinational circuit) with the following source code:
 
@@ -32,11 +32,11 @@ endmodule
 
 This adder contains a 64-bit adder with inputs of two 64-bit numbers and a carry-in signal, outputting a 64-bit sum and a carry-out signal.
 
-## Testing Process 
+## Testing Process
 During the testing process, we will create a folder named `Adder`, containing a file called `Adder.v`. This file contains the above RTL source code.
-### Exporting RTL to Python Module 
+### Exporting RTL to Python Module
 
-#### Generating Intermediate Files 
+#### Generating Intermediate Files
 Navigate to the `Adder` folder and execute the following command:
 
 ```bash
@@ -44,13 +44,13 @@ picker export --autobuild=false Adder.v -w Adder.fst --sname Adder --tdir picker
 ```
 
 This command performs the following actions:
- 
+
 1. Uses `Adder.v` as the top file, with `Adder` as the top module, and generates a dynamic library using the Verilator simulator with Python as the target language.
- 
+
 2. Enables waveform output, with the target waveform file as `Adder.fst`.
 
 3. Includes files for driving the example project (-e), and does not automatically compile after code generation (-autobuild=false).
- 
+
 4. The final file output path is `picker_out_adder`.
 
 Some command-line parameters were not used in this command, and they will be introduced in later sections.
@@ -91,7 +91,7 @@ picker_out_adder
     `-- dut.py # Generated Python UT wrapper, including calls to libDPIAdder.so, and UTAdder class declaration and implementation, equivalent to libUTAdder.so
 ```
 
-#### Building Intermediate Files 
+#### Building Intermediate Files
 Navigate to the `picker_out_adder` directory and execute the `make` command to generate the final files.
 > Use the simulator invocation script defined by `cmake/*.cmake` to compile `Adder_top.sv` and related files into the `libDPIAdder.so` dynamic library.Use the compilation script defined by `CMakeLists.txt` to wrap `libDPIAdder.so` into the `libUTAdder.so` dynamic library through `dut_base.cpp`. Both outputs from steps 1 and 2 are copied to the `UT_Adder` directory.Generate the wrapper layer using the `SWIG` tool with `dut_base.hpp` and `dut.hpp` header files, and finally build a Python module in the `UT_Adder` directory.If the `-e` parameter is included, the pre-defined `example.py` is placed in the parent directory of the `UT_Adder` directory as a sample code for calling this Python module.
 The final directory structure is:
@@ -111,16 +111,16 @@ The final directory structure is:
 `-- example.py # Sample code
 ```
 
-### Setting Up Test Code 
+### Setting Up Test Code
 
 > Replace the content in `example.py` with the following Python test code.
 
 ```python
-from UT_Adder import *
+from Adder import *
 import random
 
 # Generate unsigned random numbers
-def random_int(): 
+def random_int():
     return random.randint(-(2**63), 2**63 - 1) & ((1 << 63) - 1)
 
 # Reference model for the adder implemented in Python
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     random_test()
 ```
 
-### Running the Test 
+### Running the Test
 In the `picker_out_adder` directory, execute the `python3 example.py` command to run the test. After the test is complete, we can see the output of the example project.
 
 ```

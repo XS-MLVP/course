@@ -131,7 +131,7 @@ async def test_async():
 #### 使用异步的测试代码
 
 ```python
-from UT_RisAdder import *
+from RisAdder import *
 import random
 import asyncio
 
@@ -218,11 +218,10 @@ async def run_test():
         await dut.astep(1)  # 等待时钟进入下个周期
 
     await task  # 等待时钟结束
-    dut.finalize()
+    dut.Finish()
 
 
 if __name__ == "__main__":
     asyncio.run(run_test()) # 运行测试
     pass
 ```
-

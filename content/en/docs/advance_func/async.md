@@ -8,7 +8,7 @@ draft: true
 ---
 
 # Asynchronous Programming
-### Overview  
+### Overview
 #### Why Introduce Asynchronous Programming?
 > In the previous section, we learned how to use callback functions. However, when using callback functions, we may encounter callback hell. This means that if callbacks are nested too deeply, the code can become very complex and difficult to manage. Therefore, we can avoid this situation by using asynchronous (async/await) methods. Using asynchronous methods can make the code structure clearer. By using the await keyword, asynchronous operations can be executed sequentially without the need for managing the execution order through callback functions.
 
@@ -135,7 +135,7 @@ Here we continue to use the rising edge triggered adder as an example, and we ha
 #### Test Code Using Asynchronous
 
 ```python
-from UT_RisAdder import *
+from RisAdder import *
 import random
 import asyncio
 
@@ -147,7 +147,7 @@ FONT_COLOR_RESET = "\033[0m"  # Reset color
 class SimpleRisAdder:
     """
     The SimpleRisAdder class is a reference adder class,
-    it simulates the expected behavior of our RisAdder 
+    it simulates the expected behavior of our RisAdder
     """
     def __init__(self, width) -> None:
         self.WIDTH = width  # Bit width of the adder
@@ -222,11 +222,10 @@ async def run_test():
         await dut.astep(1)  # Wait for the clock to enter the next cycle
 
     await task  # Wait for the clock to finish
-    dut.finalize()
+    dut.Finish()
 
 
 if __name__ == "__main__":
     asyncio.run(run_test()) # Run the test
     pass
 ```
-

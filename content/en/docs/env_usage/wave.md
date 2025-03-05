@@ -20,12 +20,12 @@ Note that if you choose to generate the `libDPI_____.so` file yourself, the wave
 
 ### Python Example
 
-Normally, the DUT needs to be **explicitly declared complete** to notify the simulator to perform post-processing tasks (writing waveform, coverage files, etc.). In Python, after completing all tests, **call the `.finalize()` method of the DUT** to notify the simulator that the task is complete, and then flush the files to disk.
+Normally, the DUT needs to be **explicitly declared complete** to notify the simulator to perform post-processing tasks (writing waveform, coverage files, etc.). In Python, after completing all tests, **call the `.Finish()` method of the DUT** to notify the simulator that the task is complete, and then flush the files to disk.
 
 Using the [Adder Example](/docs/quick-start/eg-adder/), the test program is as follows:
 
 ```python
-from UT_Adder import *
+from Adder import *
 
 if __name__ == "__main__":
     dut = DUTAdder()
@@ -36,7 +36,7 @@ if __name__ == "__main__":
         dut.Step(1)
         print(dut.sum.value, dut.cout.value)
 
-    dut.finalize() # flush the wave file to disk
+    dut.Finish() # flush the wave file to disk
 ```
 After the run is completed, the waveform file with the specified name will be generated.
 

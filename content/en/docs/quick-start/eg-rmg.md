@@ -6,7 +6,7 @@ tags: [examples, docs]
 weight: 4
 ---
 
-## RTL Source Code 
+## RTL Source Code
 
 In this example, we drive a random number generator, with the source code as follows:
 
@@ -27,24 +27,24 @@ module RandomGenerator (
             lfsr <= {lfsr[14:0], lfsr[15] ^ lfsr[14]};
         end
     end
- 
+
     assign random_number = lfsr;
 endmodule
 ```
 
 This random number generator contains a 16-bit LFSR, with a 16-bit seed as input and a 16-bit random number as output. The LFSR is updated according to the following rules:
- 
+
 1. XOR the highest bit and the second-highest bit of the current LFSR to generate a `new_bit`.
- 
+
 2. Shift the original LFSR left by one bit, and place `new_bit` in the lowest bit.
 
 3. Discard the highest bit.
 
-## Testing Process 
+## Testing Process
 During testing, we will create a folder named `RandomGenerator`, which contains a `RandomGenerator.v` file. The content of this file is the RTL source code mentioned above.
-### Building the RTL into a Python Module 
+### Building the RTL into a Python Module
 
-#### Generating Intermediate Files 
+#### Generating Intermediate Files
 Navigate to the `RandomGenerator` folder and execute the following command:
 
 ```bash
@@ -52,16 +52,16 @@ picker export --autobuild=false RandomGenerator.v -w RandomGenerator.fst --sname
 ```
 
 This command does the following:
- 
+
 1. Uses `RandomGenerator.v` as the top file and `RandomGenerator` as the top module, generating a dynamic library with the Verilator simulator, targeting Python as the output language.
- 
+
 2. Enables waveform output, with the target waveform file being `RandomGenerator.fst`.
- 
+
 3. Includes files for driving the example project (`-e`), and does not automatically compile after code generation (`-autobuild=false`).
- 
+
 4. Outputs the final files to the `picker_out_rmg` directory.
 The output directory structure is similar to [Adder Verification - Generating Intermediate Files](https://chatgpt.com/docs/quick-start/eg-adder/#generating-intermediate-files) , so it will not be elaborated here.
-#### Building Intermediate Files 
+#### Building Intermediate Files
 Navigate to the `picker_out_rmg` directory and execute the `make` command to generate the final files.
 > Note: The compilation process is similar to [Adder Verification - Compilation Process](https://chatgpt.com/docs/quick-start/eg-adder/#building-intermediate-files) , so it will not be elaborated here.
 The final directory structure will be:
@@ -81,12 +81,12 @@ picker_out_rmg
 `-- example.py # Example code
 ```
 
-### Configuring the Test Code 
+### Configuring the Test Code
 
 > Replace the content of `example.py` with the following code.
 
 ```python
-from UT_RandomGenerator import *
+from RandomGenerator import *
 import random
 
 # Define the reference model
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     dut.Finish()    # Finish function will complete the writing of waveform, coverage, and other files
 ```
 
-### Running the Test Program 
+### Running the Test Program
 Execute `python example.py` in the `picker_out_rmg` directory to run the test program. After the execution, if `Test Passed` is output, the test is considered passed. After the run is complete, a waveform file `RandomGenerator.fst` will be generated, which can be viewed in the terminal using the following command:
 > gtkwave RandomGenerator.fst
 Example output:

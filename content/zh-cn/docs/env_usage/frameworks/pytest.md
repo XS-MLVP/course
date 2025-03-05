@@ -121,7 +121,7 @@ pytest test_se.py::TestSE
 
 # 测试方法执行，必须以如下格式：
 pytest 文件名 .py:: 测试类 :: 测试方法，其中 “::” 是分隔符，用于分割测试module、测试类，以及测试方法。
-# 运行test_se.py文件下的，类名是TestSE下的，名字为test_get_new_message的测试用例 
+# 运行test_se.py文件下的，类名是TestSE下的，名字为test_get_new_message的测试用例
 pytest test_se.py::TestSE::test_get_new_message
 
 # 以上选择测试用例的方法均是在**命令行**，如果您想直接在测试程序里执行可以直接在main函数中**调用pytest.main()**,其格式为：
@@ -133,9 +133,9 @@ pytest.main([模块.py::类::方法])
 
 ## 使用Pytest编写验证
 - 在测试过程中，我们使用之前验证过的加法器，进入Adder文件夹，在picker_out_adder目录下新建一个test_adder.py文件，内容如下：
-```python 
+```python
 # 导入测试模块和所需的库
-from UT_Adder import *
+from Adder import *
 import pytest
 import ctypes
 import random
@@ -191,7 +191,7 @@ if __name__ == "__main__":
 
 - 运行测试之后输出如下：
 ```shell
-collected 1 item                                                               
+collected 1 item
 
  test_adder.py ✓                                                 100% ██████████
 
