@@ -8,18 +8,19 @@ weight: 1
 
 ## 生成库文件
 
-picker可以通过参数`--lang`指定转换的对应语言（参数已支持cpp、python、java、scala、golang），由于不同编程语言对应的“库”不同，因此生成的库文件有所区别，例如java生成的是jar包，python生成的为文件夹。picker导出对应编程语言的库，需要xcomm的支持，可以通过`picker --check`查看支持情况：
+picker可以通过参数`--lang`指定转换的对应语言（参数已支持cpp、python、java、lua、scala、golang），由于不同编程语言对应的“库”不同，因此生成的库文件有所区别，例如java生成的是jar包，python生成的为文件夹。picker导出对应编程语言的库，需要xcomm的支持，可以通过`picker --check`查看支持情况：
 
 ```bash
 $picker --check
-[OK ] Version: 0.9.0---dirty
-[OK ] Exec path: /home/yaozhicheng/mambaforge/lib/python3.11/site-packages/picker/bin/picker
-[OK ] Template path: /home/yaozhicheng/mambaforge/lib/python3.11/site-packages/picker/share/picker/template
-[OK ] Support    Cpp (find: '/home/yaozhicheng/mambaforge/lib/python3.11/site-packages/picker/share/picker/include' success)
-[Err] Support   Java (find: 'java/xspcomm-java.jar' fail)
-[Err] Support  Scala (find: 'scala/xspcomm-scala.jar' fail)
-[OK ] Support Python (find: '/home/yaozhicheng/mambaforge/lib/python3.11/site-packages/picker/share/picker/python' success)
-[Err] Support Golang (find: 'golang' fail)
+[OK ] Version: 0.9.0-feat_performance_improve-b7001a6-2025-04-11-dirty
+[OK ] Exec path: /usr/local/share/lib/python3.11/site-packages/picker/bin/picker
+[OK ] Template path: /usr/local/share/lib/python3.11/site-packages/picker/share/picker/template
+[OK ] Support    Cpp (find: '/usr/local/share/lib/python3.11/site-packages/picker/share/picker/lib' success)
+[OK ] Support Golang (find: '/usr/local/share/lib/python3.11/site-packages/picker/share/picker/golang' success)
+[OK ] Support   Java (find: '/usr/local/share/lib/python3.11/site-packages/picker/share/picker/java/xspcomm-java.jar' success)
+[OK ] Support    Lua (find: '/usr/local/share/lib/python3.11/site-packages/picker/share/picker/lua/luaxspcomm.so' success)
+[OK ] Support Python (find: '/usr/local/share/lib/python3.11/site-packages/picker/share/picker/python' success)
+[OK ] Support  Scala (find: '/usr/local/share/lib/python3.11/site-packages/picker/share/picker/scala/xspcomm-scala.jar' success)
 ```
 
 输出显示success表示支持，fail表示不支持。
