@@ -53,7 +53,7 @@ Verilator 仿真器提供了[覆盖率支持](https://verilator.org/guide/latest
 
 #### genhtml
 
-由 `locv` 包提供的 `genhtml` 可以由上述的.info 文件导出可读性更好的 html 报告。命令格式为：`genhtml [OPTIONS] <infofiles>`。
+由 `lcov` 包提供的 `genhtml` 可以由上述的.info 文件导出可读性更好的 html 报告。命令格式为：`genhtml [OPTIONS] <infofiles>`。
 建议使用`-o <outputdir>`选项将结果输出到指定目录。
 
 以[加法器](/docs/quick-start/eg-adder/)为例。
