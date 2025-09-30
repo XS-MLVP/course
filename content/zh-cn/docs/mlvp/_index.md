@@ -1,7 +1,9 @@
 ---
 title: 验证框架
 description: 搭建硬件验证环境所需的框架——Toffee
-weight: 3
+categories: [教程]
+tags: [docs]
+weight: 4
 ---
 
 **Toffee** 是使用 Python 语言编写的一套硬件验证框架，它依赖于多语言转换工具 [Picker](https://github.com/XS-MLVP/picker)，该工具能够将硬件设计的 Verilog 代码转换为 Python Package，使得用户可以使用 Python 来驱动并验证硬件设计。
