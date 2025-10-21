@@ -1,6 +1,6 @@
 ---
 title: 直接使用模式
-description: 两种使用方式、各个选项参数、TUI界面和FAQ说明。
+description: 直接使用方式、各个选项参数、TUI界面和FAQ说明。
 categories: [教程]
 tags: [docs]
 weight: 2
