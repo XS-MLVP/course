@@ -1,5 +1,5 @@
 ---
-title: 验证智能体
+title: (AI)验证智能体
 description: 基于大模型进行自动化UT验证智能体
 categories: [示例项目, 教程]
 tags: [examples, docs]
