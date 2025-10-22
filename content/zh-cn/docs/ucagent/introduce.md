@@ -53,7 +53,7 @@ weight: 1
 
 - 方式二（pip 安装）
   ```bash
-  pip install git+ssh://git@github.com/XS-MLVP/UCAgent@main
+  pip install git+https://git@github.com/XS-MLVP/UCAgent@main
   ucagent --help # 确认安装成功
   ```
 
@@ -64,7 +64,7 @@ weight: 1
 1. pip 安装 UCAgent
 
    ```bash
-   pip install git+ssh://git@github.com/XS-MLVP/UCAgent@main
+   pip install git+https://git@github.com/XS-MLVP/UCAgent@main
    ```
 
 2. 准备 DUT（待测模块）
