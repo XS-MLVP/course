@@ -69,7 +69,7 @@ weight: 1
 
 2. 准备 DUT（待测模块）
 
-- 创建目录：在`{工作区}`目录下创建`Adder`目录。
+- 创建目录：在`{工作区}`目录下创建`Adder`目录。(`{工作区}`是指当前运行`ucagent`命令的地方，其他的的目录都以`{工作区}`为根目录)
   - `mkdir -p Adder`
 - RTL：使用[快速开始-简单加法器](https://open-verify.cc/mlvp/docs/quick-start/eg-adder/)的加法器,将其代码放入`Adder/Adder.v`
 - 注入 bug：将输出和位宽修改为 63 位（用于演示位宽错误导致的缺陷）。
@@ -150,7 +150,7 @@ weight: 1
 
 7. 启动 MCP Server<a id="命令"></a>
 
-- 在仓库内：
+- 在`{工作区}`目录下：
   ```bash
   ucagent output/ Adder -s -hm --tui --mcp-server-no-file-tools --no-embed-tools
   ```
