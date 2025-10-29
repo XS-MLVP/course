@@ -48,7 +48,7 @@ weight: 1
   ```bash
   git clone https://github.com/XS-MLVP/UCAgent.git
   cd UCAgent
-  pip install -r requirements.txt
+  pip install .
   ```
 
 - 方式二（pip 安装）
