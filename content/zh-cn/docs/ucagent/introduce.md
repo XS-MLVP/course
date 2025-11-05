@@ -48,12 +48,12 @@ weight: 1
   ```bash
   git clone https://github.com/XS-MLVP/UCAgent.git
   cd UCAgent
-  pip install .
+  pip3 install .
   ```
 
 - 方式二（pip 安装）
   ```bash
-  pip install git+https://git@github.com/XS-MLVP/UCAgent@main
+  pip3 install git+https://git@github.com/XS-MLVP/UCAgent@main
   ucagent --help # 确认安装成功
   ```
 
