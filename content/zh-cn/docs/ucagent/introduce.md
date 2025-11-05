@@ -64,7 +64,7 @@ weight: 1
 1. pip 安装 UCAgent
 
    ```bash
-   pip install git+https://git@github.com/XS-MLVP/UCAgent@main
+   pip3 install git+https://git@github.com/XS-MLVP/UCAgent@main
    ```
 
 2. 准备 DUT（待测模块）
