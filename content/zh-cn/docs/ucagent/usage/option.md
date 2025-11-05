@@ -193,7 +193,9 @@ python3 ucagent.py ./output Adder \
   --template-dir ./templates \
   --template-overwrite \
   --output unity_test \
-  --override 'conversation_summary.max_tokens=16384,...' \
+  --override 'conversation_summary.max_tokens=16384,conversation_summary.max_summary_tokens=2048,conversation_summary.use_uc_mode=True,lang="zh",openai.model_name="gpt-4o-mini"' \
+  --gen-instruct-file GEMINI.md \
+  --guid-doc-path ./output/Guide_Doc \
   \
   --use-todo-tools \
   \
@@ -223,7 +225,8 @@ python3 ucagent.py ./output Adder \
   - -hm：启动即人工可介入
   - -im enhanced：交互模式为增强（含规划与记忆）
   - -\-tui：启用 TUI
-  - -\-loop/--loop-msg：启动后立即进入循环并注入首条消息
+  - -l：启动后立即进入循环
+  - -\-loop/--loop-msg：进入循环注入首条消息
   - -\-seed 12345：固定随机种子
   - -\-sys-tips：自定义系统提示
 - 配置与模板
