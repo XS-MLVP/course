@@ -44,7 +44,7 @@ weight: 5
 > **4. Memory/MMIO Ram**：外围设备的模拟，用于模拟相应cache的请求
 > **5. Nutshell Cache Dut**：由Picker生成的DUT
 
-此外，您可能还需要对DUT的接口做进一步封装以实现更方便的读写请求操作，具体可以参考[Nutshll cachewrapper](https://github.com/yzcccccccccc/XS-MLVP-NutShellCache/blob/master/UT_Cache/util/cachewrapper.py)。
+此外，您可能还需要对DUT的接口做进一步封装以实现更方便的读写请求操作，具体可以参考[Nutshll cachewrapper](https://github.com/XS-MLVP/Example-NutShellCache/blob/b6be4986ac701a34aa3a3619ddddc763f6539530/UT_Cache/util/cachewrapper.py)。
 
 **3 功能点与测试点分解**：
 果壳cache可以响应MMIO请求，进一步分解可以得到一下测试点：
@@ -54,7 +54,7 @@ weight: 5
 
 
 **4 构造测试用例**：
-测试用例的构造是简单的，已知通过[创建DUT](/zh-cn/docs/basic/create_dut)得到的Nutshell cache的MMIO地址范围是`0x30000000`~`0x7fffffff`，则我们只需访问这段内存区间，应当就能获得MMIO的预期结果。需要注意的是，为了触发阻塞流水线的测试点，您可能需要连续地发起请求。
+测试用例的构造是简单的，已知通过[创建DUT](./create_dut)得到的Nutshell cache的MMIO地址范围是`0x30000000`~`0x7fffffff`，则我们只需访问这段内存区间，应当就能获得MMIO的预期结果。需要注意的是，为了触发阻塞流水线的测试点，您可能需要连续地发起请求。
 以下是一个简单的测试用例：
 ```python
 # import CacheWrapper here

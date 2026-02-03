@@ -99,7 +99,7 @@ mkdir build
 mill --no-server -d ut.runMain ut_nutshell.CacheMain --target-dir build --output-file Cache
 ```
 
-注：mill环境的配置请参考 [https://mill-build.com/mill/Intro_to_Mill.html](https://mill-build.com/mill/Intro_to_Mill.html)
+注：mill环境的配置请参考 [https://mill-build.org/mill/cli/installation-ide.html](https://mill-build.org/mill/cli/installation-ide.html)
 
 上述命令成功执行完成后，会在build目录下生成verilog文件：Cache.v。之后就可以通过picker工具进行Cache.v到 Python模块的转换。除去chisel外，其他HCL语言几乎都能生成对应的 RTL代码，因此上述基本流程也适用于其他HCL。
 

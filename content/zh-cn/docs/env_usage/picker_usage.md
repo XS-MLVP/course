@@ -51,7 +51,7 @@ Picker 导出 Python Module 的方式是基于 C++ 的。
 
 > Swig 是一个用于将 C/C++ 导出为其他高级语言的工具。该工具会解析 C++ 头文件，并生成对应的中间代码。
 > 如果希望详细了解生成过程，请参阅 [Swig 官方文档](http://www.swig.org/Doc4.2/SWIGDocumentation.html)。
-> 如果希望知道 Picker 如何生成 C++ Class，请参阅 [C++](docs/quick-start/multi-lang/cpp)。
+> 如果希望知道 Picker 如何生成 C++ Class，请参阅 [C++](../multi-lang/interface.md#c)。
 
 - 该这个模块和标准的 Python 模块一样，可以被其他 Python 程序导入并调用，文件结构也与普通 Python 模块无异。
 
